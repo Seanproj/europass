@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # v0(정적 사이트)는 빌드 단계가 없으므로 기본 점검만, v1(package.json 존재)은 전체 검사
+      - name: Detect project type
+        id: detect
+        run: |
+          if [ -f package.json ]; then echo "node=true" >> "$GITHUB_OUTPUT"; else echo "node=false" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-node@v4
+        if: steps.detect.outputs.node == 'false'
+        with:
+          node-version: 22
+
+      - name: Static site sanity check (v0)
+        if: steps.detect.outputs.node == 'false'
+        run: |
+          test -f index.html
+          for f in js/*.js; do node --check "$f"; done
+
+      - uses: actions/setup-node@v4
+        if: steps.detect.outputs.node == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: steps.detect.outputs.node == 'true'
+        run: npm ci
+
+      - name: Lint
+        if: steps.detect.outputs.node == 'true'
+        run: npm run lint --if-present
+
+      - name: Typecheck
+        if: steps.detect.outputs.node == 'true'
+        run: npm run typecheck --if-present
+
+      - name: Test
+        if: steps.detect.outputs.node == 'true'
+        run: npm test --if-present
+
+      - name: Build
+        if: steps.detect.outputs.node == 'true'
+        run: npm run build

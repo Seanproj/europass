@@ -1,57 +1,57 @@
 # 🛂 Euro Passport
 
 독일에서 출발하는 **유럽 도시 도장깨기** 여행 기록장.
-도시를 방문할 때마다 여권에 도장을 찍고, 지도를 색칠하고, 배지를 모으세요.
+안개 덮인 유럽 지도에서, 방문한 도시 주변만 상세 지도가 열립니다.
 
-| 지도 | 여권 | 공유 카드 |
-|---|---|---|
-| 방문국 색칠 + 집에서 뻗는 비행 궤적 | 도시마다 다른 잉크 도장 47종 | 인스타 피드용 이미지 자동 생성 |
+> **현재 상태:** v0(동작하는 MVP)가 배포되어 있고, v1 리디자인을 단계별로 개발하고 있습니다.
 
-## 주요 기능
+## 문서
 
-- 🗺️ **유럽 지도** — 확대/이동, 클리어한 도시는 이모지 핀, 방문한 나라 색칠
-- 🔖 **도장 찍기** — 날짜·기분·별점·한 줄 요약·일기·사진, "쾅!" 애니메이션
-- 🛂 **여권 페이지** — 권역별(중부/서/남/동/북유럽, 영국·아일랜드) 도장 컬렉션
-- 📔 **여행 일기** — 월별 타임라인
-- 🏅 **배지 18종** — 지중해의 햇살, 독일 마스터, 사계절 여행자 등
-- 🚆 **다음 여행 추천** — 거주 도시에서 가까운 미방문 도시 + 이동수단 힌트
-- 📮 **공유 카드** — 1080×1350 PNG, 폰에서는 바로 공유
-- 💾 **백업/복원** (JSON), 오프라인 동작, 홈 화면 설치(PWA)
+| 문서 | 내용 |
+|---|---|
+| [docs/DESIGN_REVIEW.md](docs/DESIGN_REVIEW.md) | v0 디자인 진단, v1 컨셉("안개 걷기"), 정보 구조, 디자인 시스템 |
+| [docs/design/concept.html](docs/design/concept.html) | v1 시각 시안 (브라우저로 열기, 라이트/다크 전환 가능) |
+| [docs/DEVELOPMENT_PROMPTS.md](docs/DEVELOPMENT_PROMPTS.md) | **Claude Code에 붙여 넣는 단계별 개발 프롬프트** (Phase 1~9) |
+| [CLAUDE.md](CLAUDE.md) | Claude Code가 매 세션 자동으로 읽는 프로젝트 규칙 |
+| [docs/PROPOSAL.md](docs/PROPOSAL.md) | 초기 기획 (플랫폼 비교) |
 
-## 실행하기
+## 개발하는 법
 
-빌드 과정이 없는 순수 HTML/CSS/JS입니다. ES 모듈 때문에 파일을 직접 여는 대신 로컬 서버로 실행하세요.
+```
+/phase 1
+```
+
+Claude Code에서 위처럼 입력하면 해당 Phase를 브랜치 생성부터 PR까지 진행합니다.
+PR을 확인하고 머지하면 GitHub Pages에 자동으로 배포됩니다. 다음 Phase는 새 세션에서 `/phase 2`로 이어가세요.
+
+### 브랜치 전략
+
+```
+main  ←──  phase-1-foundation   (PR · 머지 시 자동 배포)
+      ←──  phase-2-cities
+      ←──  fix/…, feat/…        (Phase 밖의 작은 수정)
+```
+
+- `main`은 항상 배포 가능한 상태로 유지하고, 모든 작업은 브랜치에서 진행해 PR로 머지합니다
+- PR마다 CI(`.github/workflows/ci.yml`)가 lint, typecheck, test, build를 돌립니다
+- `main`에 머지되면 `.github/workflows/deploy.yml`이 Pages에 배포합니다
+
+### 이미 갖춰진 환경
+
+- `CLAUDE.md`: 스택, 디자인 규칙, 작업 흐름을 매 세션 자동으로 공유 → 같은 설명을 반복할 필요가 없어 토큰 절약
+- `.claude/settings.json`: npm, git 같은 자주 쓰는 명령은 권한 확인 없이 실행
+- `.claude/hooks/session-start.sh`: 클라우드 세션이 시작되면 `npm install`을 자동 실행
+- `.claude/commands/phase.md`: `/phase N` 명령
+
+## 로컬에서 실행 (v0)
 
 ```bash
-python3 -m http.server 8000
-# → http://localhost:8000
+python3 -m http.server 8000   # → http://localhost:8000
 ```
 
-## 폰에서 쓰기 (GitHub Pages 무료 배포)
+Phase 1 이후에는 `npm install && npm run dev`로 실행합니다.
 
-1. 이 저장소를 GitHub에 push
-2. 저장소 **Settings → Pages → Build and deployment**
-   Source: `Deploy from a branch`, Branch: `main` / `(root)` → Save
-3. 1~2분 뒤 `https://<아이디>.github.io/<저장소이름>/` 접속
-4. 폰 브라우저 메뉴에서 **홈 화면에 추가** → 앱처럼 실행
+## 데이터와 라이선스
 
-> ⚠️ 기록은 각 기기의 브라우저에 저장됩니다. 설정(⚙︎)에서 주기적으로 **백업 파일 저장**을 해두세요.
-
-## 구조
-
-```
-index.html          화면 뼈대
-css/style.css       여권 테마 스타일
-js/cities.js        도시·국가 데이터  ← 도시 추가는 여기에 한 줄
-js/badges.js        배지 정의        ← 배지 추가는 여기에 한 줄
-js/stamp.js         도장 SVG 생성기
-js/storage.js       IndexedDB 저장, 사진 압축
-js/app.js           화면 렌더링, 지도, 공유 카드, 백업
-vendor/             d3, topojson, 세계지도 데이터 (오프라인용 번들)
-sw.js               오프라인 캐시
-docs/PROPOSAL.md    기획 제안서 & 확장 로드맵
-```
-
-## 다음 단계
-
-확장 아이디어와 Claude Code에 그대로 붙여 넣을 수 있는 요청 예시는 [docs/PROPOSAL.md](docs/PROPOSAL.md)에 있어요.
+- 지도 경계: Natural Earth (public domain), world-atlas / d3 / topojson-client (ISC)
+- v1 예정: OpenFreeMap · OpenStreetMap 타일(ODbL), GeoNames(CC BY 4.0), Wikidata(CC0), flag-icons(MIT)

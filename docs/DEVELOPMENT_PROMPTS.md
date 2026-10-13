@@ -1,0 +1,347 @@
+# 단계별 개발 프롬프트
+
+Claude Code에 **한 단계씩** 붙여 넣어 개발하는 문서입니다.
+각 단계는 독립된 브랜치와 PR로 진행하고, 머지하면 GitHub Pages에 자동 배포됩니다.
+
+## 사용법
+
+**가장 쉬운 방법:** Claude Code에서 슬래시 명령을 입력하세요.
+
+```
+/phase 1
+```
+
+`.claude/commands/phase.md`가 이 문서에서 해당 단계를 찾아 브랜치 생성 → 구현 → 검증 → PR까지 진행합니다.
+직접 붙여 넣고 싶다면 아래 각 단계의 `프롬프트` 블록을 그대로 복사하면 됩니다.
+
+**진행 원칙**
+
+- 한 세션에서 한 단계만 진행하세요. 컨텍스트가 짧을수록 토큰이 적게 들고 결과도 정확합니다.
+- 단계가 끝나면 PR을 확인하고 머지한 뒤, 새 세션에서 다음 단계를 시작하세요.
+- 결과가 마음에 들지 않으면 같은 브랜치에서 "○○를 이렇게 바꿔줘"처럼 짧게 수정을 요청하세요.
+- 모든 단계는 [`CLAUDE.md`](../CLAUDE.md)의 규칙과 [`DESIGN_REVIEW.md`](DESIGN_REVIEW.md)의 디자인 시스템을 따릅니다.
+
+## 진행 현황
+
+- [x] Phase 0 — 저장소 환경 세팅
+- [ ] Phase 1 — 기술 기반 & 앱 골격
+- [ ] Phase 2 — 유럽 도시 데이터 (600+ 도시)
+- [ ] Phase 3 — 안개 지도
+- [ ] Phase 4 — 원탭 체크인 & 도장 v2
+- [ ] Phase 5 — 바텀시트 탐색 (나라 → 도시 → 기록)
+- [ ] Phase 6 — 프로필 · 배지 · 백업
+- [ ] Phase 7 — 공유 카드 & 연말 결산
+- [ ] Phase 8 — PWA · 오프라인 · 품질
+- [ ] Phase 9 — (선택) 클라우드 동기화 & 공개 프로필
+
+---
+
+## Phase 0 — 저장소 환경 세팅 ✅
+
+이미 완료된 단계입니다.
+
+- `main` 브랜치 생성, 단계별 `phase-N-*` 브랜치에서 PR로 머지하는 흐름
+- GitHub Actions: PR마다 검사(`ci.yml`), `main`에 머지하면 Pages 배포(`deploy.yml`). `package.json` 유무를 감지해 v0 정적 사이트와 v1 빌드를 모두 지원
+- `CLAUDE.md`(프로젝트 규칙), `.claude/settings.json`(자주 쓰는 명령 허용, 클라우드 세션 시작 시 자동 `npm install`), `/phase` 명령
+- 디자인 리뷰 문서와 시각 시안
+
+---
+
+## Phase 1 — 기술 기반 & 앱 골격
+
+**브랜치** `phase-1-foundation`
+**목표** v0 정적 앱을 Vite + React + TypeScript로 옮기고, 디자인 토큰과 "지도 풀스크린 + 바텀시트" 골격을 만든다. 기존 사용자 데이터는 반드시 보존한다.
+
+```text
+Phase 1을 진행해줘. CLAUDE.md와 docs/DESIGN_REVIEW.md를 먼저 읽어.
+
+목표: v0(루트의 index.html, js/, css/)를 Vite + React + TypeScript 앱으로 재구성하고
+v1의 기반과 화면 골격을 만든다.
+
+1. 스택 (최신 안정 버전):
+   - Vite, React, TypeScript(strict)
+   - 상태: zustand / 저장소: dexie / 아이콘: lucide-react
+   - 바텀시트: vaul / 애니메이션: motion
+   - 테스트: vitest, @testing-library/react / 린트: eslint(flat config), prettier
+   - 스타일: CSS Modules + src/styles/tokens.css(CSS 변수). Tailwind는 쓰지 않음
+   - 폰트: pretendard 패키지(npm)를 self-host, 도장용 JetBrains Mono(@fontsource)
+2. 폴더 구조: src/{app,components,features/{map,checkin,collection,profile},data,db,lib,styles}
+   - v0 파일은 legacy/v0/ 로 옮겨 참고용으로 보관 (빌드 대상 아님)
+   - vendor/ 는 Phase 3에서 maplibre로 대체되므로 삭제
+3. 디자인 토큰: DESIGN_REVIEW.md 4장의 컬러, 타이포, 라운드, 그림자, 모션을 tokens.css로 정의.
+   라이트/다크는 prefers-color-scheme로 자동 전환
+4. 화면 골격 (아직 실제 지도 없이):
+   - 풀스크린 지도 영역 (Phase 3 전까지는 --land 색 placeholder)
+   - 좌상단 진행률 알약 "0개 도시 · 0개국", 우상단 프로필 버튼(원형)
+   - vaul 바텀시트: peek(검색창 "어디 다녀오셨어요?" + 국기 줄 자리) / half / full 3단계 snap
+   - safe-area-inset 대응, 360px 폭에서도 가로 스크롤 없음
+5. 데이터 계층 (src/db):
+   - Dexie DB 'euro-passport-v1': visits(id, cityId, date, note, photos[], createdAt, updatedAt), settings
+   - v0 마이그레이션: 기존 IndexedDB 'euro-passport'(stores: visits, settings)가 있으면 1회 읽어서
+     옮기고 settings에 migratedFromV0=true 기록. v0 cityId → v1 cityId 매핑 테이블은
+     src/db/v0-city-map.ts에 둔다 (Phase 2에서 id 체계가 확정되므로 지금은 v0 id 그대로 보존)
+   - v0 JSON 백업 파일(app:'euro-passport', version:1)도 읽을 수 있는 import 함수
+   - 마이그레이션 단위 테스트 (fake-indexeddb 사용)
+6. package.json 스크립트: dev, build, preview, lint, typecheck, test, format
+   - vite base는 './' (GitHub Pages 하위 경로 대응)
+7. .github/workflows의 ci.yml과 deploy.yml이 package.json을 감지해 자동으로 빌드하는지 확인
+
+완료 기준: npm run lint && npm run typecheck && npm test && npm run build 모두 통과.
+Playwright로 모바일(390x844)과 데스크톱(1280x800) 스크린샷을 찍어 라이트/다크 모두 확인하고
+PR 본문에 무엇을 확인했는지 적어줘.
+```
+
+**완료 체크** 골격 화면이 라이트/다크로 뜨고, 기존 v0에서 찍은 기록이 사라지지 않음
+
+---
+
+## Phase 2 — 유럽 도시 데이터 (600+ 도시)
+
+**브랜치** `phase-2-cities`
+**목표** 나라마다 충분한 도시가 있는 데이터셋을 스크립트로 생성한다. 한글 이름, 등급, 국기까지 포함한다.
+
+```text
+Phase 2를 진행해줘. CLAUDE.md를 먼저 읽어.
+
+목표: 유럽 45개국 내외, 600~900개 도시 데이터셋을 재현 가능한 스크립트로 만든다.
+
+1. scripts/build-cities.ts (tsx로 실행, npm run data:cities):
+   - 원천: GeoNames cities15000.zip (CC BY 4.0) — 유럽 국가만, 인구 50,000 이상
+   - 큐레이션 추가: data/curated.csv에 인구는 적어도 여행지로 유명한 곳을 직접 추가
+     (예: Hallstatt, Brugge, Rothenburg ob der Tauber, Giethoorn, Colmar, Cinque Terre(Monterosso),
+      Positano, Český Krumlov, Bled, Kotor, Mostar, Sintra, Ronda, Mont-Saint-Michel, Zermatt,
+      Grindelwald, Annecy, Lauterbrunnen, Eze, Matera, Alberobello, Plitvice, Tromsø, Lofoten(Svolvær) 등
+      50곳 이상)
+   - 한글 이름: Wikidata SPARQL로 GeoNames ID(P1566) → ko 라벨 조회. 없으면 data/ko-overrides.csv
+     에서 보충하고, 그래도 없는 도시는 목록으로 출력해서 내가 확인할 수 있게 해줘
+   - 등급(tier): 1 = 상징 도시(수도 + 대표 관광 도시, 약 120곳, data/tier1.txt로 관리)
+                2 = 인구 10만 이상 또는 큐레이션 도시 / 3 = 나머지
+   - 출력: src/data/cities.json
+     { id: "cz-prague", name: {ko, en, local}, country: "CZ", lat, lon, population, tier, capital }
+     id는 "국가코드-영문슬러그", 중복 시 지역명 접미사
+   - 결과 json은 커밋한다 (앱 실행 시 네트워크 불필요). 원천 zip은 .gitignore
+2. src/data/countries.json: ISO2, 한글명, 영문명, 권역(서/중부/남/동/북유럽, 영국·아일랜드, 발칸),
+   국가 중심 좌표(라벨 위치용), 도시 수
+3. 국기: flag-icons 패키지의 1x1 SVG를 사용하는 <Flag code="CZ" size={24} visited /> 컴포넌트
+   (원형 클립, 미방문은 grayscale + 반투명)
+4. v0 → v1 id 매핑: src/db/v0-city-map.ts 완성 (v0의 47개 id 전부 매핑, 테스트로 검증)
+5. 데이터 무결성 테스트: id 중복 없음, 좌표 범위, 모든 국가에 도시 3개 이상,
+   tier1 개수 범위, ko 이름 누락률 2% 미만
+6. 라이선스 표기: GeoNames, Wikidata(CC0), flag-icons를 README와 앱 정보 화면용 상수에 추가
+
+완료 기준: npm run data:cities로 결과가 재생성되고, 테스트 통과, 국가별 도시 수 요약표를 PR 본문에 첨부.
+네트워크 정책 때문에 GeoNames나 Wikidata 접속이 막히면 그 사실과 막힌 호스트를 알려주고 멈춰줘.
+```
+
+**완료 체크** `cities.json` 600개 이상, 한글명 누락 거의 없음, 국가별 도시 수 표 확인
+
+---
+
+## Phase 3 — 안개 지도
+
+**브랜치** `phase-3-fog-map`
+**목표** 앱의 핵심. 흑백 안개 지도 위에서 방문 도시 주변만 컬러 상세 지도로 열린다.
+
+```text
+Phase 3을 진행해줘. CLAUDE.md, docs/DESIGN_REVIEW.md 2장(컨셉), docs/design/concept.html을 먼저 읽어.
+
+목표: MapLibre GL JS로 "안개 걷기" 지도를 구현한다.
+
+1. 베이스맵: maplibre-gl + OpenFreeMap(무료, API 키 없음) 벡터 타일
+   - 스타일은 https://tiles.openfreemap.org/styles/positron 을 기반으로
+     src/features/map/style.ts에서 우리 토큰 색으로 덮어쓴 라이트/다크 스타일 생성
+   - 라벨은 name:ko → name 순으로 표시 (["coalesce", ["get","name:ko"], ["get","name"]])
+   - attribution 표기 (OpenFreeMap, OpenMapTiles, OpenStreetMap)
+2. 안개 레이어 (src/features/map/fog.ts):
+   - 세계 전체 폴리곤에 방문 도시마다 원형 구멍을 뚫은 fill 레이어. 색은 --bg, 투명도 0.92
+   - 반경은 도시 등급별 (tier1 18km, tier2 12km, tier3 8km), @turf/circle로 64분할
+   - 안개 레이어는 도로, 건물, 수계 위 + 국가 경계와 라벨 아래에 위치
+   - 줌이 낮을 때(z<5)는 안개 위에 국가 fill: 방문국은 --accent-soft, 미방문은 --land
+   - 새 방문이 생기면 구멍 반경을 0 → 목표값까지 700ms 애니메이션 (requestAnimationFrame)
+3. 국기 마커: z3~5.5에서 국가 중심에 원형 국기(Phase 2의 Flag 컴포넌트 재사용, HTML Marker 또는
+   symbol 이미지). 방문국은 컬러, 미방문은 흑백. 탭하면 해당 국가로 flyTo + 시트에 국가 상세
+4. 도시 마커 (GeoJSON source + circle/symbol 레이어, HTML 마커 금지 — 성능):
+   - z≥5: tier1, z≥6.5: tier2, z≥8: tier3 표시
+   - 방문 도시는 --accent 점 + 도시명, 미방문은 --text-2 작은 점
+   - 탭하면 시트에 도시 상세 (Phase 5 전까지는 이름만 표시하는 임시 시트)
+5. 카메라: 첫 진입 시 유럽 전체 bounds, 회전·기울기 비활성, maxBounds로 유럽 밖 이동 제한
+6. 홈 도시는 작은 집 아이콘(lucide House를 SVG 이미지로 등록)
+7. 성능: 도시 900개, 방문 200개 기준에서 모바일 60fps 근처. 지도 인스턴스는 한 번만 생성
+8. 테스트: fog 폴리곤 생성 함수 단위 테스트 (구멍 개수, 겹치는 원 처리, 반시계 방향 링)
+
+완료 기준: 테스트 방문 데이터 10개를 넣은 상태로 유럽 전체, 국가 줌, 도시 줌 3단계 스크린샷을
+라이트/다크로 찍어 확인. 이 환경에서 타일 서버가 막혀 있으면 지도 스크린샷 대신 그 사실을 PR에 적어줘.
+```
+
+**완료 체크** 방문 도시 주변만 상세 지도가 보이고, 줌아웃하면 국기와 국가 색으로 한눈에 파악됨
+
+---
+
+## Phase 4 — 원탭 체크인 & 도장 v2
+
+**브랜치** `phase-4-checkin`
+**목표** 필수 입력 0개로 도시를 "클리어"하는 핵심 동작과, 세련된 도장.
+
+```text
+Phase 4를 진행해줘. CLAUDE.md와 docs/DESIGN_REVIEW.md 3장(체크인 플로우), 4장(도장 v2)을 먼저 읽어.
+
+1. 검색 (시트 peek의 검색창):
+   - 탭하면 시트가 full로 열리고 입력에 포커스
+   - 한글, 영어, 현지어 이름 모두 검색. 한글 초성 검색 지원 (es-hangul의 getChoseong). 예: "ㅍㄹㅎ" → 프라하
+   - 결과 행: 원형 국기 + 도시명 + 국가명 · tier 점 + 방문했으면 체크 표시. 정렬은 일치도 → tier → 인구
+   - 검색어가 비어 있을 때는 "📍 현재 위치로 찾기"와 홈 기준 가까운 미방문 도시 5개 추천
+2. 현재 위치: navigator.geolocation → 30km 이내 가장 가까운 도시 제안. 권한 거부 시 조용히 숨김
+3. 체크인:
+   - 결과 행 탭 → 즉시 visit 저장(date=오늘) → 시트는 해당 도시 상세로 전환
+   - 동시에 지도 flyTo + 안개 구멍 애니메이션 + 도장 "쾅" 오버레이(scale 1.6→1, 260ms, spring)
+     + navigator.vibrate(12)
+   - 하단 토스트 "프라하 도장 획득 · 되돌리기" (5초), 되돌리기 시 visit 삭제 + 안개 복원
+   - 이미 방문한 도시는 "다시 방문 기록"으로 동작
+4. 도장 v2 컴포넌트 <Stamp city visit size />:
+   - 순수 SVG. 모양 4종(원, 타원, 사각, 팔각)은 도시 id 해시로 고정, 각도 ±8°는 visit id 해시로 고정
+   - 텍스트: 영문 대문자 도시명 / "CZ · 50.08°N 14.44°E" / "13 OCT 2026"
+   - 서체: JetBrains Mono 600, 선 1.5px + 3px 이중선, 색 --accent (tier3 히든젬은 금색 #B8892B)
+   - 미방문 상태용 점선 고스트 버전
+   - 이모지와 거친 필터 사용 금지. 스냅샷 테스트로 모양 4종 고정
+5. 도시 상세 (임시, Phase 5에서 확장): 큰 도장, 도시명(Display), 국가, 방문일,
+   보조 버튼 3개(사진 추가 · 한 줄 남기기 · 날짜 변경)는 텍스트 버튼으로 조용히
+
+완료 기준: Playwright e2e — "ㅍㄹㅎ" 검색 → 프라하 체크인 → 지도에 열림 → 되돌리기 → 원상복구.
+체크인 순간 애니메이션 중간 프레임 스크린샷을 PR에 첨부.
+```
+
+**완료 체크** 검색부터 도장까지 탭 2번, 되돌리기 동작
+
+---
+
+## Phase 5 — 바텀시트 탐색 (나라 → 도시 → 기록)
+
+**브랜치** `phase-5-collection`
+**목표** 메뉴 없이 시트 하나로 컬렉션 전체를 탐색한다.
+
+```text
+Phase 5를 진행해줘. CLAUDE.md와 docs/DESIGN_REVIEW.md 3장을 먼저 읽어.
+
+시트 안의 내비게이션 스택: 홈(peek/half) → 국가 상세 → 도시 상세. 뒤로가기는 시트 좌상단 화살표와
+브라우저 뒤로가기(history API) 모두 동작. URL 쿼리(?country=CZ, ?city=cz-prague)로 딥링크 지원.
+
+1. 시트 홈 (half 상태):
+   - 상단 요약 "9개국 · 23개 도시 · 유럽의 4%"
+   - 방문한 국기 가로 스크롤 줄 (peek에서도 보임)
+   - 국가 리스트: 원형 국기, 국가명, "5 / 24" + 얇은 진행 바. 정렬: 방문한 나라(최근 방문 순) → 미방문(가나다)
+   - 리스트 상단 세그먼트 1개만: [전체 | 방문함] (필터 칩 여러 개 금지)
+2. 국가 상세: 큰 국기 + 국가명 + 진행률 링, 도시 그리드(도장 썸네일, 미방문은 고스트 도장).
+   tier1 → 2 → 3 순으로 "대표 도시 / 더 많은 도시 / 히든젬" 섹션 구분. 지도는 국가 bounds로 fitBounds
+3. 도시 상세:
+   - 도장, 도시명, 국가, 홈에서의 거리 + 이동 힌트(기차 당일치기 등)
+   - 방문 기록 목록 (방문이 여러 번이면 1st, 2nd …)
+   - 기록 편집: 날짜 변경, 한 줄 메모(최대 140자), 사진(최대 10장, 1600px JPEG로 압축해
+     Dexie에 Blob으로 저장). 사진은 가로 스크롤 갤러리, 탭하면 풀스크린 뷰어
+   - 삭제는 길게 누르기 또는 ... 메뉴 안에 (실수 방지 확인창)
+4. 사진 EXIF (exifr): 촬영일이 있으면 방문일 제안, GPS가 있으면 가장 가까운 도시를 제안
+5. 지도와 시트 동기화: 시트에서 국가나 도시를 선택하면 지도가 이동하고, 지도에서 탭하면 시트가 열림
+
+완료 기준: e2e — 지도에서 국가 탭 → 국가 상세 → 도시 체크인 → 사진 추가 → 뒤로가기 2번으로 홈.
+모바일 스크린샷 3장(홈, 국가, 도시) 첨부.
+```
+
+---
+
+## Phase 6 — 프로필 · 배지 · 백업
+
+**브랜치** `phase-6-profile`
+
+```text
+Phase 6을 진행해줘. CLAUDE.md를 먼저 읽어.
+
+우상단 프로필 버튼 → 전체 화면 페이지 하나 (탭 없음, 위에서 아래로 스크롤):
+
+1. 헤더: 이름, 홈 도시(원형 국기), 편집 버튼
+2. 숫자 3개만 크게: 도시 · 나라 · 이동거리(km, 홈 기준 왕복 합) — tabular-nums
+3. 배지 (가로 스크롤 1줄, "모두 보기"로 그리드 시트):
+   - src/features/profile/badges.ts — 데이터 기반 정의 (id, 이름, 설명, 목표, 계산 함수)
+   - 25종 내외: 도시 수(1/10/25/50/100), 국가 수(5/10/20/30), 권역별, 독일 마스터(독일 tier1 전부),
+     수도 컬렉터, 히든젬 헌터(tier3 10곳), 사계절, 재방문, 한 달에 3개국, 북극권(위도 66.5° 이상) 등
+   - 아이콘은 lucide 아이콘 + 원형 배경. 미획득은 흑백
+   - 새 배지 획득 시 체크인 토스트 다음에 배지 토스트 (중복 알림 방지 로직 + 테스트)
+4. 타임라인: 월별 그룹, 도장 썸네일 + 도시명 + 메모 첫 줄 + 사진 1장
+5. 설정 (페이지 맨 아래, 리스트 형태): 이름, 홈 도시, 테마(자동/라이트/다크),
+   백업 내보내기(JSON + 사진 포함 zip, fflate 사용), 백업 가져오기(v0 JSON 호환), 모든 기록 삭제,
+   앱 정보(버전, 오픈소스 라이선스, 데이터 출처)
+
+완료 기준: 배지 계산 단위 테스트, 백업 → 전체 삭제 → 복원 왕복 테스트(사진 포함) 통과.
+```
+
+---
+
+## Phase 7 — 공유 카드 & 연말 결산
+
+**브랜치** `phase-7-share`
+
+```text
+Phase 7을 진행해줘. CLAUDE.md를 먼저 읽어.
+
+1. 공유 카드 (프로필의 "공유" 버튼 1개 → 시트에서 형식 선택):
+   - 피드 4:5 (1080x1350): 안개 지도 스냅샷(maplibre canvas, preserveDrawingBuffer) 위에
+     숫자 3개, 최근 도장 6개, 이름과 날짜. 여백 많게, 장식 금지
+   - 스토리 9:16 (1080x1920): 세로 레이아웃 버전
+   - 국가 카드: 국가 상세에서 공유 → 해당 국가 도장 모음
+   - 생성은 OffscreenCanvas 또는 canvas. 폰트 로딩 완료(document.fonts.ready) 후 그리기
+   - navigator.share(files) 지원 시 공유, 아니면 PNG 다운로드
+2. 연말 결산 "My Euro Year" (12월 1일~1월 31일에만 프로필 상단에 배너로 노출):
+   - 스와이프로 넘기는 5장: 올해 숫자 / 가장 먼 곳 / 최다 방문 국가 / 월별 막대 / 올해의 도장 컬렉션
+   - 각 장 이미지 저장. 디버그용으로 ?wrap=2026 쿼리로 언제든 열 수 있게
+3. 카드 렌더 함수는 순수 함수로 분리하고 스냅샷 테스트 (픽셀 비교 대신 draw call 기록 방식도 가능)
+
+완료 기준: 카드 3종 이미지를 생성해 PR에 첨부.
+```
+
+---
+
+## Phase 8 — PWA · 오프라인 · 품질
+
+**브랜치** `phase-8-quality`
+
+```text
+Phase 8을 진행해줘. CLAUDE.md를 먼저 읽어.
+
+1. PWA: vite-plugin-pwa (injectManifest). 아이콘 세트(192/512/maskable/apple-touch)는
+   디자인 토큰 색으로 생성하는 스크립트 포함. 새 버전이 있으면 조용한 토스트 "업데이트 · 새로고침"
+2. 오프라인: 앱 셸 precache. 지도 타일은 stale-while-revalidate, 최대 2000개 LRU.
+   방문 도시 주변 z8~13 타일을 체크인 직후 백그라운드로 미리 받아두기(옵션, 와이파이일 때만)
+3. 접근성: 지도 마커 키보드 탐색, 시트 포커스 트랩, 모든 아이콘 버튼 aria-label,
+   대비 검사(axe-core를 Playwright에 연동)
+4. 성능: 번들 분석(rollup-plugin-visualizer), maplibre는 동적 import, cities.json은 필요한 필드만,
+   Lighthouse CI(모바일) 성능 90+, 접근성 95+, PWA 통과를 ci.yml에 추가
+5. e2e 정리: 핵심 시나리오 5개(첫 진입, 체크인, 되돌리기, 사진 추가, 백업 복원)
+   + 시각 회귀 스크린샷(모바일 라이트/다크)
+6. 에러 처리: 저장소 접근 불가(시크릿 모드), 타일 로딩 실패, 용량 초과(navigator.storage.estimate)
+   상황별 안내 화면
+
+완료 기준: Lighthouse 리포트 수치와 e2e 결과를 PR 본문에 첨부.
+```
+
+---
+
+## Phase 9 — (선택) 클라우드 동기화 & 공개 프로필
+
+**브랜치** `phase-9-cloud`
+
+```text
+Phase 9를 진행해줘. CLAUDE.md를 먼저 읽어.
+
+Supabase를 붙여 선택적 클라우드 동기화를 만든다. 로그인하지 않아도 지금처럼 로컬로 완전히 동작해야 한다.
+
+1. 인증: Supabase Auth (Google, 이메일 매직 링크). 프로필의 설정에 "기기 간 동기화" 항목 1개
+2. 스키마: profiles, visits, photos (Storage 버킷). RLS로 본인만 쓰기.
+   supabase/migrations/에 SQL 마이그레이션 파일로 관리
+3. 동기화: Dexie ↔ Supabase 양방향, updatedAt 기준 last-write-wins, 오프라인 큐.
+   첫 로그인 시 로컬 기록 업로드
+4. 공개 프로필: 설정에서 공개를 켜면 /?u=handle 링크로 지도, 도장, 배지를 읽기 전용으로 공개.
+   메모와 사진은 각각 공개 여부 선택
+5. 환경 변수: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (GitHub Actions secrets에서 주입).
+   키가 없으면 동기화 UI를 숨김
+
+완료 기준: 두 브라우저 컨텍스트에서 동기화 e2e 통과 (Supabase 로컬 CLI 또는 모킹).
+필요한 Supabase 프로젝트 설정과 secrets 등록 방법을 docs/CLOUD_SETUP.md로 정리.
+```
