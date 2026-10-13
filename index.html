@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Euro Passport</title>
+  <meta name="description" content="독일에서 출발하는 유럽 도시 정복 여권 — 도시마다 도장을 모으는 여행 기록장">
+  <meta name="theme-color" content="#1c2b4a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Gowun+Dodum&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="cover">
+    <div class="cover-inner">
+      <div class="brand">
+        <span class="crest" aria-hidden="true">✦</span>
+        <div>
+          <p class="eyebrow">REPUBLIK DER REISENDEN<span class="ko-only"> · 여행자 공화국</span></p>
+          <h1>Euro Passport</h1>
+          <p class="owner" id="ownerLine"><span class="home-label">여권 소지자 · </span><span id="ownerName">Traveler</span> · 🏠 <span id="homeName">Frankfurt</span></p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn ghost" id="shareBtn" type="button" aria-label="공유 카드">📮<span class="label"> 공유 카드</span></button>
+        <button class="btn ghost icon" id="settingsBtn" type="button" aria-label="설정">⚙︎</button>
+      </div>
+    </div>
+    <dl class="stats" id="stats"></dl>
+    <div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" class="tab active" data-view="map">🗺️ 지도</button>
+    <button role="tab" class="tab" data-view="passport">🛂 여권</button>
+    <button role="tab" class="tab" data-view="journal">📔 기록</button>
+    <button role="tab" class="tab" data-view="badges">🏅 배지</button>
+  </nav>
+
+  <main>
+    <section class="view active" id="view-map">
+      <div class="map-wrap">
+        <svg id="map" aria-label="유럽 지도"></svg>
+        <div class="map-tip" id="mapTip" hidden></div>
+        <div class="map-legend">
+          <span><i class="dot done"></i>클리어</span>
+          <span><i class="dot todo"></i>도전 중</span>
+          <span><i class="dot home"></i>우리 집</span>
+        </div>
+        <p class="map-error" id="mapError" hidden>지도 데이터를 불러오지 못했어요. 새로고침 해 주세요.</p>
+      </div>
+      <div class="next-up" id="nextUp"></div>
+    </section>
+
+    <section class="view" id="view-passport">
+      <div class="filter-row">
+        <button class="chip active" data-filter="all">전체</button>
+        <button class="chip" data-filter="done">클리어</button>
+        <button class="chip" data-filter="todo">미방문</button>
+      </div>
+      <div id="passportPages"></div>
+    </section>
+
+    <section class="view" id="view-journal">
+      <div id="journalList" class="journal"></div>
+    </section>
+
+    <section class="view" id="view-badges">
+      <div id="badgeGrid" class="badge-grid"></div>
+    </section>
+  </main>
+
+  <!-- 도시 상세 / 도장 찍기 -->
+  <dialog id="cityDialog" class="sheet">
+    <div class="sheet-body" id="cityBody"></div>
+  </dialog>
+
+  <!-- 설정 -->
+  <dialog id="settingsDialog" class="sheet">
+    <form method="dialog" class="sheet-body settings" id="settingsForm">
+      <h2>여권 설정</h2>
+      <label>이름 <input name="name" maxlength="24" placeholder="여권에 표시될 이름"></label>
+      <label>거주 도시 (출발점)
+        <select name="home" id="homeSelect"></select>
+      </label>
+      <div class="settings-actions">
+        <button class="btn" value="save">저장</button>
+      </div>
+      <hr>
+      <h3>백업</h3>
+      <p class="hint">기록은 이 브라우저에만 저장돼요. 폰을 바꾸기 전에 꼭 백업하세요.</p>
+      <div class="settings-actions">
+        <button class="btn ghost-dark" type="button" id="exportBtn">⬇︎ 백업 파일 저장</button>
+        <label class="btn ghost-dark file-btn">⬆︎ 백업 불러오기<input type="file" id="importInput" accept="application/json" hidden></label>
+      </div>
+      <button class="link danger" type="button" id="resetBtn">모든 기록 삭제</button>
+    </form>
+  </dialog>
+
+  <!-- 공유 카드 -->
+  <dialog id="shareDialog" class="sheet">
+    <div class="sheet-body share">
+      <h2>공유 카드</h2>
+      <canvas id="shareCanvas" width="1080" height="1350"></canvas>
+      <div class="settings-actions">
+        <button class="btn" id="shareNative" type="button">공유하기</button>
+        <button class="btn ghost-dark" id="shareDownload" type="button">이미지 저장</button>
+        <button class="btn ghost-dark" type="button" data-close>닫기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="stamp-fx" id="stampFx" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

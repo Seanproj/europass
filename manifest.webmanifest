@@ -1,0 +1,14 @@
+{
+  "name": "Euro Passport — 유럽 도장깨기",
+  "short_name": "Euro Passport",
+  "description": "유럽 도시마다 도장을 모으는 여행 기록장",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4ecd8",
+  "theme_color": "#1c2b4a",
+  "lang": "ko",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
