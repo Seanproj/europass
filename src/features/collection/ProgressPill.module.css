@@ -1,0 +1,36 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--tap);
+  padding: 0 var(--sp-4) 0 var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.pill b {
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-right: 1px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-2);
+  opacity: 0.5;
+}

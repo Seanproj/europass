@@ -9,9 +9,13 @@
 - `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
-- v0: 루트의 정적 사이트(index.html, js/, css/, vendor/). Phase 1에서 `legacy/v0/`로 이동
-- v1 목표 스택: Vite + React + TypeScript(strict), zustand, dexie, maplibre-gl(OpenFreeMap),
-  vaul, motion, lucide-react, CSS Modules + `src/styles/tokens.css`, vitest, Playwright
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 1 완료: 토큰, 골격, 데이터 계층)
+- v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
+- 스택: zustand, dexie(+dexie-react-hooks), maplibre-gl(OpenFreeMap, Phase 3), motion, lucide-react,
+  CSS Modules + `src/styles/tokens.css`, vitest, Playwright
+- 바텀시트는 motion 기반 자체 구현(`src/features/collection/BottomSheet.tsx`). vaul은 Radix Dialog 기반이라
+  상시 열린 비모달 시트에서도 포커스를 가두고 나머지 화면을 스크린리더에서 숨겨서 쓰지 않음
+- TypeScript 7은 typescript-eslint가 아직 지원하지 않아 6.0 사용
 
 ## 명령어 (v1, Phase 1 이후)
 ```
@@ -37,6 +41,7 @@ npx playwright test
 
 ## 코드 규칙
 - UI 문구는 한국어, 코드 식별자는 영어, 주석은 한국어로 간결하게
+- DB 테스트는 파일 맨 위에 `// @vitest-environment node` (jsdom의 Blob은 fake-indexeddb에 저장되지 않음)
 - 기능은 `src/features/<name>/`에 모으고, 컴포넌트는 기능 폴더 안에서 시작해 재사용될 때만 `src/components/`로 이동
 - 도시 데이터(`src/data/cities.json`)는 스크립트로만 생성. 손으로 수정하지 말고 `data/*.csv`의 override를 쓸 것
 - **사용자 데이터 보존이 최우선**: Dexie 스키마를 바꿀 때는 버전을 올리고 마이그레이션 + 테스트 필수

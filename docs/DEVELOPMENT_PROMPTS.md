@@ -25,7 +25,7 @@ Claude Code에 **한 단계씩** 붙여 넣어 개발하는 문서입니다.
 ## 진행 현황
 
 - [x] Phase 0 — 저장소 환경 세팅
-- [ ] Phase 1 — 기술 기반 & 앱 골격
+- [x] Phase 1 — 기술 기반 & 앱 골격
 - [ ] Phase 2 — 유럽 도시 데이터 (600+ 도시)
 - [ ] Phase 3 — 안개 지도
 - [ ] Phase 4 — 원탭 체크인 & 도장 v2
@@ -62,7 +62,7 @@ v1의 기반과 화면 골격을 만든다.
 1. 스택 (최신 안정 버전):
    - Vite, React, TypeScript(strict)
    - 상태: zustand / 저장소: dexie / 아이콘: lucide-react
-   - 바텀시트: vaul / 애니메이션: motion
+   - 바텀시트: motion 기반 자체 구현 (vaul은 비모달 상시 시트에서 접근성 문제로 제외) / 애니메이션: motion
    - 테스트: vitest, @testing-library/react / 린트: eslint(flat config), prettier
    - 스타일: CSS Modules + src/styles/tokens.css(CSS 변수). Tailwind는 쓰지 않음
    - 폰트: pretendard 패키지(npm)를 self-host, 도장용 JetBrains Mono(@fontsource)
@@ -74,7 +74,7 @@ v1의 기반과 화면 골격을 만든다.
 4. 화면 골격 (아직 실제 지도 없이):
    - 풀스크린 지도 영역 (Phase 3 전까지는 --land 색 placeholder)
    - 좌상단 진행률 알약 "0개 도시 · 0개국", 우상단 프로필 버튼(원형)
-   - vaul 바텀시트: peek(검색창 "어디 다녀오셨어요?" + 국기 줄 자리) / half / full 3단계 snap
+   - 바텀시트: peek(검색창 "어디 다녀오셨어요?" + 국기 줄 자리) / half / full 3단계 snap
    - safe-area-inset 대응, 360px 폭에서도 가로 스크롤 없음
 5. 데이터 계층 (src/db):
    - Dexie DB 'euro-passport-v1': visits(id, cityId, date, endDate?, note, photos[], createdAt, updatedAt), settings

@@ -1,0 +1,133 @@
+/* 디자인 토큰 — docs/DESIGN_REVIEW.md 4장 기준. 색은 반드시 이 변수로만 사용 */
+:root {
+  /* 컬러 */
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --text: #15171a;
+  --text-2: #6b6f76;
+  --line: #e6e3dc;
+  --accent: #d8443a;
+  --accent-soft: #d8443a1f;
+  --gold: #b08328;
+  --land: #e9e7e1;
+  --map-water: #e3e7e8;
+  --fog: #efeeea;
+  --fog-cloud: #ffffff;
+  --glass: rgb(255 255 255 / 0.72);
+  --toast-accent: #f0625a;
+  --flag-black: #1b1b1b;
+  /* 렌즈 안 상세 지도 전용 */
+  --d-bg: #fbf7ef;
+  --d-street: #e6dccb;
+  --d-road: #ffffff;
+  --d-water: #a9d0e4;
+  --d-park: #c9e0b5;
+  --d-roof: #e9a584;
+
+  /* 타이포 */
+  --font: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --fs-display: 32px;
+  --fs-title: 20px;
+  --fs-body: 15px;
+  --fs-caption: 12px;
+  --fw-display: 700;
+  --fw-title: 650;
+  --fw-body: 450;
+  --fw-caption: 500;
+
+  /* 간격 (4pt 그리드) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --gutter: 16px;
+
+  /* 라운드 */
+  --r-card: 16px;
+  --r-sheet: 24px;
+  --r-pill: 999px;
+
+  /* 그림자 (1단계만) */
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  --shadow-sheet: 0 -8px 30px rgb(0 0 0 / 0.08);
+  /* 어두운 화면에서 면과 면을 구분하는 윗변 하이라이트 (라이트는 없음) */
+  --edge: transparent;
+
+  /* 모션 */
+  --dur: 200ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* 터치 영역 */
+  --tap: 44px;
+
+  color-scheme: light;
+}
+
+/* 다크 — 시스템 설정 자동 (data-theme="light"로 강제한 경우 제외) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0f1012;
+    --surface: #18191c;
+    --text: #f1f0ec;
+    --text-2: #9a9da3;
+    --line: #2a2c30;
+    --accent: #f0625a;
+    --accent-soft: #f0625a26;
+    --gold: #d9ae55;
+    --land: #1d1f22;
+    --map-water: #121417;
+    --fog: #141518;
+    --fog-cloud: #2c2e33;
+    --glass: rgb(24 25 28 / 0.72);
+    --toast-accent: #c9362d;
+    --flag-black: #4a4b50;
+    --d-bg: #2a2723;
+    --d-street: #3a3631;
+    --d-road: #575049;
+    --d-water: #24485c;
+    --d-park: #2b3d26;
+    --d-roof: #5c3a2e;
+    --shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+    --shadow-sheet: 0 -8px 30px rgb(0 0 0 / 0.45);
+    --edge: rgb(255 255 255 / 0.08);
+    color-scheme: dark;
+  }
+}
+
+/* 수동 다크 (Phase 6 테마 설정용) */
+:root[data-theme='dark'] {
+  --bg: #0f1012;
+  --surface: #18191c;
+  --text: #f1f0ec;
+  --text-2: #9a9da3;
+  --line: #2a2c30;
+  --accent: #f0625a;
+  --accent-soft: #f0625a26;
+  --gold: #d9ae55;
+  --land: #1d1f22;
+  --map-water: #121417;
+  --fog: #141518;
+  --fog-cloud: #2c2e33;
+  --glass: rgb(24 25 28 / 0.72);
+  --toast-accent: #c9362d;
+  --flag-black: #4a4b50;
+  --d-bg: #2a2723;
+  --d-street: #3a3631;
+  --d-road: #575049;
+  --d-water: #24485c;
+  --d-park: #2b3d26;
+  --d-roof: #5c3a2e;
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+  --shadow-sheet: 0 -8px 30px rgb(0 0 0 / 0.45);
+  --edge: rgb(255 255 255 / 0.08);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}
