@@ -33,6 +33,9 @@ jobs:
           if [ -f package.json ]; then
             npm ci
             npm run build
+            # 디자인 문서(시안)와 v0 앱(/v0/)도 함께 배포 — v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
+            cp -r docs dist/docs
+            mkdir -p dist/v0 && cp -r legacy/v0/. dist/v0/
             echo "dir=dist" >> "$GITHUB_OUTPUT"
           else
             mkdir -p _site

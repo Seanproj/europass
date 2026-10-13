@@ -1,0 +1,22 @@
+.app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.top {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + var(--sp-3));
+  left: calc(env(safe-area-inset-left) + var(--gutter));
+  right: calc(env(safe-area-inset-right) + var(--gutter));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.top > * {
+  pointer-events: auto;
+}

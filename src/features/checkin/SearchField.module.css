@@ -1,0 +1,54 @@
+.field {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  border-radius: var(--r-card);
+  background: var(--bg);
+}
+
+.trigger {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 var(--sp-2) 0 var(--sp-4);
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font-size: var(--fs-body);
+  text-align: left;
+  cursor: text;
+}
+
+.trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.locate {
+  width: var(--tap);
+  height: var(--tap);
+  margin-right: 3px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.locate svg {
+  width: 20px;
+  height: 20px;
+}

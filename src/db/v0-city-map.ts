@@ -1,0 +1,57 @@
+/**
+ * v0 도시 id → v1 도시 id 매핑.
+ * Phase 2에서 v1 id 체계("cz-prague")가 확정되면 오른쪽 값을 채운다. 지금은 v0 id를 그대로 보존.
+ */
+export const V0_CITY_MAP: Record<string, string> = {
+  berlin: 'berlin',
+  munich: 'munich',
+  hamburg: 'hamburg',
+  frankfurt: 'frankfurt',
+  cologne: 'cologne',
+  dresden: 'dresden',
+  heidelberg: 'heidelberg',
+  paris: 'paris',
+  nice: 'nice',
+  lyon: 'lyon',
+  amsterdam: 'amsterdam',
+  brussels: 'brussels',
+  bruges: 'bruges',
+  luxembourg: 'luxembourg',
+  london: 'london',
+  edinburgh: 'edinburgh',
+  dublin: 'dublin',
+  vienna: 'vienna',
+  salzburg: 'salzburg',
+  hallstatt: 'hallstatt',
+  zurich: 'zurich',
+  interlaken: 'interlaken',
+  prague: 'prague',
+  budapest: 'budapest',
+  krakow: 'krakow',
+  warsaw: 'warsaw',
+  ljubljana: 'ljubljana',
+  rome: 'rome',
+  florence: 'florence',
+  venice: 'venice',
+  milan: 'milan',
+  barcelona: 'barcelona',
+  madrid: 'madrid',
+  seville: 'seville',
+  lisbon: 'lisbon',
+  porto: 'porto',
+  athens: 'athens',
+  santorini: 'santorini',
+  dubrovnik: 'dubrovnik',
+  malta: 'malta',
+  copenhagen: 'copenhagen',
+  stockholm: 'stockholm',
+  oslo: 'oslo',
+  bergen: 'bergen',
+  helsinki: 'helsinki',
+  reykjavik: 'reykjavik',
+  tallinn: 'tallinn',
+};
+
+export function mapV0CityId(v0Id: string): string {
+  return V0_CITY_MAP[v0Id] ?? v0Id;
+}

@@ -3,7 +3,7 @@
 독일에서 출발하는 **유럽 도시 도장깨기** 여행 기록장.
 안개 덮인 유럽 지도에서, 방문한 도시 주변만 상세 지도가 열립니다.
 
-> **현재 상태:** v0(동작하는 MVP)가 배포되어 있고, v1 리디자인을 단계별로 개발하고 있습니다.
+> **현재 상태:** v1을 단계별로 개발 중이에요 (Phase 1 완료: 기술 기반과 화면 골격). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
 
 ## 문서
 
@@ -43,13 +43,17 @@ main  ←──  phase-1-foundation   (PR · 머지 시 자동 배포)
 - `.claude/hooks/session-start.sh`: 클라우드 세션이 시작되면 `npm install`을 자동 실행
 - `.claude/commands/phase.md`: `/phase N` 명령
 
-## 로컬에서 실행 (v0)
+## 로컬에서 실행
 
 ```bash
-python3 -m http.server 8000   # → http://localhost:8000
+npm install
+npm run dev        # 개발 서버 → http://localhost:5173
+npm test           # 단위 테스트
+npm run build      # 배포용 빌드 (dist/)
 ```
 
-Phase 1 이후에는 `npm install && npm run dev`로 실행합니다.
+예전 v0 앱은 `legacy/v0/`에 있고, 배포 사이트의 `/v0/` 주소에서 계속 열 수 있어요.
+v0에 남긴 기록은 v1을 처음 열 때 자동으로 옮겨집니다 (v0 데이터는 지우지 않음).
 
 ## 데이터와 라이선스
 
