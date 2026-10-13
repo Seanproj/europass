@@ -36,7 +36,7 @@ jobs:
             echo "dir=dist" >> "$GITHUB_OUTPUT"
           else
             mkdir -p _site
-            cp -r index.html manifest.webmanifest sw.js css js assets vendor _site/
+            cp -r index.html manifest.webmanifest sw.js css js assets vendor docs _site/
             echo "dir=_site" >> "$GITHUB_OUTPUT"
           fi
 
