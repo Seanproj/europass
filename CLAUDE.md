@@ -6,7 +6,7 @@
 ## 꼭 읽을 문서
 - `docs/DESIGN_REVIEW.md` — 디자인 시스템(토큰, 타이포, 도장 규칙)과 정보 구조. UI 작업 전 필독
 - `docs/DEVELOPMENT_PROMPTS.md` — 단계별 개발 계획. 진행 중인 Phase의 범위를 벗어나지 말 것
-- `docs/design/concept.html` — 시각 시안
+- `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
 - v0: 루트의 정적 사이트(index.html, js/, css/, vendor/). Phase 1에서 `legacy/v0/`로 이동

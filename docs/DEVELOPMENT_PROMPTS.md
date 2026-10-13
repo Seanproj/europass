@@ -20,6 +20,7 @@ Claude Code에 **한 단계씩** 붙여 넣어 개발하는 문서입니다.
 - 단계가 끝나면 PR을 확인하고 머지한 뒤, 새 세션에서 다음 단계를 시작하세요.
 - 결과가 마음에 들지 않으면 같은 브랜치에서 "○○를 이렇게 바꿔줘"처럼 짧게 수정을 요청하세요.
 - 모든 단계는 [`CLAUDE.md`](../CLAUDE.md)의 규칙과 [`DESIGN_REVIEW.md`](DESIGN_REVIEW.md)의 디자인 시스템을 따릅니다.
+- 화면 작업(Phase 3~7)은 `docs/design/concept.html`과 `docs/design/refs/*.jpg`를 시각 기준으로 삼습니다.
 
 ## 진행 현황
 
@@ -152,28 +153,38 @@ Phase 3을 진행해줘. CLAUDE.md, docs/DESIGN_REVIEW.md 2장(컨셉), docs/des
      src/features/map/style.ts에서 우리 토큰 색으로 덮어쓴 라이트/다크 스타일 생성
    - 라벨은 name:ko → name 순으로 표시 (["coalesce", ["get","name:ko"], ["get","name"]])
    - attribution 표기 (OpenFreeMap, OpenMapTiles, OpenStreetMap)
-2. 안개 레이어 (src/features/map/fog.ts):
-   - 세계 전체 폴리곤에 방문 도시마다 원형 구멍을 뚫은 fill 레이어. 색은 --bg, 투명도 0.92
-   - 반경은 도시 등급별 (tier1 18km, tier2 12km, tier3 8km), @turf/circle로 64분할
-   - 안개 레이어는 도로, 건물, 수계 위 + 국가 경계와 라벨 아래에 위치
-   - 줌이 낮을 때(z<5)는 안개 위에 국가 fill: 방문국은 --accent-soft, 미방문은 --land
-   - 새 방문이 생기면 구멍 반경을 0 → 목표값까지 700ms 애니메이션 (requestAnimationFrame)
-3. 국기 마커: z3~5.5에서 국가 중심에 원형 국기(Phase 2의 Flag 컴포넌트 재사용, HTML Marker 또는
-   symbol 이미지). 방문국은 컬러, 미방문은 흑백. 탭하면 해당 국가로 flyTo + 시트에 국가 상세
-4. 도시 마커 (GeoJSON source + circle/symbol 레이어, HTML 마커 금지 — 성능):
+2. 안개 레이어 (src/features/map/fog/): 레퍼런스 docs/design/refs/01-home-fog.jpg 처럼 구름 질감 + 부드러운 가장자리
+   - MapLibre 캔버스 위에 겹친 2D <canvas> 오버레이. map의 'render' 이벤트마다 다시 그림 (devicePixelRatio 대응)
+   - 그리기 순서: (1) --fog 색을 투명도 0.55로 전체 채움 (2) 미리 만든 구름 텍스처(타일링되는 노이즈 PNG,
+     scripts/build-fog-texture.ts로 생성해 커밋)를 지도 이동에 맞춰 패럴랙스로 그림
+     (3) globalCompositeOperation='destination-out' + 방사형 그라데이션으로 방문 도시마다 구멍
+   - 구멍 반경(px) = max(실제 반경을 화면 px로 변환한 값, 렌즈 최소 반경). 실제 반경은 tier1 18km, tier2 12km, tier3 8km
+   - 가장자리 번짐은 반경의 70%~100% 구간. 새 방문은 반경 0→목표 700ms ease-out
+   - 다크 모드는 토큰 색으로 같은 방식
+3. 렌즈 (z<8) — src/features/map/lens/:
+   - 유럽 전체 화면에서는 실제 반경이 1~2px이라 보이지 않으므로, 방문 도시마다 지름 60~76px 원형 "렌즈"를 표시
+   - 렌즈 내용 = 그 도시의 z13 상세 지도 스냅샷: 화면 밖 숨은 maplibre 인스턴스(preserveDrawingBuffer)로
+     도시 중심 jumpTo → 'idle' 대기 → canvas.toBlob → Dexie 'lensCache'에 저장. 한 번에 하나씩 순차 생성
+   - 표시: 스냅샷을 원형으로 잘라 가장자리를 번지게(방사형 마스크) 그림. 위에 도시명 태그(검정 반투명 알약, 홈 도시는 --accent)
+   - z7~8 구간에서 렌즈 → 실제 안개 구멍으로 크로스페이드 (opacity 보간)
+   - 스냅샷 생성 실패(오프라인 등) 시 --d-bg 단색 + 도시 점으로 대체
+4. 나라 라벨: z3~5.5에서 국가 라벨 위치에 원형 국기 + 한글 나라 이름. 방문국은 컬러, 미방문은 흑백 반투명.
+   렌즈와 겹치면 숨김(symbol 충돌 처리 또는 직접 bbox 검사). 탭하면 해당 국가로 flyTo + 시트에 국가 상세
+5. 도시 마커 (GeoJSON source + circle/symbol 레이어, HTML 마커 금지 — 성능):
    - z≥5: tier1, z≥6.5: tier2, z≥8: tier3 표시
    - 방문 도시는 --accent 점 + 도시명, 미방문은 --text-2 작은 점
    - 탭하면 시트에 도시 상세 (Phase 5 전까지는 이름만 표시하는 임시 시트)
-5. 카메라: 첫 진입 시 유럽 전체 bounds, 회전·기울기 비활성, maxBounds로 유럽 밖 이동 제한
-6. 홈 도시는 작은 집 아이콘(lucide House를 SVG 이미지로 등록)
-7. 성능: 도시 900개, 방문 200개 기준에서 모바일 60fps 근처. 지도 인스턴스는 한 번만 생성
-8. 테스트: fog 폴리곤 생성 함수 단위 테스트 (구멍 개수, 겹치는 원 처리, 반시계 방향 링)
+6. 카메라: 첫 진입 시 유럽 전체 bounds, 회전·기울기 비활성, maxBounds로 유럽 밖 이동 제한
+7. 홈 도시는 작은 집 아이콘(lucide House를 SVG 이미지로 등록), 렌즈 태그는 --accent
+8. 성능: 도시 900개, 방문 200개 기준에서 모바일 60fps 근처. 안개 캔버스는 화면 안의 구멍만 그림.
+   지도 인스턴스는 한 번만 생성
+9. 테스트: 구멍 반경 계산(줌별 px 변환, 최소 반경), 렌즈 캐시 키, 라벨 충돌 판정 단위 테스트
 
 완료 기준: 테스트 방문 데이터 10개를 넣은 상태로 유럽 전체, 국가 줌, 도시 줌 3단계 스크린샷을
 라이트/다크로 찍어 확인. 이 환경에서 타일 서버가 막혀 있으면 지도 스크린샷 대신 그 사실을 PR에 적어줘.
 ```
 
-**완료 체크** 방문 도시 주변만 상세 지도가 보이고, 줌아웃하면 국기와 국가 색으로 한눈에 파악됨
+**완료 체크** concept.html 01번 화면과 refs/01-home-fog.jpg 의 느낌이 나고, 확대하면 렌즈가 실제 지도로 자연스럽게 넘어감
 
 ---
 
@@ -197,12 +208,14 @@ Phase 4를 진행해줘. CLAUDE.md와 docs/DESIGN_REVIEW.md 3장(체크인 플�
      + navigator.vibrate(12)
    - 하단 토스트 "프라하 도장 획득 · 되돌리기" (5초), 되돌리기 시 visit 삭제 + 안개 복원
    - 이미 방문한 도시는 "다시 방문 기록"으로 동작
-4. 도장 v2 컴포넌트 <Stamp city visit size />:
-   - 순수 SVG. 모양 4종(원, 타원, 사각, 팔각)은 도시 id 해시로 고정, 각도 ±8°는 visit id 해시로 고정
-   - 텍스트: 영문 대문자 도시명 / "CZ · 50.08°N 14.44°E" / "13 OCT 2026"
-   - 서체: JetBrains Mono 600, 선 1.5px + 3px 이중선, 색 --accent (tier3 히든젬은 금색 #B8892B)
+4. 도장 v2 컴포넌트 <Stamp city visit size /> — docs/design/refs/03-stamps.jpg 와 concept.html의 stamp() 함수가 기준:
+   - 순수 SVG. 모양 5종(원, 타원, 사각, 팔각, 육각)은 도시 id 해시로 고정, 각도 ±9°는 visit id 해시로 고정
+   - 내부 레이아웃: 나라(영문 대문자, 작게, 자간 넓게) / 도시(현지 표기 대문자, 굵게) / 날짜 "13 OCT 2026" /
+     구분선 / 위도 "50.0755° N" / 경도 "14.4378° E"
+   - 서체: JetBrains Mono, 이중선(2.6 + 0.9), 색 --accent, 히든젬 도시만 --gold
+   - 잉크 결: feTurbulence로 아주 미세한 점 빠짐만 (도시별 seed 고정). 번짐/왜곡 필터 금지
    - 미방문 상태용 점선 고스트 버전
-   - 이모지와 거친 필터 사용 금지. 스냅샷 테스트로 모양 4종 고정
+   - 스냅샷 테스트로 모양 5종 고정
 5. 도시 상세 (임시, Phase 5에서 확장): 큰 도장, 도시명(Display), 국가, 방문일,
    보조 버튼 3개(사진 추가 · 한 줄 남기기 · 날짜 변경)는 텍스트 버튼으로 조용히
 
@@ -229,7 +242,9 @@ Phase 5를 진행해줘. CLAUDE.md와 docs/DESIGN_REVIEW.md 3장을 먼저 읽�
    - 상단 요약 "9개국 · 23개 도시 · 유럽의 4%"
    - 방문한 국기 가로 스크롤 줄 (peek에서도 보임)
    - 국가 리스트: 원형 국기, 국가명, "5 / 24" + 얇은 진행 바. 정렬: 방문한 나라(최근 방문 순) → 미방문(가나다)
-   - 리스트 상단 세그먼트 1개만: [전체 | 방문함] (필터 칩 여러 개 금지)
+   - 리스트 상단 세그먼트 1개만: [나라 | 도시] (필터 칩 여러 개 금지). 도시 탭은 방문한 도시를 최근 방문순으로,
+     도장 썸네일 + 도시명 + 날짜로 보여줌
+   - 디자인 기준: docs/design/refs/02-country-sheet.jpg (큰 제목 28px, 행 높이 64px, 원형 국기 34px)
 2. 국가 상세: 큰 국기 + 국가명 + 진행률 링, 도시 그리드(도장 썸네일, 미방문은 고스트 도장).
    tier1 → 2 → 3 순으로 "대표 도시 / 더 많은 도시 / 히든젬" 섹션 구분. 지도는 국가 bounds로 fitBounds
 3. 도시 상세:
