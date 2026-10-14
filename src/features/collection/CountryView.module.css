@@ -1,0 +1,126 @@
+.country {
+  margin-top: var(--sp-3);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.meta {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  display: block;
+  height: 4px;
+  margin-top: var(--sp-3);
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.barFill,
+.barDone {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.barDone {
+  background: var(--gold);
+}
+
+.section,
+.region {
+  margin-top: var(--sp-5);
+}
+
+.regionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: var(--fw-title);
+  color: var(--text);
+}
+
+.sectionTitle span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.close {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cell {
+  width: 100%;
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) 0;
+  border: 0;
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.cellName {
+  max-width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cellName b {
+  color: var(--accent);
+}

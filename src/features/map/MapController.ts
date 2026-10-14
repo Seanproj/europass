@@ -199,12 +199,18 @@ export class MapController {
   flyToCountry(code: string) {
     const bbox = this.opts.data.bboxes[code];
     if (!bbox) return;
+    const h = this.map.getContainer().clientHeight;
     this.map.fitBounds(
       [
         [bbox[0], bbox[1]],
         [bbox[2], bbox[3]],
       ],
-      { padding: { top: 80, bottom: 260, left: 32, right: 32 }, maxZoom: 7.5, duration: 900 },
+      // 시트가 아래 절반쯤을 덮으므로 그 위 영역에 나라가 들어오게
+      {
+        padding: { top: 70, bottom: Math.round(h * 0.55) + 10, left: 24, right: 24 },
+        maxZoom: 7.5,
+        duration: 900,
+      },
     );
   }
 
@@ -228,7 +234,8 @@ export class MapController {
     const h = this.map.getContainer().clientHeight;
     this.map.flyTo({
       center: [c.lon, c.lat],
-      zoom: 9,
+      // 이미 더 확대해 있으면 그 줌을 유지
+      zoom: Math.max(this.map.getZoom(), 9),
       // 아래 절반은 시트가 덮으므로 위쪽 영역 가운데에 오게
       padding: { top: 60, bottom: Math.round(h * 0.55), left: 0, right: 0 },
       duration: 1100,

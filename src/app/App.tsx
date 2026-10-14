@@ -6,6 +6,7 @@ import { ProgressPill } from '../features/collection/ProgressPill';
 import { HomeSheet } from '../features/collection/HomeSheet';
 import { ProfileButton } from '../features/profile/ProfileButton';
 import { useStats } from '../lib/useStats';
+import { useNavSync } from './nav';
 import { Toast } from '../components/Toast/Toast';
 import { StampBurst } from '../features/checkin/StampBurst';
 
@@ -14,6 +15,7 @@ const MapView = lazy(() => import('../features/map/MapView').then((m) => ({ defa
 
 export function App() {
   const stats = useStats();
+  useNavSync();
   return (
     <MotionConfig reducedMotion="user">
       <div className={styles.app}>
@@ -24,7 +26,7 @@ export function App() {
           <ProgressPill cities={stats.cities} countries={stats.countries} />
           <ProfileButton />
         </header>
-        <HomeSheet stats={stats} />
+        <HomeSheet />
         <StampBurst />
         <Toast />
       </div>

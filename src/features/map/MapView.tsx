@@ -6,7 +6,8 @@ import { db } from '../../db/db';
 import type { Profile, Visit } from '../../db/types';
 import { getCity } from '../../data/cities';
 import type { RegionsData } from '../../data/types';
-import { useUI } from '../../app/store';
+import { navigate } from '../../app/nav';
+import { useUI, type Route } from '../../app/store';
 import { MapPlaceholder } from './MapPlaceholder';
 import { MapController, type MapData } from './MapController';
 import { countryProgress, paintedRegions, type FlagCollection } from './puzzle/puzzle';
@@ -44,7 +45,8 @@ export function MapView() {
   const ctrlRef = useRef<MapController | null>(null);
   const [data, setData] = useState<MapData | null>(null);
   const [ready, setReady] = useState(false);
-  const select = useUI((s) => s.select);
+  const route = useUI((s) => s.route);
+  const revealCity = useUI((s) => s.revealCity);
 
   const visits = useLiveQuery(() => db.visits.toArray(), [], EMPTY);
   const profile = useLiveQuery(() => db.settings.get('profile'), []);
@@ -76,7 +78,7 @@ export function MapView() {
         data: mapData,
         tokens: readMapTokens(),
         onSelect: (s) =>
-          select(s.kind === 'city' ? { kind: 'city', id: s.id } : { kind: 'country', code: s.code }),
+          navigate(s.kind === 'city' ? { kind: 'city', id: s.id } : { kind: 'country', code: s.code }),
         onFrame: (f) => tagsRef.current?.update(ctrl!.map, f),
       });
       ctrlRef.current = ctrl;
@@ -89,7 +91,7 @@ export function MapView() {
       ctrl?.destroy();
       ctrlRef.current = null;
     };
-  }, [webgl, select]);
+  }, [webgl]);
 
   useEffect(() => {
     if (ready) ctrlRef.current?.setVisits(counts);
@@ -99,11 +101,25 @@ export function MapView() {
     if (ready) ctrlRef.current?.setHome(homeId);
   }, [ready, homeId]);
 
-  // 체크인·상세에서 고른 도시로 이동 (reveal이면 도착한 뒤 안개 구멍이 열린다)
-  const focus = useUI((s) => s.focus);
+  // 시트에서 나라·도시를 고르면 지도가 따라간다. 첫 체크인이면 도착한 뒤 안개 구멍이 열린다
+  const flyTo = (r: Route) => {
+    const ctrl = ctrlRef.current;
+    if (!ctrl) return;
+    if (r.kind === 'country') ctrl.flyToCountry(r.code);
+    if (r.kind === 'city') {
+      const reveal = useUI.getState().revealCity === r.id;
+      if (reveal) useUI.setState({ revealCity: null });
+      ctrl.flyToCity(r.id, { reveal });
+    }
+  };
   useEffect(() => {
-    if (ready && focus) ctrlRef.current?.flyToCity(focus.cityId, { reveal: focus.reveal });
-  }, [ready, focus]);
+    if (ready) flyTo(route);
+  }, [ready, route]);
+  // 이미 그 도시 상세에 있을 때 체크인한 경우 (경로는 그대로라 위 효과가 돌지 않음)
+  useEffect(() => {
+    const r = useUI.getState().route;
+    if (ready && revealCity && r.kind === 'city' && r.id === revealCity) flyTo(r);
+  }, [ready, revealCity]);
 
   // 라이트/다크 전환
   useEffect(() => {
@@ -125,8 +141,7 @@ export function MapView() {
           ref={tagsRef}
           progress={progress}
           onPick={(code) => {
-            ctrlRef.current?.flyToCountry(code);
-            select({ kind: 'country', code });
+            navigate({ kind: 'country', code });
           }}
         />
       )}

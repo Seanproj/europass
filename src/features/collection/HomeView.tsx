@@ -1,0 +1,125 @@
+import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import styles from './HomeView.module.css';
+import { navigate } from '../../app/nav';
+import { Flag } from '../../components/Flag/Flag';
+import { Stamp } from '../../components/Stamp/Stamp';
+import { getCity, getCountry } from '../../data/cities';
+import type { Visit } from '../../db/types';
+import { dotDate } from '../../lib/date';
+import { europePercent, type CountryProgress } from './progress';
+
+interface Props {
+  countries: CountryProgress[];
+  /** 도시별 방문 목록 (최신순) */
+  byCity: Map<string, Visit[]>;
+}
+
+type Tab = 'countries' | 'cities';
+
+/** 시트 홈: 요약 + [나라 | 도시] 세그먼트 하나 */
+export function HomeView({ countries, byCity }: Props) {
+  const [tab, setTab] = useState<Tab>('countries');
+  const visitedCountries = countries.filter((c) => c.cities > 0).length;
+  const cityCount = byCity.size;
+
+  return (
+    <section className={styles.home}>
+      <h2 className={styles.title}>나의 유럽</h2>
+      <p className={styles.meta}>
+        {visitedCountries}개국 · {cityCount}개 도시 · 유럽의 {europePercent(cityCount)}%
+      </p>
+
+      <div className={styles.segment} role="tablist" aria-label="목록">
+        {(['countries', 'cities'] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            role="tab"
+            aria-selected={tab === t}
+            className={styles.seg}
+            onClick={() => setTab(t)}
+          >
+            {t === 'countries' ? '나라' : '도시'}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'countries' ? <CountryList countries={countries} /> : <CityList byCity={byCity} />}
+    </section>
+  );
+}
+
+function CountryList({ countries }: { countries: CountryProgress[] }) {
+  return (
+    <ul className={styles.list} role="tabpanel" aria-label="나라">
+      {countries.map((p) => {
+        const name = getCountry(p.code)?.name.ko ?? p.code;
+        const visited = p.cities > 0;
+        return (
+          <li key={p.code}>
+            <button
+              type="button"
+              className={styles.row}
+              onClick={() => navigate({ kind: 'country', code: p.code })}
+            >
+              <Flag code={p.code} size={34} visited={visited} alt="" />
+              <span className={styles.body}>
+                <span className={styles.line}>
+                  <span className={styles.name}>{name}</span>
+                  <span className={styles.count}>
+                    {visited
+                      ? `${p.painted} / ${p.pieces} 조각 · ${p.cities}개 도시`
+                      : `${p.pieces}조각 · ${p.totalCities}개 도시`}
+                  </span>
+                </span>
+                <span className={styles.bar} aria-hidden>
+                  <span
+                    className={p.complete ? styles.barDone : styles.barFill}
+                    style={{ width: `${p.pieces ? (p.painted / p.pieces) * 100 : 0}%` }}
+                  />
+                </span>
+              </span>
+              <ChevronRight className={styles.chev} aria-hidden />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** 방문한 도시를 최근 방문순으로 */
+function CityList({ byCity }: { byCity: Map<string, Visit[]> }) {
+  const rows = [...byCity]
+    .map(([id, visits]) => ({ city: getCity(id), visits }))
+    .filter(
+      (r): r is { city: NonNullable<typeof r.city>; visits: Visit[] } => !!r.city && r.visits.length > 0,
+    )
+    .sort((a, b) => b.visits[0]!.date.localeCompare(a.visits[0]!.date));
+  if (rows.length === 0)
+    return <p className={styles.empty}>아직 도장이 없어요. 다녀온 도시를 검색해서 첫 도장을 찍어보세요.</p>;
+  return (
+    <ul className={styles.list} role="tabpanel" aria-label="도시">
+      {rows.map(({ city, visits }) => (
+        <li key={city.id}>
+          <button
+            type="button"
+            className={styles.row}
+            onClick={() => navigate({ kind: 'city', id: city.id })}
+          >
+            <Stamp city={city} visit={visits[0]} size={44} decorative />
+            <span className={styles.body}>
+              <span className={styles.name}>{city.name.ko}</span>
+              <span className={styles.sub}>
+                {getCountry(city.country)?.name.ko} · {dotDate(visits[0]!.date)}
+              </span>
+            </span>
+            {visits.length > 1 && <span className={styles.times}>×{visits.length}</span>}
+            <ChevronRight className={styles.chev} aria-hidden />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}

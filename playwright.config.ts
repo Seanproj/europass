@@ -6,6 +6,8 @@ export default defineConfig({
   outputDir: 'test-results',
   timeout: 60_000,
   expect: { timeout: 10_000 },
+  // 소프트웨어 WebGL이 무거워 동시에 돌리면 타이밍이 흔들린다
+  workers: 1,
   reporter: [['list']],
   use: {
     baseURL: 'http://localhost:5173',

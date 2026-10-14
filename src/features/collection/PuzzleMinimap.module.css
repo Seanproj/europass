@@ -1,0 +1,48 @@
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  margin-top: var(--sp-4);
+}
+
+.placeholder {
+  height: 160px;
+  margin-top: var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--bg);
+}
+
+.land {
+  fill: var(--land);
+}
+
+.piece {
+  opacity: 0.92;
+}
+
+/* 조각 윤곽 + 탭 영역 */
+.hit {
+  fill: transparent;
+  stroke-linejoin: round;
+  cursor: pointer;
+  outline: none;
+}
+
+.painted {
+  stroke: var(--surface);
+  stroke-width: 1.2;
+}
+
+.empty {
+  stroke: var(--text-2);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 2;
+}
+
+.selected,
+.hit:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}

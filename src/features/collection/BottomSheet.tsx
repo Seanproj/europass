@@ -1,5 +1,5 @@
 import { animate, motion, useDragControls, useMotionValue, useReducedMotion } from 'motion/react';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import styles from './BottomSheet.module.css';
 import type { SheetSnap } from '../../app/store';
 import { readSafeArea, useViewportHeight } from '../../lib/useViewportHeight';
@@ -69,7 +69,12 @@ export function BottomSheet({ label, snap, onSnapChange, header, children }: Pro
         </button>
         {header}
       </div>
-      <div className={styles.body} data-scroll={snap === 'full'}>
+      {/* half에서도 스크롤된다. 시트 아래쪽(화면 밖에 걸친 부분)만큼 여백을 더해 끝까지 닿게 */}
+      <div
+        className={styles.body}
+        data-scroll={snap !== 'peek'}
+        style={{ '--offscreen': `${full - heights[snap]}px` } as CSSProperties}
+      >
         {children}
       </div>
     </motion.section>
