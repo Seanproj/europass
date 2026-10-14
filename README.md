@@ -3,17 +3,17 @@
 독일에서 출발하는 **유럽 도시 도장깨기** 여행 기록장.
 안개 덮인 유럽 지도에서, 방문한 도시 주변만 상세 지도가 열립니다.
 
-> **현재 상태:** v1을 단계별로 개발 중이에요 (Phase 8 완료: PWA · 오프라인 · 품질). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
+> **현재 상태:** v1을 단계별로 개발 중이에요 (Phase 9 완료: 기기 간 동기화 · 공개 프로필 — 설정은 [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md)). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
 
 ## 문서
 
-| 문서 | 내용 |
-|---|---|
-| [docs/DESIGN_REVIEW.md](docs/DESIGN_REVIEW.md) | v0 디자인 진단, v1 컨셉("안개 걷기"), 정보 구조, 디자인 시스템 |
-| [docs/design/concept.html](docs/design/concept.html) | v1 시각 시안 (브라우저로 열기, 라이트/다크 전환 가능) |
-| [docs/DEVELOPMENT_PROMPTS.md](docs/DEVELOPMENT_PROMPTS.md) | **Claude Code에 붙여 넣는 단계별 개발 프롬프트** (Phase 1~9) |
-| [CLAUDE.md](CLAUDE.md) | Claude Code가 매 세션 자동으로 읽는 프로젝트 규칙 |
-| [docs/PROPOSAL.md](docs/PROPOSAL.md) | 초기 기획 (플랫폼 비교) |
+| 문서                                                       | 내용                                                           |
+| ---------------------------------------------------------- | -------------------------------------------------------------- |
+| [docs/DESIGN_REVIEW.md](docs/DESIGN_REVIEW.md)             | v0 디자인 진단, v1 컨셉("안개 걷기"), 정보 구조, 디자인 시스템 |
+| [docs/design/concept.html](docs/design/concept.html)       | v1 시각 시안 (브라우저로 열기, 라이트/다크 전환 가능)          |
+| [docs/DEVELOPMENT_PROMPTS.md](docs/DEVELOPMENT_PROMPTS.md) | **Claude Code에 붙여 넣는 단계별 개발 프롬프트** (Phase 1~9)   |
+| [CLAUDE.md](CLAUDE.md)                                     | Claude Code가 매 세션 자동으로 읽는 프로젝트 규칙              |
+| [docs/PROPOSAL.md](docs/PROPOSAL.md)                       | 초기 기획 (플랫폼 비교)                                        |
 
 ## 개발하는 법
 
@@ -75,10 +75,10 @@ npm run data:regions   # 국기 퍼즐 조각만 → src/data/regions.json, regi
 결과 JSON은 커밋되어 있어 앱 실행에는 네트워크가 필요 없어요. 원천 파일은 `data/.cache/`에 받아 두고 재사용합니다
 (`npm run data:cities -- --refresh`로 다시 받기). 손으로 고칠 때는 `data/`의 파일을 수정하세요.
 
-| 파일 | 용도 |
-|---|---|
-| `data/curated.csv` | 인구는 적어도 유명한 여행지 추가, 이름 덮어쓰기 |
-| `data/tier1.txt` | 상징 도시(tier 1) 목록 |
-| `data/ko-overrides.csv` | 한글(·영문) 이름 보충과 수정 |
-| `data/excluded.csv` | 도시로 보기 어려운 지점 제외 (대도시의 구역 등) |
-| `data/anchors-override.csv` | 국기 퍼즐 대표 도시 조정 |
+| 파일                        | 용도                                            |
+| --------------------------- | ----------------------------------------------- |
+| `data/curated.csv`          | 인구는 적어도 유명한 여행지 추가, 이름 덮어쓰기 |
+| `data/tier1.txt`            | 상징 도시(tier 1) 목록                          |
+| `data/ko-overrides.csv`     | 한글(·영문) 이름 보충과 수정                    |
+| `data/excluded.csv`         | 도시로 보기 어려운 지점 제외 (대도시의 구역 등) |
+| `data/anchors-override.csv` | 국기 퍼즐 대표 도시 조정                        |

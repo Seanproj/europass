@@ -19,6 +19,9 @@ describe('시트 내비게이션', () => {
     expect(routeFromSearch('?wrap=2026')).toEqual({ kind: 'wrap', year: 2026 });
     expect(routeFromSearch('?wrap=abc')).toEqual(HOME);
     expect(searchFromRoute({ kind: 'wrap', year: 2026 })).toBe('?wrap=2026');
+    expect(routeFromSearch('?u=Sean_1')).toEqual({ kind: 'public', handle: 'sean_1' });
+    expect(routeFromSearch('?u=a')).toEqual(HOME);
+    expect(searchFromRoute({ kind: 'public', handle: 'sean' })).toBe('?u=sean');
     expect(searchFromRoute({ kind: 'city', id: 'cz-prague' })).toBe('?city=cz-prague');
     expect(searchFromRoute(HOME)).toBe('');
   });

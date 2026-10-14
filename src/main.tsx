@@ -10,6 +10,8 @@ import { setupPWA } from './app/pwa';
 import { StorageError } from './app/StorageError';
 import { warnIfStorageFull } from './app/storageWatch';
 import { isQuotaError } from './lib/storage';
+import { cloudEnabled } from './cloud/config';
+import { isAuthRedirect } from './cloud/backend';
 
 applyTheme(loadTheme());
 setupPWA();
@@ -25,8 +27,16 @@ async function openStorage() {
   ]);
 }
 
+/** 클라우드 동기화(키가 있을 때만). 로그인하고 돌아온 주소면 화면을 그리기 전에 로그인을 마친다 */
+async function startCloudIfEnabled(beforeRender: boolean) {
+  if (!cloudEnabled || isAuthRedirect() !== beforeRender) return;
+  const { startCloud } = await import('./cloud/controller');
+  await startCloud().catch((err) => console.error('[cloud]', err));
+}
+
 openStorage().then(
-  () => {
+  async () => {
+    await startCloudIfEnabled(true);
     root.render(
       <StrictMode>
         <App />
@@ -38,7 +48,8 @@ openStorage().then(
       .catch((err) => console.error('[migrate-v0]', err))
       .then(() => markBadgesSeen(db))
       .catch((err) => console.error('[badges]', err))
-      .then(() => warnIfStorageFull());
+      .then(() => warnIfStorageFull())
+      .then(() => startCloudIfEnabled(false));
   },
   (err: unknown) => {
     console.error('[storage]', err);

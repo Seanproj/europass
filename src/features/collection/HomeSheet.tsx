@@ -60,7 +60,13 @@ export function HomeSheet() {
   let header;
   let body;
   // 프로필 페이지가 덮고 있을 때 아래 시트는 홈 그대로
-  if (route.kind === 'home' || route.kind === 'profile' || route.kind === 'wrap' || searchOpen) {
+  if (
+    route.kind === 'home' ||
+    route.kind === 'profile' ||
+    route.kind === 'wrap' ||
+    route.kind === 'public' ||
+    searchOpen
+  ) {
     header = (
       <>
         <SearchField

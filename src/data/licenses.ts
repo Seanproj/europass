@@ -13,6 +13,7 @@ export const LICENSES: License[] = [
   { name: 'Motion', license: 'MIT', url: 'https://github.com/motiondivision/motion' },
   { name: 'Lucide', license: 'ISC', url: 'https://github.com/lucide-icons/lucide' },
   { name: 'flag-icons', license: 'MIT', url: 'https://github.com/lipis/flag-icons' },
+  { name: 'Supabase JS', license: 'MIT', url: 'https://github.com/supabase/supabase-js' },
   { name: 'fflate', license: 'MIT', url: 'https://github.com/101arrowz/fflate' },
   { name: 'exifr', license: 'MIT', url: 'https://github.com/MikeKovarik/exifr' },
   { name: 'es-hangul', license: 'MIT', url: 'https://github.com/toss/es-hangul' },

@@ -17,6 +17,9 @@ const MapView = lazy(() => import('../features/map/MapView').then((m) => ({ defa
 const ProfilePage = lazy(() =>
   import('../features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
+const PublicSheet = lazy(() =>
+  import('../features/cloud/PublicSheet').then((m) => ({ default: m.PublicSheet })),
+);
 const WrapPage = lazy(() => import('../features/share/WrapPage').then((m) => ({ default: m.WrapPage })));
 
 export function App() {
@@ -41,12 +44,21 @@ export function App() {
             ) : (
               <MapPlaceholder loading />
             )}
-            <header className={styles.top}>
-              <ProgressPill cities={stats.cities} countries={stats.countries} />
-              <ProfileButton />
-            </header>
+            {/* 공개 프로필을 볼 때는 그 사람의 기록이라 내 진행률·프로필 버튼을 숨긴다 */}
+            {route.kind !== 'public' && (
+              <header className={styles.top}>
+                <ProgressPill cities={stats.cities} countries={stats.countries} />
+                <ProfileButton />
+              </header>
+            )}
           </div>
-          <HomeSheet />
+          {route.kind === 'public' ? (
+            <Suspense fallback={null}>
+              <PublicSheet key={route.handle} handle={route.handle} />
+            </Suspense>
+          ) : (
+            <HomeSheet />
+          )}
         </div>
         <Suspense fallback={null}>
           <AnimatePresence>

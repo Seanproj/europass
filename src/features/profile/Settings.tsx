@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ChevronRight,
   Database,
+  Cloud,
   Download,
   HardDrive,
   House,
@@ -27,6 +28,10 @@ import {
 import { db } from '../../db/db';
 import type { Profile } from '../../db/types';
 import { markBadgesSeen } from './badgeSync';
+import { cloudEnabled } from '../../cloud/config';
+import { useCloud } from '../../cloud/controller';
+import { CloudSheet } from '../cloud/CloudSheet';
+import { cloudSummary } from '../cloud/status';
 import { Dialog } from '../../components/Dialog/Dialog';
 import styles from './Settings.module.css';
 import ui from '../../components/Dialog/ui.module.css';
@@ -40,7 +45,7 @@ const THEMES: { value: ThemePref; label: string }[] = [
   { value: 'dark', label: '다크' },
 ];
 
-type Sheet = 'delete' | 'licenses' | 'sources' | null;
+type Sheet = 'delete' | 'licenses' | 'sources' | 'cloud' | null;
 
 /** 프로필 맨 아래 설정 목록 */
 export function Settings({
@@ -68,6 +73,7 @@ export function Settings({
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const toast = (message: string) => useUI.getState().showToast({ message });
+  const cloud = useCloud();
 
   const doExport = async () => {
     setBusy(true);
@@ -173,6 +179,15 @@ export function Settings({
       </ul>
 
       <ul className={styles.group}>
+        {/* 클라우드 키가 있을 때만 (docs/CLOUD_SETUP.md) */}
+        {cloudEnabled && (
+          <Row
+            icon={<Cloud />}
+            label="기기 간 동기화"
+            value={cloudSummary(cloud.status, cloud.lastSyncAt)}
+            onClick={() => setSheet('cloud')}
+          />
+        )}
         <Row
           icon={<Download />}
           label="백업 내보내기"
@@ -255,8 +270,11 @@ export function Settings({
         <p className={ui.text}>
           방문 기록 <b>{visitCount}개</b>와 메모, 사진이 모두 지워지고 되돌릴 수 없어요. 먼저 백업을 내보내
           두세요. 이름과 홈 도시는 그대로 남아요.
+          {cloud.user && ' 동기화 중이라 다른 기기와 클라우드에서도 지워져요.'}
         </p>
       </Dialog>
+
+      <CloudSheet open={sheet === 'cloud'} onClose={() => setSheet(null)} />
 
       <Dialog open={sheet === 'licenses'} title="오픈소스 라이선스" onClose={() => setSheet(null)}>
         <ul className={styles.credits}>

@@ -1,4 +1,4 @@
-import { newId, type PassportDB } from '../../db/db';
+import { newId, removeVisits, type PassportDB } from '../../db/db';
 import type { Visit } from '../../db/types';
 import { todayISO } from '../../lib/date';
 
@@ -24,5 +24,5 @@ export async function checkIn(db: PassportDB, cityId: string, date = todayISO())
 
 /** 토스트의 "되돌리기": 방금 만든 기록만 지운다 */
 export async function undoCheckIn(db: PassportDB, visitId: string): Promise<void> {
-  await db.visits.delete(visitId);
+  await removeVisits(db, [visitId]);
 }

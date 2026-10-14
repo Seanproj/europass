@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { LucideIcon } from 'lucide-react';
+import type { Visit } from '../db/types';
 
 /** 바텀시트 단계: peek(검색창 + 국기 줄) → half → full */
 export type SheetSnap = 'peek' | 'half' | 'full';
@@ -13,7 +14,9 @@ export type Route =
   /** 전체 화면 프로필 페이지. 아래 시트는 홈 상태로 둔다 */
   | { kind: 'profile' }
   /** 연말 결산 "My Euro Year" (전체 화면) */
-  | { kind: 'wrap'; year: number };
+  | { kind: 'wrap'; year: number }
+  /** 다른 사람의 공개 프로필 ?u=handle (읽기 전용: 지도 + 시트) */
+  | { kind: 'public'; handle: string };
 export const HOME: Route = { kind: 'home' };
 
 export interface ToastState {
@@ -53,6 +56,8 @@ interface UIState {
   clearStamp: (nonce: number) => void;
   /** 다음에 도시 상세로 갈 때 지도가 도착한 뒤 안개 구멍을 열 도시 (첫 체크인 연출) */
   revealCity: string | null;
+  /** 공개 프로필을 보는 동안 지도에 그릴 그 사람의 기록 (없으면 내 기록) */
+  publicView: { visits: Visit[]; homeCityId: string } | null;
 }
 
 let seq = 0;
@@ -81,4 +86,5 @@ export const useUI = create<UIState>((set) => ({
   playStamp: (fx) => set({ stampFx: { ...fx, nonce: ++seq } }),
   clearStamp: (nonce) => set((s) => (s.stampFx?.nonce === nonce ? { stampFx: null } : {})),
   revealCity: null,
+  publicView: null,
 }));
