@@ -7,6 +7,7 @@ import { koreanDate } from '../../lib/date';
 import { checkIn, undoCheckIn } from './checkin';
 import { takeNewBadges, unseeBadges } from '../profile/badgeSync';
 import { prefetchCityTiles } from '../map/prefetch';
+import { playStampSound } from './stampSound';
 import { reportWriteError } from '../../app/storageWatch';
 
 /**
@@ -44,6 +45,7 @@ export function useCheckIn() {
       previous: previous && { id: previous.id, date: previous.date, nth: previousNth },
     });
     navigator.vibrate?.(12);
+    playStampSound();
     // 설정을 켰고 와이파이면 이 도시 둘레 지도를 오프라인용으로 받아 둔다
     void prefetchCityTiles(city.lat, city.lon);
     let badgeIds: string[] = [];
