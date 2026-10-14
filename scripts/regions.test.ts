@@ -22,7 +22,7 @@ describe('국기 퍼즐 조각', () => {
   let shapes: Map<string, CountryShape>;
   beforeAll(() => {
     shapes = loadCountryShapes();
-  });
+  }, 30_000);
 
   it('나라마다 조각이 3~12개이고 bbox가 있다', () => {
     for (const c of COUNTRIES) {
@@ -55,7 +55,8 @@ describe('국기 퍼즐 조각', () => {
       const ratio = inside ? area(inside) / area(piece) : 0;
       expect(ratio, r.id).toBeGreaterThan(0.97);
     }
-  });
+    // 216개 조각을 모두 국경과 교차 계산해 CI에서 5초 안팎이 걸린다 (기본 제한 5초)
+  }, 30_000);
 
   it('조각들이 나라 대부분을 덮는다', () => {
     for (const c of COUNTRIES) {
