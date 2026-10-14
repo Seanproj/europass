@@ -1,5 +1,9 @@
 # 변경 기록
 
+## 다음 버전 (작업 중)
+
+- 도장 뒷면 엽서: 도시 상세의 도장을 누르면 가장 최근 방문의 사진·기간·한 줄 메모가 담긴 엽서로 뒤집힘
+
 ## v1.0.0 — 초안 완성 (2026-10)
 
 v0(단일 HTML)을 Vite + React + TypeScript 앱으로 다시 만든 첫 완성본. 단계별 개발 기록은 [docs/DEVELOPMENT_PROMPTS.md](docs/DEVELOPMENT_PROMPTS.md).

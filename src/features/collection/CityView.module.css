@@ -6,17 +6,6 @@
 }
 
 /* 도장 스택 */
-.stack {
-  position: relative;
-  width: 132px;
-  height: 132px;
-}
-
-.layer {
-  position: absolute;
-  inset: 0;
-}
-
 .name {
   margin: var(--sp-2) 0 0;
   font-size: var(--fs-display);
