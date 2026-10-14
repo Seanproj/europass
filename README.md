@@ -1,9 +1,13 @@
 # 🛂 Euro Passport
 
-독일에서 출발하는 **유럽 도시 도장깨기** 여행 기록장.
-안개 덮인 유럽 지도에서, 방문한 도시 주변만 상세 지도가 열립니다.
+유럽 도시마다 **도장을 모으는 여행 여권**.
+다녀온 도시를 고르면 탭 한 번에 도장이 찍히고, 도장은 도시마다 모양과 장식이 달라요.
+모을수록 안개 덮인 유럽 지도가 열립니다.
 
-> **현재 상태:** v1을 단계별로 개발 중이에요 (Phase 9 완료: 기기 간 동기화 · 공개 프로필 — 설정은 [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md)). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
+> **현재 상태:** v1.0.0 초안 완성 (Phase 0~10). 바뀐 내용은 [CHANGELOG.md](CHANGELOG.md),
+> 기기 간 동기화를 켜는 방법은 [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
+
+**사이트:** <https://sean1027lee-hub.github.io/Euro_Travel/> — 휴대폰에서 열고 "홈 화면에 추가"하면 앱처럼 쓸 수 있어요.
 
 ## 문서
 
@@ -11,7 +15,7 @@
 | ---------------------------------------------------------- | -------------------------------------------------------------- |
 | [docs/DESIGN_REVIEW.md](docs/DESIGN_REVIEW.md)             | v0 디자인 진단, v1 컨셉("안개 걷기"), 정보 구조, 디자인 시스템 |
 | [docs/design/concept.html](docs/design/concept.html)       | v1 시각 시안 (브라우저로 열기, 라이트/다크 전환 가능)          |
-| [docs/DEVELOPMENT_PROMPTS.md](docs/DEVELOPMENT_PROMPTS.md) | **Claude Code에 붙여 넣는 단계별 개발 프롬프트** (Phase 1~9)   |
+| [docs/DEVELOPMENT_PROMPTS.md](docs/DEVELOPMENT_PROMPTS.md) | **Claude Code에 붙여 넣는 단계별 개발 프롬프트** (Phase 1~10)  |
 | [CLAUDE.md](CLAUDE.md)                                     | Claude Code가 매 세션 자동으로 읽는 프로젝트 규칙              |
 | [docs/PROPOSAL.md](docs/PROPOSAL.md)                       | 초기 기획 (플랫폼 비교)                                        |
 

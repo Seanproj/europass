@@ -98,7 +98,7 @@ export function HomeSheet() {
         onPick={pick}
       />
     ) : (
-      <HomeView countries={countries} byCity={byCity} />
+      <HomeView countries={countries} byCity={byCity} homeId={homeId} onSearch={() => setSearchOpen(true)} />
     );
   } else if (route.kind === 'country') {
     const country = getCountry(route.code);

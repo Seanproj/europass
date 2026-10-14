@@ -25,7 +25,7 @@ export default defineConfig({
       manifest: {
         name: 'Euro Passport',
         short_name: 'Euro Passport',
-        description: '독일에서 출발하는 유럽 도시 도장깨기 — 안개 덮인 지도를 여행으로 채워가는 여권',
+        description: '유럽 도시마다 도장을 모으는 여행 여권 — 탭 한 번에 찍고, 모을수록 안개 지도가 열린다',
         lang: 'ko',
         start_url: './',
         scope: './',

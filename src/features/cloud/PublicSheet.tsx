@@ -108,7 +108,7 @@ function PublicBody({ data }: { data: PublicProfileData }) {
         <ul className={styles.stamps}>
           {stamps.map((s) => (
             <li key={s.city.id}>
-              <Stamp city={s.city} visit={s.visit} size={72} decorative />
+              <Stamp city={s.city} visit={s.visit} nth={s.nth} size={72} decorative />
               <span>{s.city.name.ko}</span>
             </li>
           ))}

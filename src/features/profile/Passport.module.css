@@ -1,0 +1,123 @@
+.section {
+  margin-top: var(--sp-6);
+  padding: 0 var(--gutter);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: var(--fw-title);
+}
+
+.tally {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+}
+
+.item {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.item dt {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-caption);
+  color: var(--text-2);
+}
+
+.item dd {
+  margin: 2px 0 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.item small {
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.item[data-gold] dd {
+  color: var(--gold);
+}
+
+.empty {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-5) var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-2);
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cell {
+  width: 100%;
+  min-height: var(--tap);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--sp-2) 0;
+  border: 0;
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cell svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more {
+  width: 100%;
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: var(--sp-2);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-2);
+  font: 600 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.more svg {
+  width: 18px;
+  height: 18px;
+}
+
+.more:focus-visible {
+  outline: 2px solid var(--accent);
+}

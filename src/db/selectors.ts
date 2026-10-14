@@ -5,6 +5,20 @@ export function byNewest(a: Visit, b: Visit): number {
   return b.date.localeCompare(a.date) || b.createdAt - a.createdAt;
 }
 
+/**
+ * 같은 도시 기록 중 몇 번째 방문인지 (날짜순, 같은 날이면 먼저 만든 순).
+ * 지난 날짜로 소급한 기록도 날짜 자리에 끼워 센다
+ */
+export function visitRank(cityVisits: Visit[], visit: Visit): number {
+  return (
+    cityVisits.filter(
+      (v) =>
+        v.id !== visit.id &&
+        (v.date < visit.date || (v.date === visit.date && v.createdAt <= visit.createdAt)),
+    ).length + 1
+  );
+}
+
 export function uniqueCityCount(visits: Visit[]): number {
   return new Set(visits.map((v) => v.cityId)).size;
 }

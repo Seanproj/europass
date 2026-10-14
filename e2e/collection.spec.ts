@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { collapseSheet } from './support/app';
 
 type DevWindow = Window & { __map: { loaded(): boolean } };
 
@@ -8,7 +9,8 @@ test('국가 탭 → 국가 상세 → 체크인 → 다시 방문(과거) → �
     timeout: 30_000,
   });
 
-  // 지도의 나라 태그 → 국가 상세
+  // 지도의 나라 태그 → 국가 상세 (첫 도장 안내로 반쯤 열린 시트를 먼저 접는다)
+  await collapseSheet(page);
   await page.getByRole('button', { name: '독일', exact: true }).click();
   await expect(page).toHaveURL(/\?country=DE$/);
   await expect(page.getByRole('heading', { name: '독일', level: 2 })).toBeVisible();

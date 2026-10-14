@@ -30,8 +30,13 @@ export function inkSeed(cityId: string): number {
  * 고정폭 서체 기준으로 글자가 maxW 안에 들어가는 크기를 고른다.
  * 그래도 넘치면 textLength로 눌러 담는다 (반환 fit)
  */
+/** 고정폭 서체 글자 폭 근사 (글자 폭 0.6em + 자간) */
+export function monoWidth(text: string, size: number, spacing: number): number {
+  return text.length * (size * 0.6 + size * spacing);
+}
+
 export function fitMono(text: string, sizes: number[], spacing: number, maxW: number) {
-  const width = (size: number) => text.length * (size * 0.6 + size * spacing);
+  const width = (size: number) => monoWidth(text, size, spacing);
   const size = sizes.find((s) => width(s) <= maxW) ?? sizes[sizes.length - 1]!;
   return { size, letterSpacing: size * spacing, fit: width(size) > maxW ? maxW : undefined };
 }

@@ -34,13 +34,14 @@ export function useCheckIn() {
       return;
     }
 
-    const { visit, nth, previous } = result;
-    if (nth === 1) useUI.setState({ revealCity: cityId });
+    const { visit, first, nth, previous, previousNth } = result;
+    if (first) useUI.setState({ revealCity: cityId });
     navigate({ kind: 'city', id: cityId });
     ui.playStamp({
       cityId,
       visit: { id: visit.id, date: visit.date },
-      previous: previous && { id: previous.id, date: previous.date },
+      nth,
+      previous: previous && { id: previous.id, date: previous.date, nth: previousNth },
     });
     navigator.vibrate?.(12);
     // 설정을 켰고 와이파이면 이 도시 둘레 지도를 오프라인용으로 받아 둔다
@@ -48,7 +49,12 @@ export function useCheckIn() {
     let badgeIds: string[] = [];
     let undone = false;
     ui.showToast({
-      message: nth === 1 ? `${city.name.ko} 도장 획득` : `${city.name.ko} ${nth}번째 방문`,
+      // 지난 날짜로 소급하면 첫 기록이 아니어도 날짜순 1번째일 수 있다
+      message: first
+        ? `${city.name.ko} 도장 획득`
+        : nth === 1
+          ? `${city.name.ko} 첫 방문 기록`
+          : `${city.name.ko} ${nth}번째 방문`,
       action: {
         label: '되돌리기',
         run: () => {

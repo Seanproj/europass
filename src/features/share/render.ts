@@ -56,6 +56,7 @@ function stamp(
     outlineOnly,
     city: item.city,
     visit: item.visit,
+    nth: item.nth,
     x,
     y,
     size,
@@ -327,7 +328,7 @@ export function drawCityCard(ctx: Ctx, d: CityCardData, t: CardTheme, photo: Can
     stamp(
       ctx,
       t,
-      { city: d.city, visit: v },
+      { city: d.city, visit: v, nth: d.visits.length - depth },
       // 도시 상세의 도장 스택과 같은 비율로 좌우 번갈아 비껴 놓는다 (132px 기준 → size 비율)
       cx + (depth === 0 ? 0 : (depth % 2 ? -1 : 1) * (10 + depth * 6) * (size / 132)),
       cy + depth * 5 * (size / 132),

@@ -146,3 +146,61 @@
   line-height: 1.6;
   color: var(--text-2);
 }
+
+/* 기록이 없을 때 첫 도장 안내 */
+.first {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+  padding: var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--bg);
+}
+
+.first > svg {
+  flex: none;
+}
+
+.firstText {
+  min-width: 0;
+}
+
+.firstTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.firstBody {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.firstButton {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--surface);
+  font: 600 14px var(--font);
+  cursor: pointer;
+}
+
+.firstButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.firstButton:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}

@@ -29,6 +29,17 @@ describe('recentStamps', () => {
       ['fr-paris', '2026-02-01'],
     ]);
   });
+
+  it('재방문 순번은 전체 기록 기준 (한 해만 골라도 도시 상세와 같은 숫자)', () => {
+    const all = [
+      visit('cz-prague', '2025-03-01'),
+      visit('cz-prague', '2025-09-01'),
+      visit('cz-prague', '2026-05-01'),
+    ];
+    const year = all.filter((v) => v.date.startsWith('2026'));
+    expect(recentStamps(year, 6)[0]?.nth).toBe(1);
+    expect(recentStamps(year, 6, all)[0]?.nth).toBe(3);
+  });
 });
 
 describe('wrapYearFor (결산 배너는 12월 1일 ~ 1월 31일)', () => {

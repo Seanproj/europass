@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export type Row = {
   id: string;
@@ -84,4 +84,16 @@ export async function checkInBySearch(page: Page, query: string) {
   await page.getByRole('button', { name: /어디 다녀오셨어요/ }).click();
   await page.getByRole('searchbox', { name: '도시 검색' }).fill(query);
   await page.getByRole('list', { name: '검색 결과' }).getByRole('button').first().click();
+}
+
+/** 시트를 접는다 (기록 없이 시작하면 첫 도장 안내 때문에 반쯤 열려 있다) */
+export async function collapseSheet(page: Page) {
+  const handle = page.getByRole('button', { name: /^시트 크기 바꾸기/ });
+  // 시작 확인(v0 이전 뒤)이 끝나 반쯤 열린 다음에 접는다
+  await expect(handle).toHaveAttribute('aria-label', /반쯤 펼침/);
+  for (let i = 0; i < 3; i++) {
+    if ((await handle.getAttribute('aria-label'))?.includes('접힘')) return;
+    await handle.click();
+  }
+  await expect(handle).toHaveAttribute('aria-label', /접힘/);
 }

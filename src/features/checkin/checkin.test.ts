@@ -20,6 +20,7 @@ describe('원탭 체크인', () => {
     expect(r.kind).toBe('added');
     if (r.kind !== 'added') return;
     expect(r.nth).toBe(1);
+    expect(r.first).toBe(true);
     expect(r.previous).toBeUndefined();
     expect(await db.visits.get(r.visit.id)).toMatchObject({
       cityId: 'cz-prague',
@@ -36,6 +37,18 @@ describe('원탭 체크인', () => {
     expect(r.kind === 'added' && r.nth).toBe(3);
     expect(r.kind === 'added' && r.previous?.date).toBe('2025-12-20');
     expect(await db.visits.where('cityId').equals('cz-prague').count()).toBe(3);
+  });
+
+  it('지난 날짜로 소급하면 날짜순으로 센다 (도장의 로마 숫자와 같은 기준)', async () => {
+    await checkIn(db, 'cz-prague', '2026-03-08');
+    await checkIn(db, 'cz-prague', '2026-09-20');
+    const r = await checkIn(db, 'cz-prague', '2025-05-01');
+    if (r.kind !== 'added') throw new Error('added가 아님');
+    expect(r.first).toBe(false);
+    expect(r.nth).toBe(1);
+    // 아래 깔리는 도장은 가장 최근 기록, 순번은 3번째로 밀린다
+    expect(r.previous?.date).toBe('2026-09-20');
+    expect(r.previousNth).toBe(3);
   });
 
   it('같은 날 같은 도시는 중복 대신 기존 기록을 돌려준다', async () => {
