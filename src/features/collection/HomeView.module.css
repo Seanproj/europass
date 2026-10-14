@@ -29,7 +29,7 @@
 }
 
 .seg {
-  min-height: 38px;
+  min-height: var(--tap);
   border: 0;
   border-radius: var(--r-pill);
   background: none;

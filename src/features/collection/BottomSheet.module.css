@@ -33,9 +33,10 @@
   display: grid;
   place-items: center;
   width: 100%;
-  height: 24px;
-  margin: 0 0 var(--sp-1);
-  padding: 0;
+  /* 레이아웃은 전과 같은 28px(24 + 4), 위로 16px 더 늘려 터치 영역 44px (시트 가장자리 바로 위까지) */
+  height: 44px;
+  margin: -16px 0 0;
+  padding: 16px 0 var(--sp-1);
   border: 0;
   background: none;
   cursor: inherit;
