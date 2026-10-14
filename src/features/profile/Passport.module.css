@@ -121,3 +121,10 @@
 .more:focus-visible {
   outline: 2px solid var(--accent);
 }
+
+.sub {
+  margin: var(--sp-5) 0 0;
+  font-size: var(--fs-body);
+  font-weight: 650;
+  color: var(--text);
+}

@@ -1,0 +1,122 @@
+.book {
+  margin-top: var(--sp-3);
+}
+
+/* 넘기는 페이지가 옆 칸으로 삐져나오지 않게 */
+.viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  perspective: 1200px;
+}
+
+.viewport:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.page {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+/* 여권 종이 느낌: 아주 옅은 가로줄 몇 개 (토큰 색) */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: var(--sp-6) var(--sp-4) var(--sp-4);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  pointer-events: none;
+}
+
+.head {
+  position: absolute;
+  top: var(--sp-3);
+  left: var(--sp-4);
+  right: var(--sp-4);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: var(--text-2);
+}
+
+.head b {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text);
+}
+
+.head small {
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.stamp {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.stamp svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stamp:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.nav button {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.nav button:disabled {
+  color: var(--text-2);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.nav button:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.nav svg {
+  width: 20px;
+  height: 20px;
+}
+
+.count {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}

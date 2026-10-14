@@ -4,14 +4,16 @@ import { navigate } from '../../app/nav';
 import { Stamp } from '../../components/Stamp/Stamp';
 import styles from './Passport.module.css';
 import type { Passport as PassportData, PassportTally } from './passport';
+import { PassportBook } from './PassportBook';
+import type { BookPage } from './passportBook';
 
 /** 처음에 보이는 도장 수 (3줄). 더 보기는 한 번에 PAGE개씩 (도장마다 SVG 필터가 있어 한꺼번에 그리지 않는다) */
 const PREVIEW = 9;
 const PAGE = 30;
 const fmt = new Intl.NumberFormat('ko-KR');
 
-/** 프로필의 "내 여권": 모은 도장 현황 + 도시마다 도장 하나 (첫 방문순) */
-export function Passport({ data }: { data: PassportData }) {
+/** 프로필의 "내 여권": 모은 도장 현황 + 연도별로 넘기는 여권 + 도시마다 도장 하나 (첫 방문순) */
+export function Passport({ data, pages }: { data: PassportData; pages: BookPage[] }) {
   const [count, setCount] = useState(PREVIEW);
   const { stamps } = data;
   const shown = stamps.slice(0, count);
@@ -30,6 +32,8 @@ export function Passport({ data }: { data: PassportData }) {
         <p className={styles.empty}>첫 도장을 찍으면 여권에 모여요</p>
       ) : (
         <>
+          <PassportBook pages={pages} />
+          <h3 className={styles.sub}>도시별 도장</h3>
           <ul className={styles.grid} aria-label="모은 도장">
             {shown.map((s) => (
               <li key={s.city.id}>
