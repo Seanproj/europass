@@ -216,7 +216,8 @@
 
 .fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* 방문일 | 머문 기간. 좁은 화면에서는 위아래로 */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--sp-2);
 }
 
@@ -367,7 +368,7 @@
 }
 
 .confirm div,
-.revisitForm div {
+.revisitActions {
   display: flex;
   justify-content: flex-end;
   gap: var(--sp-2);
@@ -375,7 +376,7 @@
 
 .menu button,
 .confirm button,
-.revisitForm button {
+.revisitActions button {
   min-height: var(--tap);
   padding: 0 var(--sp-4);
   border: 0;

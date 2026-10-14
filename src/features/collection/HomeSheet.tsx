@@ -52,9 +52,9 @@ export function HomeSheet() {
     setSearchOpen(false);
     setQuery('');
   };
-  const pick = (cityId: string, date?: string) => {
+  const pick = (cityId: string, date?: string, endDate?: string) => {
     setQuery('');
-    void checkIn(cityId, date);
+    void checkIn(cityId, date, endDate);
   };
 
   let header;

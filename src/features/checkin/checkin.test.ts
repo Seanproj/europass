@@ -51,6 +51,14 @@ describe('원탭 체크인', () => {
     expect(r.previousNth).toBe(3);
   });
 
+  it('다시 방문 기록은 머문 기간까지 함께 남긴다', async () => {
+    const r = await checkIn(db, 'cz-prague', '2014-01-15', '2014-01-17');
+    expect(await db.visits.get(r.visit.id)).toMatchObject({ date: '2014-01-15', endDate: '2014-01-17' });
+    // 당일이면 떠난 날을 남기지 않는다
+    const same = await checkIn(db, 'fr-paris', '2014-02-01', '2014-02-01');
+    expect((await db.visits.get(same.visit.id))?.endDate).toBeUndefined();
+  });
+
   it('같은 날 같은 도시는 중복 대신 기존 기록을 돌려준다', async () => {
     const first = await checkIn(db, 'cz-prague', '2026-10-14');
     const again = await checkIn(db, 'cz-prague', '2026-10-14');

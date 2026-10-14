@@ -11,15 +11,15 @@ import { reportWriteError } from '../../app/storageWatch';
 
 /**
  * 체크인 흐름: 저장 → 시트는 도시 상세 → 지도 이동(첫 방문은 도착 뒤 안개 열림) → 도장 "쾅" + 햅틱 → 되돌리기 토스트.
- * date를 주면 그 날짜로 소급 기록한다 (다시 방문 기록)
+ * date를 주면 그 날짜로 소급 기록한다 (다시 방문 기록). endDate는 머문 기간
  */
 export function useCheckIn() {
-  return useCallback(async (cityId: string, date?: string) => {
+  return useCallback(async (cityId: string, date?: string, endDate?: string) => {
     const city = getCity(cityId);
     if (!city) return;
     let result;
     try {
-      result = await checkIn(db, cityId, date);
+      result = await checkIn(db, cityId, date, endDate);
     } catch (err) {
       if (reportWriteError(err, '도장을')) return;
       throw err;

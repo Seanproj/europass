@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { formatLat, formatLon, koreanDate, stampDate, todayISO } from './date';
+import {
+  addDays,
+  formatLat,
+  formatLon,
+  isCompleteDate,
+  koreanDate,
+  stampDate,
+  stayLabel,
+  todayISO,
+} from './date';
 
 describe('날짜와 좌표 표기', () => {
   it('오늘은 기기 시간대 기준', () => {
@@ -30,5 +39,26 @@ describe('점 표기 날짜', () => {
     expect(dateRange('2025-12-20')).toBe('2025.12.20');
     expect(dateRange('2025-12-20', '2025-12-23')).toBe('2025.12.20 – 12.23');
     expect(dateRange('2025-12-30', '2026-01-02')).toBe('2025.12.30 – 2026.01.02');
+  });
+});
+
+describe('날짜 입력', () => {
+  it('addDays: 달·해·윤년을 넘어도 달력대로', () => {
+    expect(addDays('2014-01-15', 2)).toBe('2014-01-17');
+    expect(addDays('2024-02-28', 1)).toBe('2024-02-29');
+    expect(addDays('2025-12-31', 1)).toBe('2026-01-01');
+  });
+
+  it('isCompleteDate: 연도를 치는 중인 값과 없는 날짜는 저장하지 않는다', () => {
+    expect(isCompleteDate('2014-01-15')).toBe(true);
+    expect(isCompleteDate('0201-01-15')).toBe(false);
+    expect(isCompleteDate('2014-02-30')).toBe(false);
+    expect(isCompleteDate('')).toBe(false);
+    expect(isCompleteDate('2030-01-01', '2026-10-14')).toBe(false);
+  });
+
+  it('머문 기간 표기', () => {
+    expect(stayLabel(0)).toBe('당일');
+    expect(stayLabel(2)).toBe('2박 3일');
   });
 });
