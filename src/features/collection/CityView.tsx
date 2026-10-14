@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from 'react';
 import { Camera, MoreHorizontal, Plus, X } from 'lucide-react';
 import styles from './CityView.module.css';
 import { Flag } from '../../components/Flag/Flag';
-import { Stamp } from '../../components/Stamp/Stamp';
 import { CITIES, getCity, getCountry } from '../../data/cities';
 import type { City } from '../../data/types';
 import { db } from '../../db/db';
@@ -13,6 +12,7 @@ import { cityNear, distanceKm } from '../checkin/search';
 import { MAX_PHOTOS, type PhotoHints } from './photos';
 import { PhotoViewer, type ViewerPhoto } from './PhotoViewer';
 import { useBlobUrl } from './useBlobUrl';
+import { PostcardFlip } from './Postcard';
 import { reportWriteError, warnIfStorageFull } from '../../app/storageWatch';
 import { addPhotos, deleteVisit, NOTE_MAX, normalizeRange, removePhoto, updateVisit } from './visitEdits';
 
@@ -53,7 +53,7 @@ export function CityView({ cityId, visits, homeId, onCheckIn }: Props) {
 
   return (
     <section className={styles.city} aria-label={`${city.name.ko} 상세`}>
-      <StampStack city={city} visits={visits} />
+      <PostcardFlip city={city} visits={visits} />
       <h2 className={styles.name}>{city.name.ko}</h2>
       <p className={styles.meta}>
         <Flag code={city.country} size={18} visited={visits.length > 0} alt="" />
@@ -110,36 +110,6 @@ export function CityView({ cityId, visits, homeId, onCheckIn }: Props) {
         <PhotoViewer photos={photos} start={viewer.start} onClose={() => setViewer(null)} />
       )}
     </section>
-  );
-}
-
-/** 방문 수만큼 겹쳐 쌓은 도장 (최신이 맨 위, 아래 것은 옅게). 최대 5장 */
-function StampStack({ city, visits }: { city: City; visits: Visit[] }) {
-  const shown = visits.slice(0, 5);
-  return (
-    <div className={styles.stack}>
-      {shown.length === 0 && <Stamp city={city} size={132} />}
-      {[...shown].reverse().map((v, i, arr) => {
-        const depth = arr.length - 1 - i;
-        return (
-          <Stamp
-            key={v.id}
-            city={city}
-            visit={v}
-            nth={visits.length - depth}
-            size={132}
-            className={styles.layer}
-            style={{
-              opacity: depth === 0 ? 1 : Math.max(0.08, 0.26 - depth * 0.06),
-              transform:
-                depth === 0
-                  ? undefined
-                  : `translate(${(depth % 2 ? -1 : 1) * (10 + depth * 6)}px, ${depth * 5}px)`,
-            }}
-          />
-        );
-      })}
-    </div>
   );
 }
 

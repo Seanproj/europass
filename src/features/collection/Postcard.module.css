@@ -1,0 +1,182 @@
+/* 도장 앞면과 엽서 뒷면이 같은 자리를 쓴다 (3:2) */
+.frame {
+  position: relative;
+  width: min(280px, 100%);
+  aspect-ratio: 3 / 2;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  perspective: 900px;
+  cursor: pointer;
+}
+
+div.frame {
+  display: grid;
+  place-items: center;
+  cursor: default;
+}
+
+.frame:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--r-card);
+}
+
+.card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  backface-visibility: hidden;
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+/* 앞면: 가운데 도장 스택 + 오른쪽 아래 "엽서" 단서 */
+.front {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.stack {
+  position: relative;
+  display: block;
+  width: 132px;
+  height: 132px;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.hint {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.hint svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* 뒷면: 엽서 */
+.postcard {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 46% 1fr;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.photo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.noPhoto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--sp-2);
+  color: var(--text-2);
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.noPhoto svg {
+  width: 20px;
+  height: 20px;
+}
+
+.text {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-2) var(--sp-3) var(--sp-3);
+  /* 엽서 가운데 세로줄 */
+  border-left: 1px dashed var(--line);
+}
+
+.postage {
+  align-self: flex-end;
+  margin: -2px -4px 2px 0;
+}
+
+.from {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.when {
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.note,
+.empty {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note {
+  color: var(--text);
+}
+
+.empty {
+  color: var(--text-2);
+}
