@@ -1,0 +1,432 @@
+.city {
+  margin-top: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 도장 스택 */
+.stack {
+  position: relative;
+  width: 132px;
+  height: 132px;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.name {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-display);
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-align: center;
+}
+
+.meta {
+  margin: var(--sp-1) 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  padding: 6px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.chips b,
+.hint b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.hint {
+  margin: var(--sp-3) 0 0;
+  padding: 6px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+}
+
+.primary,
+.primarySmall {
+  min-height: var(--tap);
+  padding: 0 var(--sp-6);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--surface);
+  font: 700 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.primary {
+  margin-top: var(--sp-4);
+}
+
+/* 방문 타임라인: 세로선 + 점 */
+.timeline {
+  align-self: stretch;
+  margin: var(--sp-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  padding: 0 0 var(--sp-4) 28px;
+}
+
+.item::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 14px;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--line);
+}
+
+.item:last-child::before {
+  display: none;
+}
+
+.dot {
+  position: absolute;
+  left: 1px;
+  top: 8px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.item[data-first='true'] .dot {
+  background: var(--accent);
+}
+
+.itemHead {
+  width: 100%;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.itemHead:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.itemTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.itemTitle span {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.label {
+  font: 700 10px var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.thumbs {
+  display: flex;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+  cursor: zoom-in;
+}
+
+.thumb img,
+.editPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 펼친 편집 */
+.editor {
+  margin-top: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-caption);
+  color: var(--text-2);
+}
+
+.field small {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.field input {
+  min-width: 0;
+  height: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: var(--fw-body) 16px var(--font);
+}
+
+.photoEdit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.editPhoto {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.editPhoto button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border-bottom-left-radius: 10px;
+  cursor: pointer;
+}
+
+.editPhoto button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.addPhoto {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px dashed var(--text-2);
+  border-radius: 10px;
+  background: none;
+  color: var(--text-2);
+  font: 600 10px var(--font);
+  cursor: pointer;
+}
+
+.addPhoto svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.suggest {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.suggest button {
+  margin-left: var(--sp-1);
+  min-height: 32px;
+  padding: 0 var(--sp-2);
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: 700 13px var(--font);
+  cursor: pointer;
+}
+
+.editorFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.more,
+.done {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  display: grid;
+  place-items: center;
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text-2);
+  font: 600 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.done {
+  color: var(--accent);
+}
+
+.menu,
+.confirm {
+  padding: var(--sp-2);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.confirm p {
+  margin: 0 0 var(--sp-2);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.confirm div,
+.revisitForm div {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+
+.menu button,
+.confirm button,
+.revisitForm button {
+  min-height: var(--tap);
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text);
+  font: 600 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.danger {
+  color: var(--accent) !important;
+}
+
+.revisit {
+  align-self: stretch;
+  min-height: 48px;
+  margin-top: var(--sp-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--accent);
+  font: 700 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.revisit svg {
+  width: 18px;
+  height: 18px;
+}
+
+.revisitForm {
+  align-self: stretch;
+  margin-top: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.revisitForm .primarySmall {
+  color: var(--surface);
+}
+
+.city button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

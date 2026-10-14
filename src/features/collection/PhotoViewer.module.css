@@ -1,0 +1,71 @@
+/* 사진은 어느 테마에서든 어두운 배경에서 본다 */
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: var(--tag-bg);
+  backdrop-filter: blur(8px);
+  touch-action: pan-y;
+}
+
+.img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.bar {
+  position: absolute;
+  top: env(safe-area-inset-top);
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--gutter);
+  color: var(--tag-text);
+}
+
+.caption {
+  font: 600 var(--fs-caption) var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--tag-badge);
+  color: var(--tag-text);
+  cursor: pointer;
+}
+
+.btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--tag-text);
+}
+
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.prev {
+  left: var(--sp-2);
+}
+
+.next {
+  right: var(--sp-2);
+}

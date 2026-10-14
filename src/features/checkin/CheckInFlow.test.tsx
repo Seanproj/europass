@@ -1,11 +1,12 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { App } from '../../app/App';
 import { db } from '../../db/db';
-import { useUI } from '../../app/store';
+import { HOME, useUI } from '../../app/store';
 
 beforeEach(async () => {
   await db.visits.clear();
-  useUI.setState({ searchOpen: false, selection: null, toast: null, stampFx: null, sheetSnap: 'peek' });
+  useUI.setState({ searchOpen: false, route: HOME, toast: null, stampFx: null, sheetSnap: 'peek' });
+  history.replaceState(null, '', '/');
 });
 
 describe('검색 → 체크인 → 되돌리기 (탭 2번)', () => {
@@ -22,7 +23,8 @@ describe('검색 → 체크인 → 되돌리기 (탭 2번)', () => {
     expect(await screen.findByText('프라하 도장 획득')).toBeInTheDocument();
     // 시트는 도시 상세로
     expect(await screen.findByRole('heading', { name: '프라하' })).toBeInTheDocument();
-    expect(useUI.getState().focus?.cityId).toBe('cz-prague');
+    expect(useUI.getState().route).toEqual({ kind: 'city', id: 'cz-prague' });
+    expect(location.search).toBe('?city=cz-prague');
 
     fireEvent.click(screen.getByRole('button', { name: '되돌리기' }));
     await waitFor(async () => expect(await db.visits.count()).toBe(0));
@@ -39,6 +41,10 @@ describe('검색 → 체크인 → 되돌리기 (탭 2번)', () => {
     };
     await open();
     await waitFor(async () => expect(await db.visits.count()).toBe(1));
+    // 도시 상세에서 홈으로 돌아가 다시 검색
+    const pop = new Promise((r) => window.addEventListener('popstate', r, { once: true }));
+    fireEvent.click(await screen.findByRole('button', { name: '뒤로' }));
+    await act(() => pop);
     await open();
     expect(await screen.findByText('오늘 이미 기록했어요 · 프라하')).toBeInTheDocument();
     expect(await db.visits.count()).toBe(1);

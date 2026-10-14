@@ -21,3 +21,14 @@ describe('날짜와 좌표 표기', () => {
     expect(formatLon(-9.1393)).toBe('9.1393° W');
   });
 });
+
+describe('점 표기 날짜', () => {
+  it('날짜와 연월', async () => {
+    const { dotDate, dotMonth, dateRange } = await import('./date');
+    expect(dotDate('2025-12-20')).toBe('2025.12.20');
+    expect(dotMonth('2025-04-30')).toBe('2025.04');
+    expect(dateRange('2025-12-20')).toBe('2025.12.20');
+    expect(dateRange('2025-12-20', '2025-12-23')).toBe('2025.12.20 – 12.23');
+    expect(dateRange('2025-12-30', '2026-01-02')).toBe('2025.12.30 – 2026.01.02');
+  });
+});

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Undo2 } from 'lucide-react';
 import styles from './Toast.module.css';
@@ -11,11 +11,13 @@ export function Toast() {
   const toast = useUI((s) => s.toast);
   const dismiss = useUI((s) => s.dismissToast);
 
+  // 손가락·마우스·포커스가 토스트에 있는 동안은 시간을 멈춘다 (되돌리기를 누르려는 중에 사라지지 않게)
+  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || held) return;
     const t = setTimeout(() => dismiss(toast.id), DURATION_MS);
     return () => clearTimeout(t);
-  }, [toast, dismiss]);
+  }, [toast, dismiss, held]);
 
   return (
     <div className={styles.region} role="status" aria-live="polite">
@@ -24,6 +26,10 @@ export function Toast() {
           <motion.div
             key={toast.id}
             className={styles.toast}
+            onPointerEnter={() => setHeld(true)}
+            onPointerLeave={() => setHeld(false)}
+            onFocus={() => setHeld(true)}
+            onBlur={() => setHeld(false)}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}

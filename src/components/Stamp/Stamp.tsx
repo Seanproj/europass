@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type CSSProperties } from 'react';
 import { getCountry } from '../../data/cities';
 import type { City } from '../../data/types';
 import { formatLat, formatLon, koreanDate, stampDate } from '../../lib/date';
@@ -13,13 +13,24 @@ interface Props {
   /** 모양을 직접 정할 때 (테스트, 미리보기). 기본은 도시 id 해시 */
   shape?: StampShape;
   className?: string;
+  style?: CSSProperties;
+  /** 옆에 도시 이름이 같이 보이는 목록에서는 장식으로 (스크린리더가 두 번 읽지 않게) */
+  decorative?: boolean;
 }
 
 const C = 80; // viewBox 160의 가운데
 const TEXT_W = 108;
 
 /** 도장 v2: 이중선 테두리 + JetBrains Mono 타이포. 히든젬만 금색 */
-export function Stamp({ city, visit, size = 160, shape = stampShape(city.id), className }: Props) {
+export function Stamp({
+  city,
+  visit,
+  size = 160,
+  shape = stampShape(city.id),
+  className,
+  style,
+  decorative,
+}: Props) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const ghost = !visit;
   const color = ghost ? 'var(--text-2)' : city.gem ? 'var(--gold)' : 'var(--accent)';
@@ -62,12 +73,18 @@ export function Stamp({ city, visit, size = 160, shape = stampShape(city.id), cl
   return (
     <svg
       className={className}
+      style={style}
       width={size}
       height={size}
       viewBox="0 0 160 160"
-      role="img"
+      role={decorative ? undefined : 'img'}
+      aria-hidden={decorative || undefined}
       aria-label={
-        ghost ? `${city.name.ko} 도장 (아직 없음)` : `${city.name.ko} 도장, ${koreanDate(visit.date)}`
+        decorative
+          ? undefined
+          : ghost
+            ? `${city.name.ko} 도장 (아직 없음)`
+            : `${city.name.ko} 도장, ${koreanDate(visit.date)}`
       }
     >
       {!ghost && (

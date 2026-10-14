@@ -28,3 +28,19 @@ export function formatLat(lat: number): string {
 export function formatLon(lon: number): string {
   return `${Math.abs(lon).toFixed(4)}° ${lon >= 0 ? 'E' : 'W'}`;
 }
+
+/** "2025-12-20" → "2025.12.20" */
+export function dotDate(iso: string): string {
+  return iso.replaceAll('-', '.');
+}
+
+/** "2025.04" (칩용 연월) */
+export function dotMonth(iso: string): string {
+  return iso.slice(0, 7).replace('-', '.');
+}
+
+/** 방문 기간: "2025.12.20 – 12.23", 해가 바뀌면 "2025.12.30 – 2026.01.02", 당일이면 날짜만 */
+export function dateRange(start: string, end?: string): string {
+  if (!end || end === start) return dotDate(start);
+  return `${dotDate(start)} – ${end.slice(0, 4) === start.slice(0, 4) ? dotDate(end).slice(5) : dotDate(end)}`;
+}
