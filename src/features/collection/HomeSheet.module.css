@@ -6,7 +6,10 @@
   list-style: none;
 }
 
-.flag,
+.flag {
+  display: flex;
+}
+
 .more {
   width: 30px;
   height: 30px;

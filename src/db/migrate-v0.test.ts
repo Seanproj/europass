@@ -93,7 +93,7 @@ describe('migrateFromV0', () => {
 
     const visits = await db.visits.toArray();
     expect(visits).toHaveLength(3);
-    expect(await db.visits.where('cityId').equals('prague').count()).toBe(2);
+    expect(await db.visits.where('cityId').equals('cz-prague').count()).toBe(2);
 
     const v1 = await db.visits.get('v1');
     expect(v1?.note).toBe('카를교\n비가 왔지만 좋았다');
@@ -103,7 +103,7 @@ describe('migrateFromV0', () => {
     expect(v1?.createdAt).toBe(1000);
 
     expect((await db.visits.get('v2'))?.note).toBe('크리스마스 마켓');
-    expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'munich' });
+    expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'de-munich' });
     expect(await db.settings.get('migratedFromV0')).toBeDefined();
   });
 
@@ -124,7 +124,7 @@ describe('migrateFromV0', () => {
   it('v1에서 더 최근에 고친 기록은 덮어쓰지 않는다', async () => {
     await db.visits.put({
       id: 'v3',
-      cityId: 'paris',
+      cityId: 'fr-paris',
       date: '2026-03-14',
       note: 'v1에서 고친 메모',
       photos: [],
@@ -138,10 +138,10 @@ describe('migrateFromV0', () => {
   });
 
   it('이미 v1 프로필이 있으면 유지한다', async () => {
-    await db.settings.put({ key: 'profile', value: { name: '현재', homeCityId: 'berlin' } });
+    await db.settings.put({ key: 'profile', value: { name: '현재', homeCityId: 'de-berlin' } });
     await seedV0([], { name: '예전', home: 'munich' });
     await migrateFromV0(db);
-    expect((await db.settings.get('profile'))?.value).toEqual({ name: '현재', homeCityId: 'berlin' });
+    expect((await db.settings.get('profile'))?.value).toEqual({ name: '현재', homeCityId: 'de-berlin' });
   });
 });
 
