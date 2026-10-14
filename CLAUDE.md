@@ -19,7 +19,7 @@
 - 지도(`src/features/map/`): 지도 인스턴스는 `MapController` 하나. 안개는 2D 캔버스를 텍스처로 올리는 커스텀 레이어(`fog/`),
   렌즈·도시명 태그는 지도 위 오버레이 캔버스, 나라 태그만 DOM. 색은 `tokens.ts`가 tokens.css에서 읽는다.
   개발 서버에서는 `window.__map`, `window.__db`로 카메라와 DB를 조작할 수 있음 (Playwright 확인용)
-- 타일 서버(tiles.openfreemap.org)는 curl로는 막혀도 Playwright Chromium에서는 열릴 수 있다. 막히면 지도는 최소 스타일로 뜬다
+- 클라우드 환경의 Allowed domains에 tiles.openfreemap.org를 추가해 둠. 타일 서버에 닿지 않으면 지도는 최소 스타일(배경 + 국기 퍼즐 육지)로 뜬다
 - TypeScript 7은 typescript-eslint가 아직 지원하지 않아 6.0 사용
 
 ## 명령어 (v1, Phase 1 이후)
