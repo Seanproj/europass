@@ -1,0 +1,152 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--text-2);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.title b {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  flex: none;
+  padding: 2px var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.close {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  margin-right: calc(var(--sp-2) * -1);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.close svg {
+  width: 22px;
+  height: 22px;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.empty {
+  margin: var(--sp-4) 0;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* 배지 줄은 프로필 페이지처럼 좌우 여백을 가진다 → 시트 안에서는 여백을 맞춰 준다 */
+.body {
+  margin: 0 calc(var(--gutter) * -1);
+}
+
+.meta {
+  margin: var(--sp-2) var(--gutter) 0;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.meta b {
+  color: var(--text);
+}
+
+.section {
+  margin-top: var(--sp-5);
+  padding: 0 var(--gutter);
+}
+
+.h2 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-title);
+}
+
+.stamps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--sp-3) var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stamps li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+.log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.log li {
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.log li:last-child {
+  border-bottom: 0;
+}
+
+.logHead {
+  color: var(--text-2);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.logHead b {
+  margin-right: var(--sp-1);
+  font-size: var(--fs-body);
+  color: var(--text);
+}
+
+.note {
+  margin: var(--sp-1) 0 0;
+  line-height: 1.5;
+}
+
+.photos {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.photo {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--sp-2);
+  object-fit: cover;
+  background: var(--bg);
+}

@@ -14,6 +14,7 @@ const NAME_OF: Record<string, string> = {
   'lucide-react': 'Lucide',
   'flag-icons': 'flag-icons',
   fflate: 'fflate',
+  '@supabase/supabase-js': 'Supabase JS',
   exifr: 'exifr',
   'es-hangul': 'es-hangul',
   pretendard: 'Pretendard',

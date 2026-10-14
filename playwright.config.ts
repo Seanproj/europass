@@ -19,8 +19,14 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile',
-      testIgnore: /pwa\.spec\.ts/,
+      testIgnore: /(pwa|cloud)\.spec\.ts/,
       use: { ...mobile, baseURL: 'http://localhost:5173' },
+    },
+    {
+      // 클라우드 동기화: 모의 클라우드 서버(scripts/mock-cloud.ts)를 쓰는 개발 서버
+      name: 'cloud',
+      testMatch: /cloud\.spec\.ts/,
+      use: { ...mobile, baseURL: 'http://localhost:5175' },
     },
     {
       name: 'pwa',
@@ -32,6 +38,19 @@ export default defineConfig({
     {
       command: 'npm run dev -- --port 5173 --strictPort',
       url: 'http://localhost:5173',
+      reuseExistingServer: true,
+      timeout: 60_000,
+    },
+    {
+      command: 'npx tsx scripts/mock-cloud.ts 5199',
+      url: 'http://localhost:5199/health',
+      reuseExistingServer: true,
+      timeout: 30_000,
+    },
+    {
+      command:
+        'VITE_CLOUD_MOCK_URL=http://localhost:5199 VITE_CACHE_DIR=node_modules/.vite-cloud npx vite --port 5175 --strictPort',
+      url: 'http://localhost:5175',
       reuseExistingServer: true,
       timeout: 60_000,
     },

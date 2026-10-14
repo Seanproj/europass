@@ -1,7 +1,7 @@
 // @vitest-environment node
 import Dexie from 'dexie';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createDB } from './db';
+import { createDB, removeVisits } from './db';
 
 const NAME = 'upgrade-test';
 
@@ -53,10 +53,11 @@ describe('DB v1 → v2 업그레이드', () => {
     db.close();
   });
 
-  it('새로 만든 DB는 최신 버전(v3)으로 열리고 렌즈 캐시 테이블이 있다', async () => {
+  it('새로 만든 DB는 최신 버전(v4)으로 열리고 렌즈 캐시·삭제 표시 테이블이 있다', async () => {
     const db = createDB(NAME);
     await db.open();
-    expect(db.verno).toBe(3);
+    expect(db.verno).toBe(4);
+    await db.tombstones.put({ id: 'x', deletedAt: 1 });
     await db.lensCache.put({ key: 'cz-prague|light|v1', blob: new Blob(['x']), createdAt: 1 });
     expect(await db.lensCache.count()).toBe(1);
     db.close();
@@ -80,6 +81,58 @@ describe('DB v1 → v2 업그레이드', () => {
     expect(await db.visits.get('a')).toMatchObject({ cityId: 'cz-prague', note: '메모' });
     expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'de-frankfurt' });
     expect(await db.lensCache.count()).toBe(0);
+    db.close();
+  });
+});
+
+describe('DB v3 → v4 업그레이드 (Phase 9)', () => {
+  it('기존 방문 기록·사진·설정은 그대로, 삭제 표시 테이블만 생긴다', async () => {
+    const old = new Dexie(NAME);
+    old.version(3).stores({ visits: 'id, cityId, date, [cityId+date]', settings: 'key', lensCache: 'key' });
+    const photo = new Blob([new Uint8Array([1, 2, 3])], { type: 'image/jpeg' });
+    await old.table('visits').put({
+      id: 'v1',
+      cityId: 'cz-prague',
+      date: '2026-01-01',
+      note: '메모',
+      photos: [photo],
+      createdAt: 1,
+      updatedAt: 2,
+    });
+    await old.table('settings').put({ key: 'profile', value: { name: 'Sean', homeCityId: 'de-frankfurt' } });
+    old.close();
+
+    const db = createDB(NAME);
+    await db.open();
+    expect(db.verno).toBe(4);
+    const v = await db.visits.get('v1');
+    expect(v).toMatchObject({ cityId: 'cz-prague', note: '메모', updatedAt: 2 });
+    expect(v?.photos[0]?.size).toBe(3);
+    expect(v?.syncedAt).toBeUndefined();
+    expect(await db.tombstones.count()).toBe(0);
+    expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'de-frankfurt' });
+    db.close();
+  });
+});
+
+describe('removeVisits', () => {
+  it('클라우드에 올린 기록만 삭제 표시를 남긴다', async () => {
+    const db = createDB(NAME);
+    const base = {
+      cityId: 'cz-prague',
+      date: '2026-01-01',
+      note: '',
+      photos: [],
+      createdAt: 1,
+      updatedAt: 5,
+    };
+    await db.visits.bulkPut([
+      { id: 'local', ...base },
+      { id: 'synced', ...base, syncedAt: 5 },
+    ]);
+    await removeVisits(db, ['local', 'synced', 'missing']);
+    expect(await db.visits.count()).toBe(0);
+    expect((await db.tombstones.toArray()).map((t) => t.id)).toEqual(['synced']);
     db.close();
   });
 });

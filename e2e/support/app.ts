@@ -16,6 +16,8 @@ export type DevWindow = Window & {
   __db: {
     visits: {
       bulkPut(v: Row[]): Promise<unknown>;
+      toArray(): Promise<Row[]>;
+      update(id: string, patch: Partial<Row>): Promise<number>;
       count(): Promise<number>;
       get(id: string): Promise<Row | undefined>;
       where(k: string): { equals(v: string): { count(): Promise<number> } };

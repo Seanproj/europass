@@ -68,9 +68,12 @@ export function MapView() {
   const route = useUI((s) => s.route);
   const revealCity = useUI((s) => s.revealCity);
 
-  const visits = useLiveQuery(() => db.visits.toArray(), [], EMPTY);
+  const myVisits = useLiveQuery(() => db.visits.toArray(), [], EMPTY);
   const profile = useLiveQuery(() => db.settings.get('profile'), []);
-  const homeId = (profile?.value as Profile | undefined)?.homeCityId;
+  // 다른 사람의 공개 프로필을 보는 동안은 그 사람의 기록을 그린다
+  const publicView = useUI((s) => s.publicView);
+  const visits = publicView?.visits ?? myVisits;
+  const homeId = publicView ? publicView.homeCityId : (profile?.value as Profile | undefined)?.homeCityId;
 
   const counts = useMemo(() => {
     const m = new Map<string, number>();
@@ -108,8 +111,11 @@ export function MapView() {
         base,
         data: mapData,
         tokens: readMapTokens(),
-        onSelect: (s) =>
-          navigate(s.kind === 'city' ? { kind: 'city', id: s.id } : { kind: 'country', code: s.code }),
+        onSelect: (s) => {
+          // 공개 프로필은 읽기 전용 (내 시트로 넘어가지 않는다)
+          if (useUI.getState().route.kind === 'public') return;
+          navigate(s.kind === 'city' ? { kind: 'city', id: s.id } : { kind: 'country', code: s.code });
+        },
         onTileError: notifyTileError,
         onFrame: (f) => {
           tagsRef.current?.update(ctrl!.map, f);
@@ -183,7 +189,7 @@ export function MapView() {
         <CityMarkers
           ref={markersRef}
           cities={visitedCities}
-          onPick={(id) => navigate({ kind: 'city', id })}
+          onPick={(id) => useUI.getState().route.kind !== 'public' && navigate({ kind: 'city', id })}
         />
       )}
       {data && (
@@ -191,7 +197,7 @@ export function MapView() {
           ref={tagsRef}
           progress={progress}
           onPick={(code) => {
-            navigate({ kind: 'country', code });
+            if (useUI.getState().route.kind !== 'public') navigate({ kind: 'country', code });
           }}
         />
       )}

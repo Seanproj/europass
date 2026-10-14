@@ -1,4 +1,4 @@
-import type { PassportDB } from '../../db/db';
+import { removeVisits, type PassportDB } from '../../db/db';
 import type { Visit } from '../../db/types';
 import { compressPhoto, MAX_PHOTOS, readPhotoHints, type PhotoHints } from './photos';
 
@@ -51,5 +51,5 @@ export async function removePhoto(db: PassportDB, visit: Visit, index: number) {
 }
 
 export async function deleteVisit(db: PassportDB, id: string) {
-  await db.visits.delete(id);
+  await removeVisits(db, [id]);
 }

@@ -29,6 +29,10 @@ jobs:
       # v1: Vite 빌드 결과(dist/) 배포 / v0: 저장소 루트를 그대로 배포
       - name: Build site
         id: site
+        # 기기 간 동기화: 비밀값이 없으면 동기화 UI가 숨겨진 채로 빌드된다 (docs/CLOUD_SETUP.md)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
           if [ -f package.json ]; then
             npm ci

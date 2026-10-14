@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { getCity, getCountry } from '../data/cities';
 import { HOME, useUI, type Route } from './store';
+import { HANDLE_RE } from '../cloud/types';
 
 /** URL 쿼리 → 화면. 모르는 나라·도시는 홈으로 */
 export function routeFromSearch(search: string): Route {
   const q = new URLSearchParams(search);
   if (q.has('profile')) return { kind: 'profile' };
+  const handle = q.get('u')?.toLowerCase();
+  if (handle && HANDLE_RE.test(handle)) return { kind: 'public', handle };
   // 연말 결산은 디버그용으로 ?wrap=2026처럼 언제든 열 수 있다
   const wrap = q.get('wrap');
   if (wrap && /^\d{4}$/.test(wrap)) return { kind: 'wrap', year: Number(wrap) };
@@ -21,6 +24,7 @@ export function searchFromRoute(r: Route): string {
   if (r.kind === 'country') return `?country=${r.code}`;
   if (r.kind === 'profile') return '?profile';
   if (r.kind === 'wrap') return `?wrap=${r.year}`;
+  if (r.kind === 'public') return `?u=${r.handle}`;
   return '';
 }
 

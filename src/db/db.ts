@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { LensCacheRow, Profile, SettingRow, Visit } from './types';
+import type { LensCacheRow, Profile, SettingRow, TombstoneRow, Visit } from './types';
 import { mapV0CityId } from './v0-city-map';
 
 export const DB_NAME = 'euro-passport-v1';
@@ -8,6 +8,7 @@ export type PassportDB = Dexie & {
   visits: EntityTable<Visit, 'id'>;
   settings: EntityTable<SettingRow, 'key'>;
   lensCache: EntityTable<LensCacheRow, 'key'>;
+  tombstones: EntityTable<TombstoneRow, 'id'>;
 };
 
 export function createDB(name = DB_NAME): PassportDB {
@@ -43,7 +44,28 @@ export function createDB(name = DB_NAME): PassportDB {
     settings: 'key',
     lensCache: 'key',
   });
+  // v4 (Phase 9): 기기 간 동기화용 삭제 표시 테이블. 방문 기록 자체는 그대로 (syncedAt은 인덱스 없는 필드)
+  db.version(4).stores({
+    visits: 'id, cityId, date, [cityId+date]',
+    settings: 'key',
+    lensCache: 'key',
+    tombstones: 'id',
+  });
   return db;
+}
+
+/**
+ * 방문 기록 지우기 (되돌리기, 기록 삭제, 모두 삭제가 모두 여기로).
+ * 클라우드에 올린 적 있는 기록이면 삭제 표시를 남겨 다른 기기에서도 지워지게 한다
+ */
+export async function removeVisits(db: PassportDB, ids: string[]): Promise<void> {
+  await db.transaction('rw', db.visits, db.tombstones, async () => {
+    const rows = await db.visits.bulkGet(ids);
+    const now = Date.now();
+    const marks = rows.filter((v): v is Visit => !!v?.syncedAt).map((v) => ({ id: v.id, deletedAt: now }));
+    if (marks.length) await db.tombstones.bulkPut(marks);
+    await db.visits.bulkDelete(ids);
+  });
 }
 
 export const db = createDB();

@@ -1,5 +1,5 @@
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
-import type { PassportDB } from './db';
+import { removeVisits, type PassportDB } from './db';
 import type { Profile, Visit } from './types';
 import {
   convertV0Profile,
@@ -77,10 +77,18 @@ export async function exportBackup(db: PassportDB, now = new Date()): Promise<Ui
       files[name] = [new Uint8Array(await blob.arrayBuffer()), { level: 0 }];
       names.push(name);
     }
-    manifest.visits.push({ ...v, photos: names });
+    // 동기화 표시는 이 기기에만 해당해서 백업에 넣지 않는다
+    manifest.visits.push({ ...withoutSync(v), photos: names });
   }
   files[MANIFEST] = strToU8(JSON.stringify(manifest, null, 2));
   return zipSync(files);
+}
+
+/** 동기화 표시(syncedAt)는 이 기기에만 해당한다: 백업에 넣지 않고, 가져온 기록은 새로 올릴 변경으로 본다 */
+function withoutSync<T extends { syncedAt?: unknown }>(v: T): Omit<T, 'syncedAt'> {
+  const copy = { ...v };
+  delete copy.syncedAt;
+  return copy;
 }
 
 export function backupFileName(now = new Date()): string {
@@ -127,18 +135,21 @@ export async function importBackup(db: PassportDB, bytes: Uint8Array): Promise<I
   }
   if (!isBackupV2(data)) throw new BackupFormatError('Euro Passport 백업 파일이 아니에요');
 
-  const visits: Visit[] = data.visits.filter(isVisitRow).map((v) => ({
-    ...v,
-    note: typeof v.note === 'string' ? v.note : '',
-    createdAt: typeof v.createdAt === 'number' ? v.createdAt : Date.now(),
-    updatedAt: typeof v.updatedAt === 'number' ? v.updatedAt : Date.now(),
-    photos: (Array.isArray(v.photos) ? v.photos : [])
-      .filter((name) => typeof name === 'string' && files[name])
-      .map(
-        (name) =>
-          new Blob([files[name] as Uint8Array<ArrayBuffer>], { type: MIME[name.split('.').pop()!] ?? '' }),
-      ),
-  }));
+  const visits: Visit[] = data.visits
+    .filter(isVisitRow)
+    .map(withoutSync)
+    .map((v) => ({
+      ...v,
+      note: typeof v.note === 'string' ? v.note : '',
+      createdAt: typeof v.createdAt === 'number' ? v.createdAt : Date.now(),
+      updatedAt: typeof v.updatedAt === 'number' ? v.updatedAt : Date.now(),
+      photos: (Array.isArray(v.photos) ? v.photos : [])
+        .filter((name) => typeof name === 'string' && files[name])
+        .map(
+          (name) =>
+            new Blob([files[name] as Uint8Array<ArrayBuffer>], { type: MIME[name.split('.').pop()!] ?? '' }),
+        ),
+    }));
   const result = await mergeVisits(db, visits);
   if (data.profile && !(await db.settings.get('profile'))) {
     await db.settings.put({ key: 'profile', value: data.profile });
@@ -151,6 +162,8 @@ export async function importBackup(db: PassportDB, bytes: Uint8Array): Promise<I
  * 프로필(이름·홈 도시)은 남기고, v0 자동 이전 표시도 남겨 지운 기록이 v0에서 되살아나지 않게 한다
  */
 export async function deleteAllData(db: PassportDB): Promise<void> {
+  const ids = (await db.visits.toCollection().primaryKeys()) as string[];
+  await removeVisits(db, ids);
   await db.transaction('rw', db.visits, db.lensCache, db.settings, async () => {
     await db.visits.clear();
     await db.lensCache.clear();
