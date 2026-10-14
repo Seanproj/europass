@@ -103,11 +103,11 @@ export function ProfilePage() {
           <div className={styles.actions}>
             <button type="button" className={styles.edit} onClick={() => setSharing(true)}>
               <Share2 aria-hidden />
-              공유
+              <span className={styles.editLabel}>공유</span>
             </button>
             <button type="button" className={styles.edit} onClick={() => setEditing(true)}>
               <Pencil aria-hidden />
-              편집
+              <span className={styles.editLabel}>편집</span>
             </button>
           </div>
         </header>

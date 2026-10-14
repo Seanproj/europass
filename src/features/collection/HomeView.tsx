@@ -28,12 +28,12 @@ export function HomeView({ countries, byCity, homeId, onSearch }: Props) {
 
   return (
     <section className={styles.home}>
+      {/* 기록이 없을 때는 안내가 먼저 (반쯤 펼친 시트에서 "도시 찾기"까지 바로 보이게) */}
+      {cityCount === 0 && <FirstStamp homeId={homeId} onSearch={onSearch} />}
       <h2 className={styles.title}>나의 유럽</h2>
       <p className={styles.meta}>
         {visitedCountries}개국 · {cityCount}개 도시 · 유럽의 {europePercent(cityCount)}%
       </p>
-
-      {cityCount === 0 && <FirstStamp homeId={homeId} onSearch={onSearch} />}
 
       <div className={styles.segment} role="tablist" aria-label="목록">
         {(['countries', 'cities'] as const).map((t) => (
@@ -64,7 +64,7 @@ function FirstStamp({ homeId, onSearch }: Pick<Props, 'homeId' | 'onSearch'>) {
   const home = getCity(homeId ?? '') ?? getCity('de-frankfurt');
   return (
     <div className={styles.first}>
-      {home && <Stamp city={home} size={92} decorative />}
+      {home && <Stamp city={home} size={76} decorative />}
       <div className={styles.firstText}>
         <p className={styles.firstTitle}>첫 도장을 찍어보세요</p>
         <p className={styles.firstBody}>

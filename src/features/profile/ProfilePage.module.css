@@ -71,6 +71,12 @@
   gap: 6px;
   margin: var(--sp-1) 0 0;
   color: var(--text-2);
+  white-space: nowrap;
+}
+
+.home span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .actions {
@@ -202,4 +208,22 @@
 .wrapText span {
   font-size: var(--fs-caption);
   color: var(--text-2);
+}
+
+/* 좁은 휴대폰: 공유·편집은 아이콘만 (이름과 홈 도시가 한 줄에 들어가게). 글자는 스크린리더용으로 남긴다 */
+@media (max-width: 399px) {
+  .edit {
+    width: var(--tap);
+    padding: 0;
+    justify-content: center;
+  }
+
+  .editLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
