@@ -44,3 +44,23 @@ export function dateRange(start: string, end?: string): string {
   if (!end || end === start) return dotDate(start);
   return `${dotDate(start)} – ${end.slice(0, 4) === start.slice(0, 4) ? dotDate(end).slice(5) : dotDate(end)}`;
 }
+
+/** "2014-01-15" + 2 → "2014-01-17" (달력 기준, 시간대 영향 없음) */
+export function addDays(iso: string, days: number): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const t = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1) + days * 86_400_000);
+  return t.toISOString().slice(0, 10);
+}
+
+/** 입력 중인 날짜가 저장해도 되는 값인지: 완전한 YYYY-MM-DD, 1950년 이후, max 이하 */
+export function isCompleteDate(value: string, max?: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  if (Number(value.slice(0, 4)) < 1950) return false;
+  if (addDays(value, 0) !== value) return false; // 2월 30일 같은 없는 날
+  return !max || value <= max;
+}
+
+/** 머문 기간: 0 → "당일", 2 → "2박 3일" */
+export function stayLabel(nights: number): string {
+  return nights === 0 ? '당일' : `${nights}박 ${nights + 1}일`;
+}

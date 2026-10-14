@@ -1,5 +1,7 @@
 import { removeVisits, type PassportDB } from '../../db/db';
 import type { Visit } from '../../db/types';
+import { stayNights } from '../../db/selectors';
+import { addDays } from '../../lib/date';
 import { compressPhoto, MAX_PHOTOS, readPhotoHints, type PhotoHints } from './photos';
 
 export const NOTE_MAX = 140;
@@ -14,13 +16,15 @@ export async function updateVisit(
   await db.visits.update(id, { ...clean, updatedAt: Date.now() });
 }
 
-/** 날짜를 바꿀 때 종료일이 시작일보다 앞서지 않게 */
-export function normalizeRange(
-  date: string,
-  endDate: string | undefined,
-): { date: string; endDate?: string } {
-  if (!endDate || endDate <= date) return { date, endDate: undefined };
-  return { date, endDate };
+/** 방문일을 옮길 때 머문 기간(박수)은 그대로 두고 떠난 날도 같이 옮긴다 */
+export function moveVisitDate(visit: Pick<Visit, 'date' | 'endDate'>, date: string) {
+  const nights = stayNights(visit);
+  return { date, endDate: nights > 0 ? addDays(date, nights) : undefined };
+}
+
+/** 머문 기간(박수)으로 떠난 날을 정한다. 0이면 당일 */
+export function withNights(date: string, nights: number) {
+  return { endDate: nights > 0 ? addDays(date, nights) : undefined };
 }
 
 export interface AddPhotosResult {

@@ -20,13 +20,20 @@ export type CheckInResult =
   | { kind: 'duplicate'; visit: Visit };
 
 /** 원탭 체크인: 필수 입력 없이 오늘 날짜로 기록한다 */
-export async function checkIn(db: PassportDB, cityId: string, date = todayISO()): Promise<CheckInResult> {
+/** endDate를 주면 머문 기간까지 함께 기록한다 (다시 방문 기록) */
+export async function checkIn(
+  db: PassportDB,
+  cityId: string,
+  date = todayISO(),
+  endDate?: string,
+): Promise<CheckInResult> {
   return db.transaction('rw', db.visits, async () => {
     const same = await db.visits.where('[cityId+date]').equals([cityId, date]).first();
     if (same) return { kind: 'duplicate', visit: same };
     const before = await db.visits.where('cityId').equals(cityId).toArray();
     const now = Date.now();
     const visit: Visit = { id: newId(), cityId, date, note: '', photos: [], createdAt: now, updatedAt: now };
+    if (endDate && endDate > date) visit.endDate = endDate;
     await db.visits.add(visit);
     const all = [...before, visit];
     const previous = before.sort(byNewest)[0];
