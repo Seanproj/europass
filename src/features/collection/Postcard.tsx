@@ -6,7 +6,7 @@ import { Stamp } from '../../components/Stamp/Stamp';
 import type { City } from '../../data/types';
 import { stayNights } from '../../db/selectors';
 import type { Visit } from '../../db/types';
-import { dateRange } from '../../lib/date';
+import { dateRange, stayLabel } from '../../lib/date';
 import { useBlobUrl } from './useBlobUrl';
 
 /** 방문 수만큼 겹쳐 쌓은 도장 (최신이 맨 위, 아래 것은 옅게). 최대 5장 */
@@ -39,8 +39,6 @@ export function StampStack({ city, visits }: { city: City; visits: Visit[] }) {
     </span>
   );
 }
-
-const stay = (nights: number) => (nights === 0 ? '당일' : `${nights}박 ${nights + 1}일`);
 
 /**
  * 도시 상세 맨 위: 도장 스택을 누르면 카드처럼 뒤집혀 가장 최근 방문의 엽서가 된다.
@@ -119,7 +117,7 @@ function PostcardBack({ city, visit, nth }: { city: City; visit: Visit; nth: num
         <Stamp city={city} visit={visit} nth={nth} size={52} decorative className={styles.postage} />
         <b className={styles.from}>{city.name.ko}에서</b>
         <span className={styles.when}>
-          {dateRange(visit.date, visit.endDate)} · {stay(stayNights(visit))}
+          {dateRange(visit.date, visit.endDate)} · {stayLabel(stayNights(visit))}
         </span>
         <span className={note ? styles.note : styles.empty}>
           {note ?? '아래 방문 기록을 눌러 한 줄을 남겨 보세요'}
