@@ -16,3 +16,8 @@ export async function saveProfile(d: PassportDB, profile: Profile): Promise<void
     value: { name: profile.name.trim() || DEFAULT_PROFILE.name, homeCityId: profile.homeCityId },
   });
 }
+
+export async function getProfile(d: PassportDB): Promise<Profile> {
+  const row = await d.settings.get('profile');
+  return { ...DEFAULT_PROFILE, ...(row?.value as Profile | undefined) };
+}

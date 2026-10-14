@@ -28,10 +28,35 @@
 }
 
 .title {
+  flex: 1;
+  min-width: 0;
   font-size: var(--fs-body);
   font-weight: 600;
   color: var(--text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.action {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  margin-right: calc(var(--sp-2) * -1);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.action svg {
+  width: 20px;
+  height: 20px;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--accent);
 }

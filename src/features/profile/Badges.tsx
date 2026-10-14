@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import styles from './Badges.module.css';
-import { Dialog } from './Dialog';
+import { Dialog } from '../../components/Dialog/Dialog';
 import type { BadgeState } from './badges';
 
 /** 원형 배경 + lucide 아이콘. 미획득은 흑백 */

@@ -1,28 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import styles from './PuzzleMinimap.module.css';
 import { FLAG_BLACK } from '../../data/flags';
-import type { Bbox, Region, RegionsData } from '../../data/types';
-import type { FlagCollection } from '../map/puzzle/puzzle';
+import { loadPuzzleData as loadPuzzle, type PuzzleData } from '../map/puzzle/data';
 import { puzzleColor } from '../map/puzzle/puzzle';
-
-interface PuzzleData {
-  regions: Region[];
-  bboxes: Record<string, Bbox>;
-  flag: FlagCollection;
-}
-
-// 지도와 같은 청크를 쓰는 국기 퍼즐 데이터 (한 번만 불러온다)
-let dataPromise: Promise<PuzzleData> | null = null;
-function loadPuzzle(): Promise<PuzzleData> {
-  dataPromise ??= Promise.all([
-    import('../../data/regions.json'),
-    import('../../data/regions-flag.json'),
-  ]).then(([r, f]) => {
-    const rd = r.default as unknown as RegionsData;
-    return { regions: rd.regions, bboxes: rd.bboxes, flag: f.default as unknown as FlagCollection };
-  });
-  return dataPromise;
-}
 
 const W = 320;
 const MAX_H = 240;

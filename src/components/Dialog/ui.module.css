@@ -1,4 +1,4 @@
-/* 프로필 페이지의 시트들이 함께 쓰는 버튼·입력 */
+/* 시트 안의 버튼·입력 (프로필 설정, 공유 시트) */
 .button {
   min-height: var(--tap);
   display: inline-flex;

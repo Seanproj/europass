@@ -14,7 +14,12 @@ import { CityView } from './CityView';
 import { CountryView } from './CountryView';
 import { FlagRings } from './FlagRings';
 import { HomeView } from './HomeView';
-import { NavHeader } from './NavHeader';
+import { NavAction, NavHeader } from './NavHeader';
+import { Share2 } from 'lucide-react';
+import { todayISO } from '../../lib/date';
+import { getProfile } from '../profile/profile';
+import { ShareDialog, type ShareFormat } from '../share/ShareDialog';
+import { makeCityCard, makeCountryCard } from '../share/share';
 import { countryProgress, sortCountries } from './progress';
 
 const EMPTY: Visit[] = [];
@@ -27,6 +32,7 @@ export function HomeSheet() {
   const searchOpen = useUI((s) => s.searchOpen);
   const setSearchOpen = useUI((s) => s.setSearchOpen);
   const [query, setQuery] = useState('');
+  const [share, setShare] = useState<ShareFormat | null>(null);
   const geo = useGeolocation();
   const checkIn = useCheckIn();
 
@@ -54,7 +60,7 @@ export function HomeSheet() {
   let header;
   let body;
   // 프로필 페이지가 덮고 있을 때 아래 시트는 홈 그대로
-  if (route.kind === 'home' || route.kind === 'profile' || searchOpen) {
+  if (route.kind === 'home' || route.kind === 'profile' || route.kind === 'wrap' || searchOpen) {
     header = (
       <>
         <SearchField
@@ -91,11 +97,57 @@ export function HomeSheet() {
   } else if (route.kind === 'country') {
     const country = getCountry(route.code);
     const progress = countries.find((c) => c.code === route.code);
-    header = <NavHeader title={country?.name.ko ?? route.code} />;
+    const code = route.code;
+    header = (
+      <NavHeader
+        title={country?.name.ko ?? code}
+        action={
+          progress && progress.cities > 0 ? (
+            <NavAction
+              label={`${country?.name.ko} 카드 공유`}
+              icon={<Share2 aria-hidden />}
+              onClick={() =>
+                setShare({
+                  id: `country-${code}`,
+                  label: '국가 카드',
+                  aspect: 4 / 5,
+                  fileName: `euro-passport-${code.toLowerCase()}-${todayISO()}.png`,
+                  make: async () => makeCountryCard(code, await db.visits.toArray(), await getProfile(db)),
+                })
+              }
+            />
+          ) : undefined
+        }
+      />
+    );
     body = progress && <CountryView key={route.code} code={route.code} progress={progress} byCity={byCity} />;
   } else {
     const city = getCity(route.id);
-    header = <NavHeader title={city ? `${getCountry(city.country)?.name.ko} · ${city.name.ko}` : ''} />;
+    const id = route.id;
+    // 도시 카드는 두 번 이상 간 도시만 ("프라하와 나 · 3번의 방문")
+    const many = (byCity.get(id)?.length ?? 0) >= 2;
+    header = (
+      <NavHeader
+        title={city ? `${getCountry(city.country)?.name.ko} · ${city.name.ko}` : ''}
+        action={
+          city && many ? (
+            <NavAction
+              label={`${city.name.ko} 카드 공유`}
+              icon={<Share2 aria-hidden />}
+              onClick={() =>
+                setShare({
+                  id: `city-${id}`,
+                  label: '도시 카드',
+                  aspect: 4 / 5,
+                  fileName: `euro-passport-${id}-${todayISO()}.png`,
+                  make: async () => makeCityCard(id, await db.visits.toArray(), await getProfile(db)),
+                })
+              }
+            />
+          ) : undefined
+        }
+      />
+    );
     body = (
       <CityView
         key={route.id}
@@ -108,8 +160,16 @@ export function HomeSheet() {
   }
 
   return (
-    <BottomSheet label="나의 유럽" snap={snap} onSnapChange={setSnap} header={header}>
-      {body}
-    </BottomSheet>
+    <>
+      <BottomSheet label="나의 유럽" snap={snap} onSnapChange={setSnap} header={header}>
+        {body}
+      </BottomSheet>
+      <ShareDialog
+        open={!!share}
+        title={share?.label ?? ''}
+        formats={share ? [share] : []}
+        onClose={() => setShare(null)}
+      />
+    </>
   );
 }

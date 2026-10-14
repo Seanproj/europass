@@ -73,6 +73,12 @@
   color: var(--text-2);
 }
 
+.actions {
+  flex: none;
+  display: flex;
+  gap: var(--sp-2);
+}
+
 .edit {
   flex: none;
   min-height: var(--tap);
@@ -149,4 +155,51 @@
   line-height: 1.5;
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
+}
+
+/* 연말 결산 배너 (12월 ~ 1월) */
+.wrap {
+  width: calc(100% - var(--gutter) * 2);
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0 var(--gutter) var(--sp-4);
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4);
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--accent-soft);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wrap > svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+}
+
+.wrap > svg:last-child {
+  width: 18px;
+  height: 18px;
+  color: var(--text-2);
+}
+
+.wrap:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.wrapText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wrapText span {
+  font-size: var(--fs-caption);
+  color: var(--text-2);
 }

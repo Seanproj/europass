@@ -9,13 +9,17 @@
 - `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 6 완료: 프로필 · 배지 · 백업)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 7 완료: 공유 카드 · 연말 결산)
 - 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양은 도시 id 해시, 각도는 방문 id 해시).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
-  시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile과 브라우저 뒤로가기를 맞춤)
+  시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile, ?wrap=과 브라우저 뒤로가기를 맞춤)
 - 프로필(`src/features/profile/`): 전체 화면 페이지 하나. 배지는 `badges.ts`의 데이터 정의 + `badgeSync.ts`(알림 기록은 settings 'badgesSeen',
   체크인으로 새로 얻을 때만 토스트, 가져오기·v0 이전으로 얻은 것은 조용히). 토스트는 store의 큐로 체크인 토스트 뒤에 줄 선다.
   테마는 localStorage + `<html data-theme>`, 바뀌면 `themechange` 이벤트로 지도가 다시 그린다
+- 공유(`src/features/share/`): 카드 그리기는 순수 함수(`render.ts`, 2D 컨텍스트 + 데이터 + 테마)라 `RecordingContext`로
+  그리기 호출을 스냅샷 테스트한다. 실제로 그릴 때는 기록 패스로 쓰인 글꼴·글자를 먼저 불러온다(`share.ts`).
+  도장은 `components/Stamp/drawStamp.ts`가 SVG 도장과 같은 도형(`stampGeometry.ts`)을 캔버스에 그린다.
+  지도 스냅샷은 `MapController.snapshot()`(render 이벤트 안에서 복사, 카메라는 되돌림). 연말 결산은 `?wrap=YYYY`
 - 백업(`src/db/backup.ts`): zip(backup.json + photos/) 내보내기·가져오기(v0 JSON 호환, 지우지 않고 합침), 모든 기록 삭제(프로필과 v0 이전 표시는 남김)
 - 도시 id는 `"cz-prague"` 형식. 조회는 `src/data/cities.ts`, 국기는 `src/components/Flag`, 국기 퍼즐 도형은 `src/data/flags.ts`
 - v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐

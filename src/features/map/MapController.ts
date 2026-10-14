@@ -1,5 +1,6 @@
 import type { GeoJSONSource, LngLatBoundsLike } from 'maplibre-gl';
-import { MapLibreMap } from './maplibre';
+import { LngLatBounds, MapLibreMap } from './maplibre';
+import type { SnapshotRequest } from './snapshot';
 import type { StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { CITIES, getCity } from '../../data/cities';
 import type { Bbox, City, Region } from '../../data/types';
@@ -93,6 +94,7 @@ export class MapController {
   private lastLenses: { cityId: string; c: Circle }[] = [];
   private snapshotter: LensSnapshotter;
   private destroyed = false;
+  private snapshotQueue: Promise<void> = Promise.resolve();
 
   constructor(private opts: Options) {
     this.tokens = opts.tokens;
@@ -190,6 +192,88 @@ export class MapController {
     }
     // 스타일을 통째로 바꾸고 style.load에서 우리 레이어를 다시 얹는다
     this.map.setStyle(this.styleFor(tokens), { diff: false });
+  }
+
+  /**
+   * 공유 카드용 스냅샷: 방문한 도시가 카드의 보이는 영역에 들어오게 카메라를 잠깐 옮겨
+   * 타일이 다 온 뒤 지도 + 렌즈 오버레이를 한 장으로 합치고, 카메라를 되돌린다.
+   * 'render' 이벤트 안에서 바로 복사하므로 preserveDrawingBuffer 없이도 그림이 남아 있다
+   */
+  snapshot(req: SnapshotRequest): Promise<HTMLCanvasElement | null> {
+    // 한 번에 하나씩 (겹치면 카메라 되돌리기가 꼬인다)
+    const run = this.snapshotQueue.then(() => this.takeSnapshot(req));
+    this.snapshotQueue = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  }
+
+  private async takeSnapshot(req: SnapshotRequest): Promise<HTMLCanvasElement | null> {
+    const map = this.map;
+    const el = map.getContainer();
+    const W = el.clientWidth;
+    const H = el.clientHeight;
+    if (!W || !H) return null;
+    let cw = W;
+    let ch = W / req.aspect;
+    if (ch > H) {
+      ch = H;
+      cw = H * req.aspect;
+    }
+    const cx = (W - cw) / 2;
+    const cy = (H - ch) / 2;
+    const m = Math.min(cw, ch) * 0.08;
+    // 위쪽은 렌즈와 도시명 태그가 점 위로 솟으니 더 비운다
+    const padding = {
+      left: cx + m,
+      right: W - cx - cw + m,
+      top: cy + m + 48,
+      bottom: H - (cy + ch * req.visible) + m,
+    };
+
+    const prev = { center: map.getCenter(), zoom: map.getZoom() };
+    // 아래 판이 덮는 만큼 여백을 크게 주면 maxBounds가 줌을 당겨 버리므로 잠깐 푼다.
+    // 방문 도시가 넓게 퍼져 있으면 평소 최소 줌보다 더 멀리서 봐야 한다
+    const maxBounds = map.getMaxBounds();
+    const minZoom = map.getMinZoom();
+    map.setMaxBounds(null);
+    map.setMinZoom(0);
+    const bounds = new LngLatBounds();
+    for (const c of this.visited) bounds.extend([c.lon, c.lat]);
+    if (this.visited.length === 0) map.fitBounds(europeBounds(false), { padding, animate: false });
+    else {
+      // 도시 한 곳뿐이어도 너무 확대되지 않게
+      map.fitBounds(bounds, { padding, animate: false, maxZoom: 6 });
+    }
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 8_000);
+      map.once('idle', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      map.triggerRepaint();
+    });
+    const out = await new Promise<HTMLCanvasElement>((resolve) => {
+      map.once('render', () => {
+        const src = map.getCanvas();
+        const k = src.width / W;
+        const c = document.createElement('canvas');
+        c.width = Math.round(cw * k);
+        c.height = Math.round(ch * k);
+        const g = c.getContext('2d')!;
+        g.drawImage(src, cx * k, cy * k, cw * k, ch * k, 0, 0, c.width, c.height);
+        const ov = this.opts.overlay;
+        const ok = ov.width / W;
+        if (ok > 0) g.drawImage(ov, cx * ok, cy * ok, cw * ok, ch * ok, 0, 0, c.width, c.height);
+        resolve(c);
+      });
+      map.triggerRepaint();
+    });
+    map.setMinZoom(minZoom);
+    map.setMaxBounds(maxBounds);
+    map.jumpTo(prev);
+    return out;
   }
 
   getProgress(): Map<string, CountryProgress> {

@@ -17,16 +17,19 @@ const MapView = lazy(() => import('../features/map/MapView').then((m) => ({ defa
 const ProfilePage = lazy(() =>
   import('../features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
+const WrapPage = lazy(() => import('../features/share/WrapPage').then((m) => ({ default: m.WrapPage })));
 
 export function App() {
   const stats = useStats();
   useNavSync();
-  const profileOpen = useUI((s) => s.route.kind === 'profile');
+  const route = useUI((s) => s.route);
+  const profileOpen = route.kind === 'profile';
+  const pageOpen = profileOpen || route.kind === 'wrap';
   return (
     <MotionConfig reducedMotion="user">
       <div className={styles.app}>
-        {/* 프로필 페이지가 덮고 있는 동안 아래 화면은 포커스·스크린리더에서 뺀다 */}
-        <div className={styles.layer} inert={profileOpen}>
+        {/* 프로필·결산 페이지가 덮고 있는 동안 아래 화면은 포커스·스크린리더에서 뺀다 */}
+        <div className={styles.layer} inert={pageOpen}>
           <Suspense fallback={<MapPlaceholder />}>
             <MapView />
           </Suspense>
@@ -37,7 +40,10 @@ export function App() {
           <HomeSheet />
         </div>
         <Suspense fallback={null}>
-          <AnimatePresence>{profileOpen && <ProfilePage key="profile" />}</AnimatePresence>
+          <AnimatePresence>
+            {profileOpen && <ProfilePage key="profile" />}
+            {route.kind === 'wrap' && <WrapPage key="wrap" year={route.year} />}
+          </AnimatePresence>
         </Suspense>
         <StampBurst />
         <Toast />

@@ -25,9 +25,9 @@ import {
 import { db } from '../../db/db';
 import type { Profile } from '../../db/types';
 import { markBadgesSeen } from './badgeSync';
-import { Dialog } from './Dialog';
+import { Dialog } from '../../components/Dialog/Dialog';
 import styles from './Settings.module.css';
-import ui from './ui.module.css';
+import ui from '../../components/Dialog/ui.module.css';
 import { loadTheme, setTheme, type ThemePref } from './theme';
 
 const THEMES: { value: ThemePref; label: string }[] = [
