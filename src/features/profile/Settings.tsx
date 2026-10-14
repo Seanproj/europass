@@ -11,6 +11,7 @@ import {
   SunMoon,
   Trash2,
   Upload,
+  Volume2,
   WifiOff,
   UserRound,
 } from 'lucide-react';
@@ -37,6 +38,7 @@ import styles from './Settings.module.css';
 import ui from '../../components/Dialog/ui.module.css';
 import { loadTheme, setTheme, type ThemePref } from './theme';
 import { loadPrefetchSetting, savePrefetchSetting } from '../map/prefetch';
+import { loadSoundSetting, saveSoundSetting } from '../checkin/stampSound';
 import { estimateStorage, formatBytes, STORAGE_WARN_RATIO, type StorageUsage } from '../../lib/storage';
 
 const THEMES: { value: ThemePref; label: string }[] = [
@@ -59,6 +61,7 @@ export function Settings({
 }) {
   const [theme, setThemeState] = useState(loadTheme);
   const [prefetch, setPrefetch] = useState(loadPrefetchSetting);
+  const [sound, setSound] = useState(loadSoundSetting);
   const [usage, setUsage] = useState<StorageUsage | null>(null);
   // 기록 수가 바뀌면(사진 추가·삭제 포함) 다시 잰다
   useEffect(() => {
@@ -154,6 +157,27 @@ export function Settings({
               </button>
             ))}
           </span>
+        </li>
+        <li>
+          <label className={styles.row}>
+            <span className={styles.icon} aria-hidden>
+              <Volume2 />
+            </span>
+            <span className={styles.label}>
+              도장 소리
+              <span className={styles.hint}>도장을 찍을 때 "쾅" 하고 울려요</span>
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              className={styles.switch}
+              checked={sound}
+              onChange={(e) => {
+                saveSoundSetting(e.target.checked);
+                setSound(e.target.checked);
+              }}
+            />
+          </label>
         </li>
         <li>
           <label className={styles.row}>

@@ -22,7 +22,8 @@ for (const motion of ['no-preference', 'reduce'] as const) {
     await expect(postcard).toContainText('사진을 넣으면');
     await expect(postcard).toContainText('한 줄을 남겨 보세요');
 
-    // 메모와 사진을 남기면 엽서에 바로 보인다
+    // 메모와 사진을 남기면 엽서에 바로 보인다 (새로 연 페이지에서 개발용 DB 핸들이 생길 때까지 기다린다)
+    await page.waitForFunction(() => !!(window as unknown as DevWindow).__db);
     const jpeg = await makeJpeg(page);
     await page.evaluate(
       async (bytes) => {
