@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 import styles from './HomeView.module.css';
 import { navigate } from '../../app/nav';
 import { Flag } from '../../components/Flag/Flag';
@@ -13,12 +13,15 @@ interface Props {
   countries: CountryProgress[];
   /** 도시별 방문 목록 (최신순) */
   byCity: Map<string, Visit[]>;
+  /** 기록이 없을 때 고스트 도장으로 보여줄 홈 도시 */
+  homeId?: string;
+  onSearch: () => void;
 }
 
 type Tab = 'countries' | 'cities';
 
 /** 시트 홈: 요약 + [나라 | 도시] 세그먼트 하나 */
-export function HomeView({ countries, byCity }: Props) {
+export function HomeView({ countries, byCity, homeId, onSearch }: Props) {
   const [tab, setTab] = useState<Tab>('countries');
   const visitedCountries = countries.filter((c) => c.cities > 0).length;
   const cityCount = byCity.size;
@@ -29,6 +32,8 @@ export function HomeView({ countries, byCity }: Props) {
       <p className={styles.meta}>
         {visitedCountries}개국 · {cityCount}개 도시 · 유럽의 {europePercent(cityCount)}%
       </p>
+
+      {cityCount === 0 && <FirstStamp homeId={homeId} onSearch={onSearch} />}
 
       <div className={styles.segment} role="tablist" aria-label="목록">
         {(['countries', 'cities'] as const).map((t) => (
@@ -51,6 +56,26 @@ export function HomeView({ countries, byCity }: Props) {
         {tab === 'countries' ? <CountryList countries={countries} /> : <CityList byCity={byCity} />}
       </div>
     </section>
+  );
+}
+
+/** 기록이 없을 때: 홈 도시의 빈 도장 자리 + 첫 도장 안내 */
+function FirstStamp({ homeId, onSearch }: Pick<Props, 'homeId' | 'onSearch'>) {
+  const home = getCity(homeId ?? '') ?? getCity('de-frankfurt');
+  return (
+    <div className={styles.first}>
+      {home && <Stamp city={home} size={92} decorative />}
+      <div className={styles.firstText}>
+        <p className={styles.firstTitle}>첫 도장을 찍어보세요</p>
+        <p className={styles.firstBody}>
+          다녀온 도시를 고르면 바로 도장이 찍히고, 모을수록 지도의 안개가 걷혀요.
+        </p>
+        <button type="button" className={styles.firstButton} onClick={onSearch}>
+          <Search aria-hidden />
+          도시 찾기
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -112,7 +137,7 @@ function CityList({ byCity }: { byCity: Map<string, Visit[]> }) {
             className={styles.row}
             onClick={() => navigate({ kind: 'city', id: city.id })}
           >
-            <Stamp city={city} visit={visits[0]} size={44} decorative />
+            <Stamp city={city} visit={visits[0]} nth={visits.length} size={44} decorative />
             <span className={styles.body}>
               <span className={styles.name}>{city.name.ko}</span>
               <span className={styles.sub}>

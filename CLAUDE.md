@@ -11,11 +11,12 @@
 
 ## 현재 상태
 
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 9 완료: 클라우드 동기화 · 공개 프로필)
-- 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양은 도시 id 해시, 각도는 방문 id 해시).
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 10 완료: 도장 여권 강화)
+- 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양·장식은 도시 id 해시, 각도는 방문 id 해시,
+  수도 별·재방문 로마 숫자 표식은 `nth` prop. 기하는 `stampParts.ts` 하나를 SVG와 캔버스가 같이 그림. 견본은 개발 서버 `/stamps.html`).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
   시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile, ?wrap=과 브라우저 뒤로가기를 맞춤)
-- 프로필(`src/features/profile/`): 전체 화면 페이지 하나. 배지는 `badges.ts`의 데이터 정의 + `badgeSync.ts`(알림 기록은 settings 'badgesSeen',
+- 프로필(`src/features/profile/`): 전체 화면 페이지 하나. "내 여권" 도감은 `passport.ts`(도시마다 도장 하나, 첫 방문순). 배지는 `badges.ts`의 데이터 정의 + `badgeSync.ts`(알림 기록은 settings 'badgesSeen',
   체크인으로 새로 얻을 때만 토스트, 가져오기·v0 이전으로 얻은 것은 조용히). 토스트는 store의 큐로 체크인 토스트 뒤에 줄 선다.
   테마는 localStorage + `<html data-theme>`, 바뀌면 `themechange` 이벤트로 지도가 다시 그린다
 - 공유(`src/features/share/`): 카드 그리기는 순수 함수(`render.ts`, 2D 컨텍스트 + 데이터 + 테마)라 `RecordingContext`로

@@ -1,15 +1,8 @@
 import type { City } from '../../data/types';
 import { mulberry32, type Ctx } from '../../lib/canvas';
-import {
-  FRAMES,
-  INNER_WIDTH,
-  OUTER_WIDTH,
-  STAMP_BOX,
-  STAMP_C,
-  stampLayout,
-  type Outline,
-} from './stampGeometry';
+import { STAMP_BOX, STAMP_C, type Outline } from './stampGeometry';
 import { inkSeed, stampAngle, stampShape } from './stampMath';
+import { stampOrnament, stampParts } from './stampParts';
 
 export interface DrawStampOptions {
   city: City;
@@ -28,6 +21,8 @@ export interface DrawStampOptions {
   alpha?: number;
   /** 테두리만 (겹쳐 쌓인 이전 도장) */
   outlineOnly?: boolean;
+  /** 이 도시의 몇 번째 방문인지 (2 이상이면 로마 숫자 표식) */
+  nth?: number;
 }
 
 function outlinePath(ctx: Ctx, o: Outline) {
@@ -51,8 +46,13 @@ function outlinePath(ctx: Ctx, o: Outline) {
 export function drawStamp(ctx: Ctx, o: DrawStampOptions) {
   const shape = stampShape(o.city.id);
   const ghost = !o.visit;
-  const { outer, inner } = FRAMES[shape];
-  const { lines, rule } = stampLayout(o.city, o.visit?.date ?? null, shape);
+  const parts = stampParts({
+    city: o.city,
+    date: o.visit?.date ?? null,
+    shape,
+    ornament: stampOrnament(o.city.id, shape),
+    nth: o.visit ? o.nth : undefined,
+  });
   const angle = o.angle ?? (o.visit ? stampAngle(o.visit.id) : 0);
 
   ctx.save();
@@ -65,41 +65,68 @@ export function drawStamp(ctx: Ctx, o: DrawStampOptions) {
   ctx.strokeStyle = o.ink;
   ctx.fillStyle = o.ink;
   ctx.lineJoin = 'round';
-  ctx.setLineDash(ghost ? [4, 3] : []);
-  ctx.lineWidth = OUTER_WIDTH;
-  outlinePath(ctx, outer);
-  ctx.stroke();
-  ctx.lineWidth = INNER_WIDTH;
-  outlinePath(ctx, inner);
-  ctx.stroke();
-  ctx.setLineDash([]);
 
+  for (const p of parts) {
+    if (o.outlineOnly && p.kind !== 'outline') continue;
+    switch (p.kind) {
+      case 'outline':
+        ctx.setLineDash(ghost ? [4, 3] : []);
+        ctx.lineWidth = p.width;
+        outlinePath(ctx, p.outline);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        break;
+      case 'text': {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.font = `${p.weight} ${p.size}px ${o.mono}`;
+        ctx.letterSpacing = `${p.letterSpacing}px`;
+        const w = ctx.measureText(p.text).width;
+        if (p.fit && w > p.fit) {
+          // 넘치는 이름은 가로로 눌러 담는다 (SVG의 textLength와 같은 효과)
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.scale(p.fit / w, 1);
+          ctx.fillText(p.text, 0, 0);
+          ctx.restore();
+        } else ctx.fillText(p.text, p.x, p.y);
+        ctx.letterSpacing = '0px';
+        break;
+      }
+      case 'glyph':
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.font = `${p.weight} ${p.size}px ${o.mono}`;
+        ctx.fillText(p.ch, 0, 0);
+        ctx.restore();
+        break;
+      case 'line':
+        ctx.lineWidth = p.width;
+        ctx.beginPath();
+        ctx.moveTo(p.x1, p.y1);
+        ctx.lineTo(p.x2, p.y2);
+        ctx.stroke();
+        break;
+      case 'dot':
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      case 'star':
+        ctx.beginPath();
+        p.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+        ctx.closePath();
+        ctx.fill();
+        break;
+    }
+  }
   if (o.outlineOnly) {
     ctx.restore();
     return;
   }
-
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
-  for (const l of lines) {
-    ctx.font = `${l.weight} ${l.size}px ${o.mono}`;
-    ctx.letterSpacing = `${l.letterSpacing}px`;
-    const w = ctx.measureText(l.text).width;
-    if (l.fit && w > l.fit) {
-      // 넘치는 이름은 가로로 눌러 담는다 (SVG의 textLength와 같은 효과)
-      ctx.save();
-      ctx.translate(STAMP_C, l.y);
-      ctx.scale(l.fit / w, 1);
-      ctx.fillText(l.text, 0, 0);
-      ctx.restore();
-    } else ctx.fillText(l.text, STAMP_C, l.y);
-  }
-  ctx.letterSpacing = '0px';
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  ctx.moveTo(STAMP_C - rule.half, rule.y);
-  ctx.lineTo(STAMP_C + rule.half, rule.y);
-  ctx.stroke();
 
   // 잉크 결: 종이색 점을 조금 찍어 고무도장처럼 (도시마다 같은 무늬)
   if (!ghost) {

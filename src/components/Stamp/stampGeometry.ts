@@ -88,14 +88,22 @@ export function stampLayout(city: City, date: string | null, shape: StampShape) 
   const { top, gap } = FRAMES[shape];
   const country = (getCountry(city.country)?.name.en ?? city.country).toUpperCase();
   const name = city.name.local.toUpperCase();
-  const line = (y: number, text: string, sizes: number[], weight: number, spacing: number): StampLine => {
-    const f = fitMono(text, sizes, spacing, TEXT_W);
+  const line = (
+    y: number,
+    text: string,
+    sizes: number[],
+    weight: number,
+    spacing: number,
+    maxW = TEXT_W,
+  ): StampLine => {
+    const f = fitMono(text, sizes, spacing, maxW);
     return { y, text, size: f.size, weight, letterSpacing: f.letterSpacing, fit: f.fit };
   };
   const nameLine = line(top + 20 * gap, name, [16, 13, 11, 9], 700, 0.18);
   return {
     lines: [
-      line(top, country, [6.5, 5.5], 500, 0.3),
+      // 육각형은 위쪽이 좁아서 나라 이름 폭을 줄인다
+      line(top, country, [6.5, 5.5], 500, 0.3, shape === 'hex' ? 84 : TEXT_W),
       nameLine,
       line(top + 36 * gap, date ? stampDate(date) : '· · ·', [10], 500, 0.15),
       line(top + 56 * gap, formatLat(city.lat), [7], 500, 0.14),

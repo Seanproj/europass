@@ -35,6 +35,8 @@ export interface StampFx {
   nonce: number;
   cityId: string;
   visit: { id: string; date: string };
+  /** 이 도시의 몇 번째 방문인지 */
+  nth: number;
   /** 재방문이면 그 아래 깔리는 이전 도장 */
   previous?: { id: string; date: string };
 }

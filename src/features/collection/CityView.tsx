@@ -126,6 +126,7 @@ function StampStack({ city, visits }: { city: City; visits: Visit[] }) {
             key={v.id}
             city={city}
             visit={v}
+            nth={visits.length - depth}
             size={132}
             className={styles.layer}
             style={{

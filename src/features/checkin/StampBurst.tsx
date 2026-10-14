@@ -34,14 +34,16 @@ export function StampBurst() {
             exit={{ opacity: 0, transition: { duration: 0.25 } }}
             data-testid="stamp-burst"
           >
-            {fx.previous && <Stamp city={city} visit={fx.previous} size={168} className={styles.under} />}
+            {fx.previous && (
+              <Stamp city={city} visit={fx.previous} nth={fx.nth - 1} size={168} className={styles.under} />
+            )}
             <motion.div
               className={styles.stamp}
               initial={reduce ? { opacity: 0 } : { scale: 1.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={reduce ? { duration: 0.15 } : { type: 'spring', duration: 0.26, bounce: 0.35 }}
             >
-              <Stamp city={city} visit={fx.visit} size={168} />
+              <Stamp city={city} visit={fx.visit} nth={fx.nth} size={168} />
             </motion.div>
           </motion.div>
         )}

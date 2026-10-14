@@ -46,7 +46,7 @@ function Row({ entry: { visit, nth } }: { entry: TimelineEntry }) {
         onClick={() => city && navigate({ kind: 'city', id: city.id })}
         disabled={!city}
       >
-        {city && <Stamp city={city} visit={visit} size={48} decorative className={styles.stamp} />}
+        {city && <Stamp city={city} visit={visit} nth={nth} size={48} decorative className={styles.stamp} />}
         <span className={styles.text}>
           <span className={styles.name}>
             {name}

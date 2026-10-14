@@ -1,15 +1,8 @@
 import { useId, type CSSProperties } from 'react';
 import type { City } from '../../data/types';
 import { koreanDate } from '../../lib/date';
-import {
-  FRAMES,
-  INNER_WIDTH,
-  OUTER_WIDTH,
-  STAMP_C as C,
-  stampLayout,
-  type Outline,
-  type StampLine,
-} from './stampGeometry';
+import { STAMP_C as C, type Outline } from './stampGeometry';
+import { stampOrnament, stampParts, type StampOrnament, type StampPart } from './stampParts';
 import { inkSeed, stampAngle, stampShape, type StampShape } from './stampMath';
 
 interface Props {
@@ -20,18 +13,24 @@ interface Props {
   size?: number;
   /** 모양을 직접 정할 때 (테스트, 미리보기). 기본은 도시 id 해시 */
   shape?: StampShape;
+  /** 테두리 장식을 직접 정할 때. 기본은 도시 id 해시 */
+  ornament?: StampOrnament;
+  /** 이 도시의 몇 번째 방문인지 (2 이상이면 로마 숫자 표식) */
+  nth?: number;
   className?: string;
   style?: CSSProperties;
   /** 옆에 도시 이름이 같이 보이는 목록에서는 장식으로 (스크린리더가 두 번 읽지 않게) */
   decorative?: boolean;
 }
 
-/** 도장 v2: 이중선 테두리 + JetBrains Mono 타이포. 히든젬만 금색 */
+/** 도장 v3: 이중선 테두리 + 장식 + JetBrains Mono 타이포 + 표식. 히든젬만 금색 */
 export function Stamp({
   city,
   visit,
   size = 160,
   shape = stampShape(city.id),
+  ornament,
+  nth,
   className,
   style,
   decorative,
@@ -41,26 +40,14 @@ export function Stamp({
   const color = ghost ? 'var(--text-2)' : city.gem ? 'var(--gold)' : 'var(--accent)';
   const angle = visit ? stampAngle(visit.id) : 0;
   const dash = ghost ? '4 3' : undefined;
-  const { lines, rule } = stampLayout(city, visit?.date ?? null, shape);
-  const { outer, inner } = FRAMES[shape];
-  const text = (l: StampLine) => (
-    <text
-      key={l.y}
-      x={C}
-      y={l.y}
-      textAnchor="middle"
-      fontFamily="var(--mono)"
-      fontSize={l.size}
-      fontWeight={l.weight}
-      letterSpacing={l.letterSpacing}
-      textLength={l.fit}
-      lengthAdjust={l.fit ? 'spacingAndGlyphs' : undefined}
-      fill={color}
-    >
-      {l.text}
-    </text>
-  );
-  const outline = (o: Outline, sw: number) => {
+  const parts = stampParts({
+    city,
+    date: visit?.date ?? null,
+    shape,
+    ornament: ornament ?? stampOrnament(city.id, shape),
+    nth: visit ? nth : undefined,
+  });
+  const outline = (o: Outline, sw: number, key: number) => {
     const line = {
       fill: 'none',
       stroke: color,
@@ -68,10 +55,57 @@ export function Stamp({
       strokeDasharray: dash,
       strokeLinejoin: 'round' as const,
     };
-    if (o.kind === 'circle') return <circle cx={C} cy={C} r={o.r} {...line} />;
-    if (o.kind === 'ellipse') return <ellipse cx={C} cy={C} rx={o.rx} ry={o.ry} {...line} />;
-    if (o.kind === 'rect') return <rect x={o.x} y={o.y} width={o.w} height={o.h} rx={o.r} {...line} />;
-    return <polygon points={o.points.map(([x, y]) => `${x},${y}`).join(' ')} {...line} />;
+    if (o.kind === 'circle') return <circle key={key} cx={C} cy={C} r={o.r} {...line} />;
+    if (o.kind === 'ellipse') return <ellipse key={key} cx={C} cy={C} rx={o.rx} ry={o.ry} {...line} />;
+    if (o.kind === 'rect')
+      return <rect key={key} x={o.x} y={o.y} width={o.w} height={o.h} rx={o.r} {...line} />;
+    return <polygon key={key} points={o.points.map(([x, y]) => `${x},${y}`).join(' ')} {...line} />;
+  };
+  const part = (p: StampPart, i: number) => {
+    switch (p.kind) {
+      case 'outline':
+        return outline(p.outline, p.width, i);
+      case 'text':
+        return (
+          <text
+            key={i}
+            x={p.x}
+            y={p.y}
+            textAnchor="middle"
+            fontFamily="var(--mono)"
+            fontSize={p.size}
+            fontWeight={p.weight}
+            letterSpacing={p.letterSpacing}
+            textLength={p.fit}
+            lengthAdjust={p.fit ? 'spacingAndGlyphs' : undefined}
+            fill={color}
+          >
+            {p.text}
+          </text>
+        );
+      case 'glyph':
+        return (
+          <text
+            key={i}
+            x={p.x}
+            y={p.y}
+            transform={`rotate(${p.rot} ${p.x} ${p.y})`}
+            textAnchor="middle"
+            fontFamily="var(--mono)"
+            fontSize={p.size}
+            fontWeight={p.weight}
+            fill={color}
+          >
+            {p.ch}
+          </text>
+        );
+      case 'line':
+        return <line key={i} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2} stroke={color} strokeWidth={p.width} />;
+      case 'dot':
+        return <circle key={i} cx={p.x} cy={p.y} r={p.r} fill={color} />;
+      case 'star':
+        return <polygon key={i} points={p.points.map(([x, y]) => `${x},${y}`).join(' ')} fill={color} />;
+    }
   };
 
   return (
@@ -88,7 +122,7 @@ export function Stamp({
           ? undefined
           : ghost
             ? `${city.name.ko} 도장 (아직 없음)`
-            : `${city.name.ko} 도장, ${koreanDate(visit.date)}`
+            : `${city.name.ko} 도장, ${koreanDate(visit.date)}${nth && nth >= 2 ? `, ${nth}번째 방문` : ''}`
       }
     >
       {!ghost && (
@@ -117,18 +151,7 @@ export function Stamp({
         filter={ghost ? undefined : `url(#ink-${uid})`}
         opacity={ghost ? 0.55 : 0.94}
       >
-        {outline(outer, OUTER_WIDTH)}
-        {outline(inner, INNER_WIDTH)}
-        {lines.slice(0, 3).map(text)}
-        <line
-          x1={C - rule.half}
-          y1={rule.y}
-          x2={C + rule.half}
-          y2={rule.y}
-          stroke={color}
-          strokeWidth={0.8}
-        />
-        {lines.slice(3).map(text)}
+        {parts.map(part)}
       </g>
     </svg>
   );

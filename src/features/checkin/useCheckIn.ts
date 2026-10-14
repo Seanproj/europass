@@ -40,6 +40,7 @@ export function useCheckIn() {
     ui.playStamp({
       cityId,
       visit: { id: visit.id, date: visit.date },
+      nth,
       previous: previous && { id: previous.id, date: previous.date },
     });
     navigator.vibrate?.(12);

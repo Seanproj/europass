@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUI } from '../../app/store';
 import { getCity, getCountry } from '../../data/cities';
@@ -37,6 +37,15 @@ export function HomeSheet() {
   const checkIn = useCheckIn();
 
   const visits = useLiveQuery(() => db.visits.toArray(), [], EMPTY);
+  // 기록이 하나도 없이 시작하면 시트를 반쯤 열어 첫 도장 안내가 보이게 (시작할 때 한 번만)
+  const total = useLiveQuery(() => db.visits.count(), []);
+  const checkedStart = useRef(false);
+  useEffect(() => {
+    if (total === undefined || checkedStart.current) return;
+    checkedStart.current = true;
+    const ui = useUI.getState();
+    if (total === 0 && ui.route.kind === 'home' && ui.sheetSnap === 'peek') ui.setSheetSnap('half');
+  }, [total]);
   const profile = useLiveQuery(() => db.settings.get('profile'), []);
   const homeId = (profile?.value as Profile | undefined)?.homeCityId;
 
@@ -98,7 +107,7 @@ export function HomeSheet() {
         onPick={pick}
       />
     ) : (
-      <HomeView countries={countries} byCity={byCity} />
+      <HomeView countries={countries} byCity={byCity} homeId={homeId} onSearch={() => setSearchOpen(true)} />
     );
   } else if (route.kind === 'country') {
     const country = getCountry(route.code);

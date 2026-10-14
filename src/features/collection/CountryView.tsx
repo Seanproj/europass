@@ -103,7 +103,7 @@ function CityGrid({ cities, byCity }: { cities: City[]; byCity: Map<string, Visi
               onClick={() => navigate({ kind: 'city', id: c.id })}
               aria-label={`${c.name.ko}${visits ? ` (${visits.length}번 방문)` : ''}`}
             >
-              <Stamp city={c} visit={visits?.[0] ?? null} size={72} decorative />
+              <Stamp city={c} visit={visits?.[0] ?? null} nth={visits?.length} size={72} decorative />
               <span className={styles.cellName}>
                 {c.name.ko}
                 {visits && visits.length > 1 && <b> ×{visits.length}</b>}

@@ -9,18 +9,22 @@ import { profileStats, type ProfileStats } from '../profile/stats';
 export interface StampItem {
   city: City;
   visit: { id: string; date: string };
+  /** 이 도시의 몇 번째 방문인지 (도장의 로마 숫자 표식) */
+  nth?: number;
 }
 
 /** 최근 방문한 도시 n곳의 가장 최근 도장 (같은 도시는 한 번만) */
 export function recentStamps(visits: Visit[], n: number): StampItem[] {
   const out: StampItem[] = [];
   const seen = new Set<string>();
+  const count = new Map<string, number>();
+  for (const v of visits) count.set(v.cityId, (count.get(v.cityId) ?? 0) + 1);
   for (const v of [...visits].sort(byNewest)) {
     if (seen.has(v.cityId)) continue;
     const city = getCity(v.cityId);
     if (!city) continue;
     seen.add(v.cityId);
-    out.push({ city, visit: { id: v.id, date: v.date } });
+    out.push({ city, visit: { id: v.id, date: v.date }, nth: count.get(v.cityId) });
     if (out.length === n) break;
   }
   return out;
