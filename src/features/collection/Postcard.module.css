@@ -1,8 +1,10 @@
-/* 도장 앞면과 엽서 뒷면이 같은 자리를 쓴다 (3:2) */
+/* 도장 앞면과 엽서 뒷면이 같은 자리를 쓴다. 앞면은 도장 높이만큼만 (작은 화면에서 반쯤 펼친 시트에 도시 이름까지 보이게),
+   뒤집으면 엽서 비율(264 × 176)로 늘어난다 */
 .frame {
   position: relative;
-  width: min(280px, 100%);
-  aspect-ratio: 3 / 2;
+  width: min(264px, 100%);
+  height: 148px;
+  transition: height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: block;
   padding: 0;
   border: 0;
@@ -12,6 +14,16 @@
   text-align: left;
   perspective: 900px;
   cursor: pointer;
+}
+
+.frame[aria-pressed='true'] {
+  height: 176px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    transition: none;
+  }
 }
 
 div.frame {
