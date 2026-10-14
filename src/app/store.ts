@@ -11,7 +11,9 @@ export type Route =
   | { kind: 'country'; code: string }
   | { kind: 'city'; id: string }
   /** 전체 화면 프로필 페이지. 아래 시트는 홈 상태로 둔다 */
-  | { kind: 'profile' };
+  | { kind: 'profile' }
+  /** 연말 결산 "My Euro Year" (전체 화면) */
+  | { kind: 'wrap'; year: number };
 export const HOME: Route = { kind: 'home' };
 
 export interface ToastState {

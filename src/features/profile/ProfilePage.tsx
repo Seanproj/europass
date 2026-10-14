@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { motion } from 'motion/react';
-import { ChevronLeft, Pencil } from 'lucide-react';
-import { goBack } from '../../app/nav';
+import { ChevronLeft, ChevronRight, Pencil, Share2, Sparkles } from 'lucide-react';
+import { goBack, navigate } from '../../app/nav';
+import { wrapYearFor } from '../share/cardData';
 import { Flag } from '../../components/Flag/Flag';
 import { getCity } from '../../data/cities';
 import { db } from '../../db/db';
@@ -14,9 +15,24 @@ import styles from './ProfilePage.module.css';
 import { Settings } from './Settings';
 import { profileStats, timelineByMonth } from './stats';
 import { Timeline } from './Timeline';
-import { useProfile } from './profile';
+import { getProfile, useProfile } from './profile';
+import { ShareDialog, type ShareFormat } from '../share/ShareDialog';
+import { makeSummaryCard } from '../share/share';
+import { todayISO } from '../../lib/date';
 
 const EMPTY: Visit[] = [];
+
+const summaryFormat = (id: 'feed' | 'story', label: string, aspect: number): ShareFormat => ({
+  id,
+  label,
+  aspect,
+  fileName: `euro-passport-${id}-${todayISO()}.png`,
+  make: async () => makeSummaryCard(id, await db.visits.toArray(), await getProfile(db)),
+});
+const SUMMARY_FORMATS = [
+  summaryFormat('feed', '피드 4:5', 4 / 5),
+  summaryFormat('story', '스토리 9:16', 9 / 16),
+];
 const fmt = new Intl.NumberFormat('ko-KR');
 
 /** 우상단 프로필 버튼으로 여는 전체 화면 페이지 하나 (탭 없이 위에서 아래로) */
@@ -24,10 +40,13 @@ export function ProfilePage() {
   const visits = useLiveQuery(() => db.visits.toArray(), [], EMPTY);
   const profile = useProfile();
   const [editing, setEditing] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const stats = useMemo(() => profileStats(visits, profile.homeCityId), [visits, profile.homeCityId]);
   const badges = useMemo(() => evaluateBadges(visits), [visits]);
   const months = useMemo(() => timelineByMonth(visits), [visits]);
   const home = getCity(profile.homeCityId);
+  // 연말 결산 배너: 12월 1일 ~ 1월 31일에만
+  const wrapYear = wrapYearFor(todayISO());
 
   // 열리면 제목으로 포커스를 옮겨 스크린리더가 새 화면을 읽게
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -49,6 +68,21 @@ export function ProfilePage() {
           </button>
         </div>
 
+        {wrapYear !== null && (
+          <button
+            type="button"
+            className={styles.wrap}
+            onClick={() => navigate({ kind: 'wrap', year: wrapYear })}
+          >
+            <Sparkles aria-hidden />
+            <span className={styles.wrapText}>
+              <b>My Euro Year {wrapYear}</b>
+              <span>올해의 여행을 다섯 장으로</span>
+            </span>
+            <ChevronRight aria-hidden />
+          </button>
+        )}
+
         <header className={styles.header}>
           <div className={styles.who}>
             <h1 id="profile-name" ref={headingRef} tabIndex={-1} className={styles.name}>
@@ -61,10 +95,16 @@ export function ProfilePage() {
               </p>
             )}
           </div>
-          <button type="button" className={styles.edit} onClick={() => setEditing(true)}>
-            <Pencil aria-hidden />
-            편집
-          </button>
+          <div className={styles.actions}>
+            <button type="button" className={styles.edit} onClick={() => setSharing(true)}>
+              <Share2 aria-hidden />
+              공유
+            </button>
+            <button type="button" className={styles.edit} onClick={() => setEditing(true)}>
+              <Pencil aria-hidden />
+              편집
+            </button>
+          </div>
         </header>
 
         <dl className={styles.numbers}>
@@ -105,6 +145,12 @@ export function ProfilePage() {
         <Settings profile={profile} visitCount={visits.length} onEditProfile={() => setEditing(true)} />
       </div>
       <ProfileEditor open={editing} profile={profile} onClose={() => setEditing(false)} />
+      <ShareDialog
+        open={sharing}
+        title="공유 카드"
+        formats={SUMMARY_FORMATS}
+        onClose={() => setSharing(false)}
+      />
     </motion.main>
   );
 }

@@ -5,9 +5,9 @@ import { CITIES, getCity, getCountry } from '../../data/cities';
 import { db } from '../../db/db';
 import type { Profile } from '../../db/types';
 import { buildIndex, searchCities } from '../checkin/search';
-import { Dialog } from './Dialog';
+import { Dialog } from '../../components/Dialog/Dialog';
 import styles from './ProfileEditor.module.css';
-import ui from './ui.module.css';
+import ui from '../../components/Dialog/ui.module.css';
 import { saveProfile } from './profile';
 
 let index: ReturnType<typeof buildIndex> | undefined;

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { THEME_EVENT } from '../profile/theme';
+import { registerMapSnapshot } from './snapshot';
 import { useLiveQuery } from 'dexie-react-hooks';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import styles from './MapView.module.css';
@@ -85,10 +86,12 @@ export function MapView() {
       ctrlRef.current = ctrl;
       // 개발 서버에서만: 콘솔·Playwright로 카메라를 움직여 확인할 수 있게
       if (import.meta.env.DEV) Object.assign(window, { __map: ctrl.map, __db: db });
+      registerMapSnapshot((req) => ctrl!.snapshot(req));
       setReady(true);
     });
     return () => {
       abort.abort();
+      registerMapSnapshot(null);
       ctrl?.destroy();
       ctrlRef.current = null;
     };
