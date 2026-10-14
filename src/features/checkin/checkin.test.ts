@@ -1,0 +1,55 @@
+// @vitest-environment node
+import 'fake-indexeddb/auto';
+import Dexie from 'dexie';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createDB, type PassportDB } from '../../db/db';
+import { checkIn, undoCheckIn } from './checkin';
+
+let db: PassportDB;
+beforeEach(() => {
+  db = createDB(`checkin-${Math.random()}`);
+});
+afterEach(async () => {
+  db.close();
+  await Dexie.delete(db.name);
+});
+
+describe('원탭 체크인', () => {
+  it('오늘 날짜로 바로 기록한다 (필수 입력 없음)', async () => {
+    const r = await checkIn(db, 'cz-prague', '2026-10-14');
+    expect(r.kind).toBe('added');
+    if (r.kind !== 'added') return;
+    expect(r.nth).toBe(1);
+    expect(r.previous).toBeUndefined();
+    expect(await db.visits.get(r.visit.id)).toMatchObject({
+      cityId: 'cz-prague',
+      date: '2026-10-14',
+      note: '',
+      photos: [],
+    });
+  });
+
+  it('다른 날 다시 가면 새 기록이 쌓이고 몇 번째 방문인지 알려준다', async () => {
+    await checkIn(db, 'cz-prague', '2025-04-30');
+    await checkIn(db, 'cz-prague', '2025-12-20');
+    const r = await checkIn(db, 'cz-prague', '2026-10-14');
+    expect(r.kind === 'added' && r.nth).toBe(3);
+    expect(r.kind === 'added' && r.previous?.date).toBe('2025-12-20');
+    expect(await db.visits.where('cityId').equals('cz-prague').count()).toBe(3);
+  });
+
+  it('같은 날 같은 도시는 중복 대신 기존 기록을 돌려준다', async () => {
+    const first = await checkIn(db, 'cz-prague', '2026-10-14');
+    const again = await checkIn(db, 'cz-prague', '2026-10-14');
+    expect(again.kind).toBe('duplicate');
+    expect(again.visit.id).toBe(first.visit.id);
+    expect(await db.visits.count()).toBe(1);
+  });
+
+  it('되돌리기는 방금 만든 기록만 지운다', async () => {
+    const old = await checkIn(db, 'cz-prague', '2025-04-30');
+    const r = await checkIn(db, 'cz-prague', '2026-10-14');
+    await undoCheckIn(db, r.visit.id);
+    expect((await db.visits.toArray()).map((v) => v.id)).toEqual([old.visit.id]);
+  });
+});

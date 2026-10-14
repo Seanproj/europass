@@ -24,6 +24,8 @@ const SATELLITE_RATIO = 2;
 // 이 인구 이상은 위성도시여도 남긴다
 const SATELLITE_KEEP_POPULATION = 200_000;
 // 도시 구역, 역사적 장소 등 도시가 아닌 지점
+// 히든젬으로 볼 큐레이션 도시의 인구 상한
+const GEM_MAX_POPULATION = 100_000;
 // Wikidata 항목이 도시의 대표 항목이라고 볼 sitelink 수
 const MAIN_ITEM_SITELINKS = 20;
 const EXCLUDED_FEATURE_CODES = new Set(['PPLX', 'PPLH', 'PPLQ', 'PPLW', 'PPLCH']);
@@ -213,6 +215,8 @@ async function main() {
         capital: r.fcode === 'PPLC',
         regionId: '',
         ...(r.geonameid ? { geonameid: Number(r.geonameid) } : {}),
+        // 히든젬: 상징 도시가 아닌 작은 큐레이션 여행지 (금색 도장)
+        ...(n.cand.curated && tier !== 1 && r.population < GEM_MAX_POPULATION ? { gem: true } : {}),
       };
     })
     .sort(

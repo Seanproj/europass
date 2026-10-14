@@ -1,0 +1,60 @@
+.region {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + var(--sp-4));
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--gutter);
+  pointer-events: none;
+}
+
+/* 배경과 글자를 뒤집어 어느 테마에서도 눈에 띄게 */
+.toast {
+  width: 100%;
+  max-width: 420px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--text);
+  color: var(--surface);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  font: 600 var(--fs-body) var(--font);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action {
+  flex: none;
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--toast-accent);
+  font: 700 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.action svg {
+  width: 18px;
+  height: 18px;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--toast-accent);
+}

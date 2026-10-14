@@ -9,7 +9,9 @@
 - `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 3 완료: 안개 지도 · 국기 퍼즐 · 렌즈)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 4 완료: 원탭 체크인 · 도장 v2)
+- 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양은 도시 id 해시, 각도는 방문 id 해시).
+  화면 사이 신호(시트 상태, 선택, 토스트, 도장 연출, 지도 이동)는 `src/app/store.ts` 하나로 주고받는다
 - 도시 id는 `"cz-prague"` 형식. 조회는 `src/data/cities.ts`, 국기는 `src/components/Flag`, 국기 퍼즐 도형은 `src/data/flags.ts`
 - v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
 - 스택: zustand, dexie(+dexie-react-hooks), maplibre-gl(OpenFreeMap, Phase 3), motion, lucide-react,
@@ -29,7 +31,7 @@ npm run lint       # eslint
 npm run typecheck  # tsc --noEmit
 npm test           # vitest
 npm run build      # 프로덕션 빌드 (dist/)
-npx playwright test
+npx playwright test # e2e (npm run e2e). 개발 서버를 띄우고 사전 설치된 Chromium 사용
 ```
 
 ## UX 원칙 (어기지 말 것)

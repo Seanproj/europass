@@ -1,0 +1,35 @@
+/* 지도에서 보이는 위쪽 영역의 가운데 (시트가 반쯤 열려 있으므로) */
+.layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: calc(env(safe-area-inset-top) + 64px);
+  height: 38vh;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.stack {
+  position: relative;
+  width: 168px;
+  height: 168px;
+}
+
+.stamp,
+.under {
+  position: absolute;
+  inset: 0;
+}
+
+/* 아래 깔린 이전 도장은 살짝 흐리게, 조금 비켜서 */
+.under {
+  opacity: 0.3;
+  transform: translate(-14px, 10px);
+}
+
+.stamp svg {
+  display: block;
+  filter: drop-shadow(0 2px 0 var(--surface));
+}

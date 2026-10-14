@@ -1,0 +1,131 @@
+.detail {
+  position: relative;
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.close {
+  position: absolute;
+  top: calc(var(--sp-2) * -1);
+  right: calc(var(--sp-2) * -1);
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.stamps {
+  position: relative;
+  width: 128px;
+  height: 128px;
+}
+
+.top,
+.under {
+  position: absolute;
+  inset: 0;
+}
+
+.under {
+  opacity: 0.2;
+  transform: translate(-14px, 8px);
+}
+
+.under + .under {
+  opacity: 0.32;
+  transform: translate(12px, 5px);
+}
+
+.name {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-display);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.meta {
+  margin: var(--sp-1) 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-body);
+  color: var(--text);
+}
+
+.noteInput {
+  width: 100%;
+  margin-top: var(--sp-3);
+  height: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fw-body) 16px var(--font);
+}
+
+.actions {
+  margin-top: var(--sp-2);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* 조용한 텍스트 버튼 */
+.text {
+  min-height: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: var(--fw-caption) 13px var(--font);
+  cursor: pointer;
+}
+
+.text:focus-visible,
+.close:focus-visible,
+.primary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.primary {
+  margin-top: var(--sp-4);
+  min-height: var(--tap);
+  padding: 0 var(--sp-6);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--surface);
+  font: 700 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
