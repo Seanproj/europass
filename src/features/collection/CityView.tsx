@@ -13,6 +13,7 @@ import { cityNear, distanceKm } from '../checkin/search';
 import { MAX_PHOTOS, type PhotoHints } from './photos';
 import { PhotoViewer, type ViewerPhoto } from './PhotoViewer';
 import { useBlobUrl } from './useBlobUrl';
+import { reportWriteError, warnIfStorageFull } from '../../app/storageWatch';
 import { addPhotos, deleteVisit, NOTE_MAX, normalizeRange, removePhoto, updateVisit } from './visitEdits';
 
 interface Props {
@@ -298,8 +299,15 @@ function VisitEditor({ visit, city, isOnly, onCheckIn, onDone }: EditorProps) {
             e.target.value = '';
             if (!files.length) return;
             setBusy(true);
-            const r = await addPhotos(db, visit, files).finally(() => setBusy(false));
-            setHints(r.hints);
+            try {
+              const r = await addPhotos(db, visit, files);
+              setHints(r.hints);
+              void warnIfStorageFull();
+            } catch (err) {
+              if (!reportWriteError(err, '사진을')) throw err;
+            } finally {
+              setBusy(false);
+            }
           }}
         />
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { THEME_EVENT } from '../profile/theme';
 import { registerMapSnapshot } from './snapshot';
+import { registerTileTemplates } from './prefetch';
 import { useLiveQuery } from 'dexie-react-hooks';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import styles from './MapView.module.css';
@@ -15,9 +16,25 @@ import { MapController, type MapData } from './MapController';
 import { countryProgress, paintedRegions, type FlagCollection } from './puzzle/puzzle';
 import { loadBaseStyle } from './style';
 import { CountryTags, type CountryTagsHandle } from './tags/CountryTags';
+import { CityMarkers, type CityMarkersHandle } from './tags/CityMarkers';
 import { readMapTokens } from './tokens';
 
 const EMPTY: Visit[] = [];
+
+let tileErrorShown = false;
+/** 타일을 못 받을 때 세션에 한 번만 조용히 알린다 */
+function notifyTileError() {
+  if (tileErrorShown) return;
+  tileErrorShown = true;
+  useUI.getState().showToast(
+    {
+      message: navigator.onLine
+        ? '지도 일부를 불러오지 못했어요. 잠시 뒤 다시 시도해요'
+        : '오프라인이에요. 저장해 둔 지역만 자세히 보여요',
+    },
+    { queue: true },
+  );
+}
 
 function supportsWebGL2(): boolean {
   if (typeof WebGL2RenderingContext === 'undefined') return false;
@@ -44,6 +61,7 @@ export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const tagsRef = useRef<CountryTagsHandle>(null);
+  const markersRef = useRef<CityMarkersHandle>(null);
   const ctrlRef = useRef<MapController | null>(null);
   const [data, setData] = useState<MapData | null>(null);
   const [ready, setReady] = useState(false);
@@ -60,6 +78,15 @@ export function MapView() {
     return m;
   }, [visits]);
 
+  const visitedCities = useMemo(
+    () =>
+      [...counts].flatMap(([id, n]) => {
+        const city = getCity(id);
+        return city ? [{ city, visits: n }] : [];
+      }),
+    [counts],
+  );
+
   const progress = useMemo(() => {
     if (!data) return new Map();
     return countryProgress(paintedRegions(counts.keys(), getCity), data.regions);
@@ -73,6 +100,8 @@ export function MapView() {
     void Promise.all([loadMapData(), loadBaseStyle(abort.signal)]).then(([mapData, base]) => {
       if (abort.signal.aborted || !containerRef.current || !overlayRef.current) return;
       setData(mapData);
+      // 기본 지도 스타일을 못 받았으면(오프라인 등) 간단한 지도로 뜬다는 걸 알린다
+      if (!base) notifyTileError();
       ctrl = new MapController({
         container: containerRef.current,
         overlay: overlayRef.current,
@@ -81,17 +110,23 @@ export function MapView() {
         tokens: readMapTokens(),
         onSelect: (s) =>
           navigate(s.kind === 'city' ? { kind: 'city', id: s.id } : { kind: 'country', code: s.code }),
-        onFrame: (f) => tagsRef.current?.update(ctrl!.map, f),
+        onTileError: notifyTileError,
+        onFrame: (f) => {
+          tagsRef.current?.update(ctrl!.map, f);
+          markersRef.current?.update(ctrl!.map);
+        },
       });
       ctrlRef.current = ctrl;
       // 개발 서버에서만: 콘솔·Playwright로 카메라를 움직여 확인할 수 있게
       if (import.meta.env.DEV) Object.assign(window, { __map: ctrl.map, __db: db });
       registerMapSnapshot((req) => ctrl!.snapshot(req));
+      registerTileTemplates(() => ctrl!.tileTemplates());
       setReady(true);
     });
     return () => {
       abort.abort();
       registerMapSnapshot(null);
+      registerTileTemplates(null);
       ctrl?.destroy();
       ctrlRef.current = null;
     };
@@ -144,6 +179,13 @@ export function MapView() {
     <div className={styles.root}>
       <div ref={containerRef} className={styles.map} role="region" aria-label="유럽 지도" />
       <canvas ref={overlayRef} className={styles.overlay} aria-hidden="true" />
+      {data && (
+        <CityMarkers
+          ref={markersRef}
+          cities={visitedCities}
+          onPick={(id) => navigate({ kind: 'city', id })}
+        />
+      )}
       {data && (
         <CountryTags
           ref={tagsRef}

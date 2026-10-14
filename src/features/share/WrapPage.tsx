@@ -90,6 +90,18 @@ export function WrapPage({ year }: { year: number }) {
       <div
         ref={track}
         className={styles.track}
+        // 키보드: 포커스한 뒤 왼쪽·오른쪽 화살표로 넘긴다
+        tabIndex={0}
+        aria-label="결산 장들 (화살표 키로 넘기기)"
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            go(Math.min(index + 1, slides.length - 1));
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            go(Math.max(index - 1, 0));
+          }
+        }}
         onScroll={(e) => {
           const el = e.currentTarget;
           setIndex(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));

@@ -7,10 +7,30 @@
     <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)" />
     <meta name="description" content="독일에서 출발하는 유럽 도시 도장깨기 — 안개 덮인 지도를 여행으로 채워가는 여권" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <title>Euro Passport</title>
+    <style>
+      /* 첫 화면 뼈대: 스크립트가 뜨기 전에 지도 바탕 + 검색 시트를 먼저 그린다 (React가 그리면 사라짐) */
+      .boot { position: fixed; inset: 0; background: var(--fog); }
+      .boot-sheet {
+        position: absolute; left: 0; right: 0; bottom: 0; max-width: 640px; margin: 0 auto;
+        padding: 26px 16px calc(env(safe-area-inset-bottom) + 72px);
+        background: var(--surface); border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+        box-shadow: var(--shadow-sheet);
+      }
+      .boot-search {
+        height: 52px; display: flex; align-items: center; padding: 0 16px; border-radius: var(--r-pill);
+        background: var(--bg); color: var(--text-2);
+        font: 450 15px var(--font);
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot" aria-hidden="true">
+        <div class="boot-sheet"><div class="boot-search">어디 다녀오셨어요?</div></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

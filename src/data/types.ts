@@ -11,11 +11,10 @@ export interface City {
   population: number;
   /** 1 = 상징 도시, 2 = 인구 10만 이상 또는 큐레이션, 3 = 나머지 */
   tier: Tier;
-  capital: boolean;
+  /** 수도만 true (아니면 필드 없음) */
+  capital?: true;
   /** 국기 퍼즐 조각 id (= 조각 대표 도시의 id) */
   regionId: string;
-  /** GeoNames ID. 큐레이션으로 좌표를 직접 넣은 곳은 없음 */
-  geonameid?: number;
   /** 히든젬: 상징 도시가 아닌 작은 큐레이션 여행지. 도장이 금색 */
   gem?: true;
 }

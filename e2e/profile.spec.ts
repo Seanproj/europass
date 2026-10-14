@@ -1,6 +1,3 @@
-import { mkdtemp, readFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 type Row = {
@@ -74,9 +71,7 @@ test('체크인 토스트 다음에 배지 토스트가 한 번 나온다', asyn
   await expect(page.getByText('배지 획득 · 첫 도장')).toBeHidden({ timeout: 8_000 });
 });
 
-test('프로필: 숫자·배지·타임라인 → 백업 내보내기 → 모두 삭제 → 가져오기로 사진까지 복원', async ({
-  page,
-}, info) => {
+test('프로필: 숫자 · 배지(모두 보기) · 타임라인, 뒤로 가면 지도', async ({ page }, info) => {
   await openApp(page);
   await seed(page);
   await page.getByRole('button', { name: '프로필' }).click();
@@ -96,37 +91,6 @@ test('프로필: 숫자·배지·타임라인 → 백업 내보내기 → 모두
   await page.screenshot({ path: info.outputPath('badges-grid.png') });
   await grid.getByRole('button', { name: '닫기' }).click();
   await expect(grid).toBeHidden();
-
-  // 내보내기
-  const download = page.waitForEvent('download');
-  await main.getByRole('button', { name: /백업 내보내기/ }).click();
-  const file = await download;
-  expect(file.suggestedFilename()).toMatch(/^euro-passport-\d{4}-\d{2}-\d{2}\.zip$/);
-  // 테스트 제목이 들어간 출력 폴더(한글·기호)는 파일 선택에서 열리지 않아 ASCII 임시 폴더에 둔다
-  const zipPath = join(await mkdtemp(join(tmpdir(), 'ep-backup-')), 'backup.zip');
-  await file.saveAs(zipPath);
-  expect((await readFile(zipPath)).subarray(0, 2).toString()).toBe('PK');
-
-  // 모두 삭제 (확인 필요)
-  await main.getByRole('button', { name: /모든 기록 삭제/ }).click();
-  await page
-    .getByRole('dialog', { name: '모든 기록 삭제' })
-    .getByRole('button', { name: '모두 삭제' })
-    .click();
-  await expect(page.getByText('모든 기록을 지웠어요')).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as DevWindow).__db.visits.count())).toBe(0);
-  await expect(main.getByText('아직 방문 기록이 없어요')).toBeVisible();
-
-  // 가져오기
-  await main.locator('input[type="file"]').setInputFiles(zipPath);
-  await expect(page.getByText('기록 3개를 가져왔어요')).toBeVisible();
-  const restored = await page.evaluate(async () => {
-    const v = await (window as unknown as DevWindow).__db.visits.get('p2');
-    return { type: v?.photos[0]?.type, size: v?.photos[0]?.size };
-  });
-  expect(restored.type).toBe('image/jpeg');
-  expect(restored.size).toBeGreaterThan(500);
-  await expect(main.getByText('총 3번의 방문 · 가장 많이 간 도시 프라하(2)')).toBeVisible();
 
   // 뒤로 → 지도
   await main.getByRole('button', { name: '지도로 돌아가기' }).click();

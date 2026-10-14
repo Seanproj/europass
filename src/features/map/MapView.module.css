@@ -35,3 +35,15 @@
 .root :global(.maplibregl-ctrl-attrib a) {
   color: var(--text-2);
 }
+
+/* 출처 표기: 사용자가 (i)를 눌러 연 경우에만 펼친 글자를 보인다 (MapController 참고) */
+.map :global(.maplibregl-ctrl-attrib.maplibregl-compact-show:not([data-user-open])) {
+  padding: 0;
+}
+
+.map
+  :global(
+    .maplibregl-ctrl-attrib.maplibregl-compact-show:not([data-user-open]) .maplibregl-ctrl-attrib-inner
+  ) {
+  display: none;
+}

@@ -9,7 +9,7 @@
 - `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 7 완료: 공유 카드 · 연말 결산)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 8 완료: PWA · 오프라인 · 품질)
 - 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양은 도시 id 해시, 각도는 방문 id 해시).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
   시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile, ?wrap=과 브라우저 뒤로가기를 맞춤)
@@ -20,6 +20,11 @@
   그리기 호출을 스냅샷 테스트한다. 실제로 그릴 때는 기록 패스로 쓰인 글꼴·글자를 먼저 불러온다(`share.ts`).
   도장은 `components/Stamp/drawStamp.ts`가 SVG 도장과 같은 도형(`stampGeometry.ts`)을 캔버스에 그린다.
   지도 스냅샷은 `MapController.snapshot()`(render 이벤트 안에서 복사, 카메라는 되돌림). 연말 결산은 `?wrap=YYYY`
+- PWA(`src/sw/sw.ts`, vite-plugin-pwa injectManifest): 앱 셸 precache, 지도 타일 stale-while-revalidate(2000개),
+  한글 글꼴 조각은 쓰일 때 캐시. `/v0/`·`/docs/`는 가로채지 않는다. 아이콘은 `npm run icons`(토큰 색으로 생성).
+  새 버전은 "새로고침" 토스트(`src/app/pwa.ts`). 체크인 후 타일 미리 받기는 설정에서 켜는 옵션(`map/prefetch.ts`)
+- 지도는 첫 화면이 그려진 뒤(idle) 불러온다(`App.tsx`). index.html의 정적 뼈대가 그 전까지 보인다
+- 오류 안내: 저장소를 못 열면 `StorageError` 화면, 용량 90% 넘으면 토스트 + 설정의 저장 공간(`app/storageWatch.ts`), 타일 실패 토스트
 - 백업(`src/db/backup.ts`): zip(backup.json + photos/) 내보내기·가져오기(v0 JSON 호환, 지우지 않고 합침), 모든 기록 삭제(프로필과 v0 이전 표시는 남김)
 - 도시 id는 `"cz-prague"` 형식. 조회는 `src/data/cities.ts`, 국기는 `src/components/Flag`, 국기 퍼즐 도형은 `src/data/flags.ts`
 - v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
@@ -40,8 +45,13 @@ npm run lint       # eslint
 npm run typecheck  # tsc --noEmit
 npm test           # vitest
 npm run build      # 프로덕션 빌드 (dist/)
-npx playwright test # e2e (npm run e2e). 개발 서버를 띄우고 사전 설치된 Chromium 사용
+npx playwright test # e2e (npm run e2e). 개발 서버 + vite preview(PWA)를 띄우고 사전 설치된 Chromium 사용
+npm run analyze    # 번들 구성 dist/stats.html
+npm run icons      # 앱 아이콘 다시 만들기 (tokens.css 색)
 ```
+- e2e: 핵심 5개는 `e2e/core.spec.ts`. 시각 회귀 기준 이미지는 `e2e/__screenshots__/`(갱신: `--update-snapshots`).
+  접근성은 axe(`e2e/a11y.spec.ts`), 서비스 워커·오프라인은 `pwa` 프로젝트(빌드 후 preview)
+- Lighthouse CI(`lighthouserc.cjs`, ci.yml의 lighthouse 잡): 접근성 95+ 필수, 성능 90+는 경고
 
 ## UX 원칙 (어기지 말 것)
 - 화면은 **지도 1개 + 바텀시트 1개 + 프로필 페이지 1개**. 탭바, 필터 칩 여러 개, 모달 남발 금지

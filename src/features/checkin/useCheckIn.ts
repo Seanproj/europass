@@ -6,6 +6,8 @@ import { db } from '../../db/db';
 import { koreanDate } from '../../lib/date';
 import { checkIn, undoCheckIn } from './checkin';
 import { takeNewBadges, unseeBadges } from '../profile/badgeSync';
+import { prefetchCityTiles } from '../map/prefetch';
+import { reportWriteError } from '../../app/storageWatch';
 
 /**
  * 체크인 흐름: 저장 → 시트는 도시 상세 → 지도 이동(첫 방문은 도착 뒤 안개 열림) → 도장 "쾅" + 햅틱 → 되돌리기 토스트.
@@ -15,7 +17,13 @@ export function useCheckIn() {
   return useCallback(async (cityId: string, date?: string) => {
     const city = getCity(cityId);
     if (!city) return;
-    const result = await checkIn(db, cityId, date);
+    let result;
+    try {
+      result = await checkIn(db, cityId, date);
+    } catch (err) {
+      if (reportWriteError(err, '도장을')) return;
+      throw err;
+    }
     const ui = useUI.getState();
 
     if (result.kind === 'duplicate') {
@@ -35,6 +43,8 @@ export function useCheckIn() {
       previous: previous && { id: previous.id, date: previous.date },
     });
     navigator.vibrate?.(12);
+    // 설정을 켰고 와이파이면 이 도시 둘레 지도를 오프라인용으로 받아 둔다
+    void prefetchCityTiles(city.lat, city.lon);
     let badgeIds: string[] = [];
     let undone = false;
     ui.showToast({

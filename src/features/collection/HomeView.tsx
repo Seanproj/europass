@@ -36,6 +36,8 @@ export function HomeView({ countries, byCity }: Props) {
             key={t}
             type="button"
             role="tab"
+            id={`home-tab-${t}`}
+            aria-controls="home-panel"
             aria-selected={tab === t}
             className={styles.seg}
             onClick={() => setTab(t)}
@@ -45,14 +47,16 @@ export function HomeView({ countries, byCity }: Props) {
         ))}
       </div>
 
-      {tab === 'countries' ? <CountryList countries={countries} /> : <CityList byCity={byCity} />}
+      <div role="tabpanel" id="home-panel" aria-labelledby={`home-tab-${tab}`}>
+        {tab === 'countries' ? <CountryList countries={countries} /> : <CityList byCity={byCity} />}
+      </div>
     </section>
   );
 }
 
 function CountryList({ countries }: { countries: CountryProgress[] }) {
   return (
-    <ul className={styles.list} role="tabpanel" aria-label="나라">
+    <ul className={styles.list} aria-label="나라">
       {countries.map((p) => {
         const name = getCountry(p.code)?.name.ko ?? p.code;
         const visited = p.cities > 0;
@@ -100,7 +104,7 @@ function CityList({ byCity }: { byCity: Map<string, Visit[]> }) {
   if (rows.length === 0)
     return <p className={styles.empty}>아직 도장이 없어요. 다녀온 도시를 검색해서 첫 도장을 찍어보세요.</p>;
   return (
-    <ul className={styles.list} role="tabpanel" aria-label="도시">
+    <ul className={styles.list} aria-label="도시">
       {rows.map(({ city, visits }) => (
         <li key={city.id}>
           <button

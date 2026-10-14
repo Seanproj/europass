@@ -55,7 +55,11 @@ export function SearchField({
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') onClose();
+              if (e.key === 'Escape') {
+                // 시트가 같이 접히지 않게
+                e.preventDefault();
+                onClose();
+              }
             }}
           />
         </form>
