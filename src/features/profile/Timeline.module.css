@@ -1,0 +1,108 @@
+.section {
+  margin-top: var(--sp-6);
+  padding: 0 var(--gutter);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: var(--fw-title);
+}
+
+.empty {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-5) var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--bg);
+  color: var(--text-2);
+  text-align: center;
+}
+
+.month {
+  margin-top: var(--sp-4);
+}
+
+.monthTitle {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-caption);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.list li:last-child .row {
+  border-bottom: 0;
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--sp-2);
+}
+
+.stamp {
+  flex: none;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nth {
+  font-weight: var(--fw-body);
+  color: var(--text-2);
+}
+
+.date {
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--sp-2);
+  object-fit: cover;
+  background: var(--bg);
+}

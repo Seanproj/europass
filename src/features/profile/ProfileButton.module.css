@@ -22,3 +22,25 @@
   width: 20px;
   height: 20px;
 }
+
+.button {
+  padding: 0;
+  overflow: hidden;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.initial {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}

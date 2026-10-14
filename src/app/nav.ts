@@ -5,6 +5,7 @@ import { HOME, useUI, type Route } from './store';
 /** URL 쿼리 → 화면. 모르는 나라·도시는 홈으로 */
 export function routeFromSearch(search: string): Route {
   const q = new URLSearchParams(search);
+  if (q.has('profile')) return { kind: 'profile' };
   const city = q.get('city');
   if (city && getCity(city)) return { kind: 'city', id: city };
   const country = q.get('country')?.toUpperCase();
@@ -15,6 +16,7 @@ export function routeFromSearch(search: string): Route {
 export function searchFromRoute(r: Route): string {
   if (r.kind === 'city') return `?city=${encodeURIComponent(r.id)}`;
   if (r.kind === 'country') return `?country=${r.code}`;
+  if (r.kind === 'profile') return '?profile';
   return '';
 }
 
@@ -30,7 +32,7 @@ interface HistoryState {
 const depthNow = () => (history.state as HistoryState | null)?.depth ?? 0;
 const urlFor = (r: Route) => `${location.pathname}${searchFromRoute(r)}${location.hash}`;
 
-/** 시트 화면 이동. 상세로 들어가면 시트를 반쯤 펼친다 */
+/** 시트 화면 이동 (프로필 페이지 포함). 상세로 들어가면 시트를 반쯤 펼친다 */
 export function navigate(route: Route, { replace = false } = {}) {
   const ui = useUI.getState();
   if (sameRoute(route, ui.route)) return;
@@ -50,7 +52,8 @@ function apply(route: Route) {
   useUI.setState({
     route,
     searchOpen: false,
-    sheetSnap: route.kind !== 'home' && ui.sheetSnap === 'peek' ? 'half' : ui.sheetSnap,
+    sheetSnap:
+      (route.kind === 'country' || route.kind === 'city') && ui.sheetSnap === 'peek' ? 'half' : ui.sheetSnap,
   });
 }
 

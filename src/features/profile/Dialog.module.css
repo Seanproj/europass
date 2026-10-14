@@ -1,0 +1,101 @@
+.dialog {
+  width: 100%;
+  max-width: 560px;
+  max-height: min(86dvh, 720px);
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sheet);
+  overflow: hidden;
+}
+
+.dialog[open] {
+  display: flex;
+  animation: rise var(--dur) var(--ease);
+}
+
+.dialog::backdrop {
+  background: var(--scrim);
+}
+
+@media (min-width: 720px) {
+  .dialog {
+    margin: auto;
+    border-radius: var(--r-sheet);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] {
+    animation: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+.panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-2) 0 var(--gutter);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: var(--fw-title);
+}
+
+.close {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.close svg {
+  width: 22px;
+  height: 22px;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--sp-3) var(--gutter) var(--sp-4);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--gutter) calc(env(safe-area-inset-bottom) + var(--sp-3));
+  border-top: 1px solid var(--line);
+}
