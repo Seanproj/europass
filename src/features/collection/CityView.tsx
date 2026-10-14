@@ -7,21 +7,31 @@ import type { City } from '../../data/types';
 import { db } from '../../db/db';
 import { stayNights, totalStayDays } from '../../db/selectors';
 import type { Visit } from '../../db/types';
-import { dateRange, dotMonth, koreanDate, todayISO } from '../../lib/date';
+import { dateRange, dotMonth, koreanDate, stayLabel, todayISO } from '../../lib/date';
 import { cityNear, distanceKm } from '../checkin/search';
 import { MAX_PHOTOS, type PhotoHints } from './photos';
 import { PhotoViewer, type ViewerPhoto } from './PhotoViewer';
 import { useBlobUrl } from './useBlobUrl';
 import { PostcardFlip } from './Postcard';
 import { reportWriteError, warnIfStorageFull } from '../../app/storageWatch';
-import { addPhotos, deleteVisit, NOTE_MAX, normalizeRange, removePhoto, updateVisit } from './visitEdits';
+import {
+  addPhotos,
+  deleteVisit,
+  moveVisitDate,
+  NOTE_MAX,
+  removePhoto,
+  updateVisit,
+  withNights,
+} from './visitEdits';
+import { DateInput } from './DateInput';
+import { StayStepper } from './StayStepper';
 
 interface Props {
   cityId: string;
   /** 이 도시의 방문 (최신순) */
   visits: Visit[];
   homeId: string | undefined;
-  onCheckIn: (cityId: string, date?: string) => void;
+  onCheckIn: (cityId: string, date?: string, endDate?: string) => void;
 }
 
 /** 도시 상세: 도장 스택 + 방문 타임라인 (concept.html 04) */
@@ -123,10 +133,10 @@ interface ItemProps {
   open: boolean;
   onToggle: () => void;
   onPhoto: (index: number) => void;
-  onCheckIn: (cityId: string, date?: string) => void;
+  onCheckIn: (cityId: string, date?: string, endDate?: string) => void;
 }
 
-/** 타임라인 항목: "2번째 · 2025.12.20 – 12.23 · 3박", 메모, 사진 줄. 탭하면 그 자리에서 펼쳐 편집 */
+/** 타임라인 항목: "2번째 · 2025.12.20 – 12.23 · 3박 4일", 메모, 사진 줄. 탭하면 그 자리에서 펼쳐 편집 */
 function TimelineItem({
   visit,
   nth,
@@ -148,7 +158,7 @@ function TimelineItem({
         <span className={styles.itemTitle}>
           <b>{nth === 1 ? '첫 방문' : `${nth}번째`}</b>
           <span>
-            {dateRange(visit.date, visit.endDate)} · {nights === 0 ? '당일' : `${nights}박`}
+            {dateRange(visit.date, visit.endDate)} · {stayLabel(nights)}
           </span>
         </span>
         {label && <span className={styles.label}>{label}</span>}
@@ -183,7 +193,7 @@ interface EditorProps {
   visit: Visit;
   city: City;
   isOnly: boolean;
-  onCheckIn: (cityId: string, date?: string) => void;
+  onCheckIn: (cityId: string, date?: string, endDate?: string) => void;
   onDone: () => void;
 }
 
@@ -203,26 +213,20 @@ function VisitEditor({ visit, city, isOnly, onCheckIn, onDone }: EditorProps) {
       <div className={styles.fields}>
         <label className={styles.field}>
           <span>방문일</span>
-          <input
-            type="date"
+          <DateInput
             value={visit.date}
             max={today}
-            onChange={(e) =>
-              e.target.value && void updateVisit(db, visit.id, normalizeRange(e.target.value, visit.endDate))
-            }
+            onCommit={(d) => void updateVisit(db, visit.id, moveVisitDate(visit, d))}
           />
         </label>
-        <label className={styles.field}>
-          <span>떠난 날</span>
-          <input
-            type="date"
-            value={visit.endDate ?? ''}
-            min={visit.date}
-            onChange={(e) =>
-              void updateVisit(db, visit.id, normalizeRange(visit.date, e.target.value || undefined))
-            }
+        <div className={styles.field}>
+          <span>머문 기간</span>
+          <StayStepper
+            date={visit.date}
+            nights={stayNights(visit)}
+            onChange={(n) => void updateVisit(db, visit.id, withNights(visit.date, n))}
           />
-        </label>
+        </div>
       </div>
       <label className={styles.field}>
         <span>
@@ -289,7 +293,7 @@ function VisitEditor({ visit, city, isOnly, onCheckIn, onDone }: EditorProps) {
           사진은 {koreanDate(hints.date)}에 찍혔어요.
           <button
             type="button"
-            onClick={() => void updateVisit(db, visit.id, normalizeRange(hints.date!, visit.endDate))}
+            onClick={() => void updateVisit(db, visit.id, moveVisitDate(visit, hints.date!))}
           >
             방문일로 바꾸기
           </button>
@@ -370,11 +374,12 @@ function Revisit({
   onCheckIn,
 }: {
   cityId: string;
-  onCheckIn: (cityId: string, date?: string) => void;
+  onCheckIn: (cityId: string, date?: string, endDate?: string) => void;
 }) {
   const [picking, setPicking] = useState(false);
   const today = todayISO();
   const [date, setDate] = useState(today);
+  const [nights, setNights] = useState(0);
   if (!picking)
     return (
       <button type="button" className={styles.revisit} onClick={() => setPicking(true)}>
@@ -388,14 +393,18 @@ function Revisit({
         e.preventDefault();
         if (!date) return;
         setPicking(false);
-        onCheckIn(cityId, date);
+        onCheckIn(cityId, date, withNights(date, nights).endDate);
       }}
     >
       <label className={styles.field}>
         <span>언제 다녀왔나요?</span>
-        <input type="date" value={date} max={today} required onChange={(e) => setDate(e.target.value)} />
+        <DateInput value={date} max={today} required onCommit={setDate} />
       </label>
-      <div>
+      <div className={styles.field}>
+        <span>머문 기간</span>
+        <StayStepper date={date} nights={nights} onChange={setNights} />
+      </div>
+      <div className={styles.revisitActions}>
         <button type="button" onClick={() => setPicking(false)}>
           취소
         </button>

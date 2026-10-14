@@ -4,7 +4,7 @@ import Dexie from 'dexie';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDB, type PassportDB } from '../../db/db';
 import type { Visit } from '../../db/types';
-import { addPhotos, deleteVisit, normalizeRange, removePhoto, updateVisit } from './visitEdits';
+import { addPhotos, deleteVisit, moveVisitDate, removePhoto, updateVisit, withNights } from './visitEdits';
 
 let db: PassportDB;
 const base: Visit = {
@@ -34,10 +34,22 @@ describe('방문 기록 편집', () => {
     expect(v!.updatedAt).toBeGreaterThan(1);
   });
 
-  it('종료일은 시작일 다음 날부터만 남긴다', () => {
-    expect(normalizeRange('2025-12-20', '2025-12-23')).toEqual({ date: '2025-12-20', endDate: '2025-12-23' });
-    expect(normalizeRange('2025-12-20', '2025-12-20')).toEqual({ date: '2025-12-20', endDate: undefined });
-    expect(normalizeRange('2025-12-20', '2025-12-01')).toEqual({ date: '2025-12-20', endDate: undefined });
+  it('머문 기간(박수)으로 떠난 날을 정한다: 1월 15일 + 2박 → 1월 17일', () => {
+    expect(withNights('2014-01-15', 2)).toEqual({ endDate: '2014-01-17' });
+    expect(withNights('2014-01-15', 0)).toEqual({ endDate: undefined });
+    // 달과 해가 바뀌어도
+    expect(withNights('2025-12-30', 3)).toEqual({ endDate: '2026-01-02' });
+  });
+
+  it('방문일을 옮기면 머문 기간은 그대로 두고 떠난 날도 같이 옮긴다', () => {
+    expect(moveVisitDate({ date: '2025-12-20', endDate: '2025-12-23' }, '2014-01-15')).toEqual({
+      date: '2014-01-15',
+      endDate: '2014-01-18',
+    });
+    expect(moveVisitDate({ date: '2025-12-20' }, '2014-01-15')).toEqual({
+      date: '2014-01-15',
+      endDate: undefined,
+    });
   });
 
   it('사진은 방문당 10장까지, 지우기도 된다', async () => {

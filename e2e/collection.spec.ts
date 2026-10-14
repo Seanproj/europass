@@ -47,3 +47,36 @@ test('국가 탭 → 국가 상세 → 체크인 → 다시 방문(과거) → �
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { name: '나의 유럽' })).toBeVisible();
 });
+
+test('날짜: 지난 날짜 + 머문 기간으로 다시 방문 기록, 방문일을 옮기면 기간은 그대로', async ({ page }) => {
+  await page.goto('/?city=de-munich');
+  await page.waitForFunction(() => (window as unknown as DevWindow).__map?.loaded(), null, {
+    timeout: 30_000,
+  });
+  await page.getByRole('button', { name: '여기 다녀왔어요' }).click();
+  await expect(page.getByText('뮌헨 도장 획득')).toBeHidden({ timeout: 10_000 });
+
+  // 2014년 1월 15일 도착, 하루씩 두 번 늘리면 2박 3일 · 1월 17일까지
+  await page.getByRole('button', { name: '다시 방문 기록' }).click();
+  await page.getByLabel('언제 다녀왔나요?').fill('2014-01-15');
+  const stay = page.getByRole('group', { name: '머문 기간' });
+  await expect(stay).toContainText('당일');
+  await stay.getByRole('button', { name: '하루 늘리기' }).click();
+  await stay.getByRole('button', { name: '하루 늘리기' }).click();
+  await expect(stay).toContainText('2박 3일');
+  await expect(stay).toContainText('2014년 1월 17일까지');
+  await page.getByRole('button', { name: '기록', exact: true }).click();
+
+  const items = page.getByRole('list', { name: '방문 기록' }).locator(':scope > li');
+  await expect(items).toHaveCount(2);
+  const old = items.nth(1);
+  await expect(old).toContainText('2014.01.15 – 01.17 · 2박 3일');
+
+  // 펼쳐서 방문일을 2월 10일로 옮기면 떠난 날도 2월 12일로
+  await old.getByRole('button', { name: /첫 방문/ }).click();
+  await old.getByLabel('방문일').fill('2014-02-10');
+  await expect(old).toContainText('2014.02.10 – 02.12 · 2박 3일');
+  // 기간 줄이기
+  await old.getByRole('group', { name: '머문 기간' }).getByRole('button', { name: '하루 줄이기' }).click();
+  await expect(old).toContainText('2014.02.10 – 02.11 · 1박 2일');
+});
