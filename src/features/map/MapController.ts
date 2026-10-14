@@ -68,6 +68,8 @@ interface Options {
   tokens: MapTokens;
   onSelect: (s: MapSelection) => void;
   onFrame: (f: FrameInfo) => void;
+  /** 지도 타일을 받지 못했을 때 (오프라인, 서버 오류) */
+  onTileError?: () => void;
 }
 
 const APPEAR_MS = 400;
@@ -120,15 +122,26 @@ export class MapController {
       localIdeographFontFamily: LOCAL_IDEOGRAPH_FONT,
       attributionControl: { compact: true, customAttribution: opts.base ? undefined : ATTRIBUTION },
     });
-    // 출처 표기는 접힌 (i) 버튼으로 시작 (MapLibre는 처음에 펼쳐 둔다)
-    this.map.once('load', () => {
-      opts.container.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
+    // 출처 표기는 접힌 (i) 버튼으로 시작 (MapLibre는 처음에 펼쳐 둔다). 만들자마자 접어서 펼친 글자가 잠깐도 보이지 않게
+    // MapLibre가 시작할 때 몇 번 다시 펼치므로, 사용자가 (i)를 눌러 연 경우(data-user-open)에만 펼쳐 보이게 한다 (MapView.module.css)
+    const attrib = opts.container.querySelector<HTMLElement>('.maplibregl-ctrl-attrib');
+    const collapse = () => attrib?.classList.remove('maplibregl-compact-show');
+    collapse();
+    this.map.once('load', collapse);
+    attrib?.querySelector('.maplibregl-ctrl-attrib-button')?.addEventListener('click', () => {
+      // MapLibre가 먼저 열고 닫은 뒤에 불린다
+      if (attrib.classList.contains('maplibregl-compact-show')) attrib.dataset.userOpen = 'true';
+      else delete attrib.dataset.userOpen;
     });
     this.map.touchZoomRotate.disableRotation();
     this.map.keyboard.disableRotation();
 
     this.map.on('style.load', () => void this.install());
     this.map.on('render', () => this.frame());
+    // 타일 요청 실패 (MapLibre는 다음에 다시 시도한다). 앱은 안내만 한다
+    this.map.on('error', (e) => {
+      if ((e as { sourceId?: string; tile?: unknown }).tile) opts.onTileError?.();
+    });
     this.map.on('click', (e) => this.handleClick(e.point));
     this.map.on('mousemove', (e) => {
       this.map.getCanvas().style.cursor = this.hitTest(e.point) ? 'pointer' : '';
@@ -274,6 +287,15 @@ export class MapController {
     map.setMaxBounds(maxBounds);
     map.jumpTo(prev);
     return out;
+  }
+
+  /** 지금 스타일의 벡터 타일 주소 틀 (타일 미리 받기용) */
+  tileTemplates(): string[] {
+    const style = this.map.getStyle();
+    return Object.keys(style?.sources ?? {}).flatMap((id) => {
+      const src = this.map.getSource(id) as { type?: string; tiles?: string[] } | undefined;
+      return src?.type === 'vector' && Array.isArray(src.tiles) ? src.tiles : [];
+    });
   }
 
   getProgress(): Map<string, CountryProgress> {

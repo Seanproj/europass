@@ -1,12 +1,53 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 import pkg from './package.json' with { type: 'json' };
+import { lightToken } from './scripts/lib/tokens.ts';
+
+const BG = lightToken('--bg');
 
 export default defineConfig({
   // GitHub Pages 하위 경로(/Euro_Travel/)에서도 동작하도록 상대 경로
   base: './',
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src/sw',
+      filename: 'sw.ts',
+      // 새 버전은 사용자가 "새로고침"을 누를 때 적용 (main.tsx에서 등록)
+      registerType: 'prompt',
+      injectRegister: false,
+      manifest: {
+        name: 'Euro Passport',
+        short_name: 'Euro Passport',
+        description: '독일에서 출발하는 유럽 도시 도장깨기 — 안개 덮인 지도를 여행으로 채워가는 여권',
+        lang: 'ko',
+        start_url: './',
+        scope: './',
+        display: 'standalone',
+        background_color: BG,
+        theme_color: BG,
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+        // Pretendard 한글 조각(약 3MB)은 쓰일 때 캐시. 분석 리포트는 제외
+        globIgnores: ['**/PretendardVariable*.woff2', 'stats.html'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
+    }),
+    // ANALYZE=1 npm run build → dist/stats.html (번들 구성)
+    ...(process.env.ANALYZE
+      ? [visualizer({ filename: 'dist/stats.html', gzipSize: true }) as PluginOption]
+      : []),
+  ],
   // e2e가 실행 중에 쓰는 결과 파일(스크린샷, 백업 zip) 때문에 개발 서버가 페이지를 새로고침하지 않게
   server: { watch: { ignored: ['**/test-results/**', '**/playwright-report/**'] } },
   // 앱 정보 화면의 버전

@@ -6,8 +6,8 @@
   --text: #15171a;
   --text-2: #6b6f76;
   --line: #e6e3dc;
-  --accent: #d8443a;
-  --accent-soft: #d8443a1f;
+  --accent: #c8392f; /* 흰 바탕 작은 글자에서도 대비 4.5:1 이상 (WCAG AA) */
+  --accent-soft: #c8392f1f;
   --gold: #b08328;
   --land: #e9e7e1;
   --map-water: #e3e7e8;

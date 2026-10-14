@@ -57,3 +57,30 @@ jobs:
       - name: Build
         if: steps.detect.outputs.node == 'true'
         run: npm run build
+
+  # Lighthouse (모바일): 빌드 결과를 3번 재서 중간값. 접근성 95+는 실패, 성능 90+는 경고 (lighthouserc.cjs)
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.15.1 autorun
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lhci-report

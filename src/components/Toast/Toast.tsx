@@ -46,7 +46,7 @@ export function Toast() {
             <span className={styles.message}>{toast.message}</span>
             {toast.action && (
               <button type="button" className={styles.action} onClick={toast.action.run}>
-                <Undo2 aria-hidden />
+                {toast.action.icon ? <toast.action.icon aria-hidden /> : <Undo2 aria-hidden />}
                 {toast.action.label}
               </button>
             )}

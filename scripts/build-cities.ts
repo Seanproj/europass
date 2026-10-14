@@ -8,11 +8,15 @@ import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { unzipSync, strFromU8 } from 'fflate';
 import { CACHE_DIR, ROOT, cachedDownload, fetchWithHint, writeJson } from './lib/cache';
+import { slimCity } from './lib/slim';
 import { COUNTRIES, COUNTRY_CODES, REGION_GROUP_KO } from './lib/countries';
 import { readCsv, readList } from './lib/csv';
 import { distanceKm, labelPoint, loadCountryShapes, round } from './lib/geo';
 import { slugify } from './lib/slug';
-import type { City, Country } from '../src/data/types';
+import type { City as AppCity, Country } from '../src/data/types';
+
+/** 스크립트 안의 도시 (출력할 때 slimCity로 줄인다) */
+type City = Omit<AppCity, 'capital'> & { capital: boolean; geonameid?: number };
 
 // 후보 기준 (이름과 id는 후보 전체에 대해 정한다)
 const MIN_POPULATION = 50_000;
@@ -237,7 +241,8 @@ async function main() {
     cityCount: cities.filter((x) => x.country === c.code).length,
   }));
 
-  writeJson(join(OUT, 'cities.json'), cities);
+  // 앱 번들에는 쓰는 필드만 (geonameid 빼고, capital은 참일 때만)
+  writeJson(join(OUT, 'cities.json'), cities.map(slimCity));
   writeJson(join(OUT, 'countries.json'), countries);
 
   // 7. 요약
@@ -453,7 +458,7 @@ function loadWikidataByName(queries: NameQuery[]): Promise<Map<string, WikidataL
 function readPreviousRegionIds(): Map<string, string> {
   const path = join(OUT, 'cities.json');
   if (!existsSync(path)) return new Map();
-  const prev = JSON.parse(readFileSync(path, 'utf8')) as City[];
+  const prev = JSON.parse(readFileSync(path, 'utf8')) as AppCity[];
   return new Map(prev.map((c) => [c.id, c.regionId]));
 }
 

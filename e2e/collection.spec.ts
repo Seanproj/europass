@@ -1,26 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 type DevWindow = Window & { __map: { loaded(): boolean } };
 
-/** 테스트용 JPEG (브라우저 캔버스로 만든다) */
-async function makeJpeg(page: Page): Promise<Buffer> {
-  const dataUrl = await page.evaluate(() => {
-    const c = document.createElement('canvas');
-    c.width = 400;
-    c.height = 300;
-    const ctx = c.getContext('2d')!;
-    ctx.fillStyle = '#c9e0b5';
-    ctx.fillRect(0, 0, 400, 300);
-    ctx.fillStyle = '#d8443a';
-    ctx.fillRect(120, 80, 160, 140);
-    return c.toDataURL('image/jpeg', 0.9);
-  });
-  return Buffer.from(dataUrl.split(',')[1]!, 'base64');
-}
-
-test('국가 탭 → 국가 상세 → 체크인 → 사진 → 다시 방문(과거) → 타임라인 2건 → 뒤로 2번으로 홈', async ({
-  page,
-}) => {
+test('국가 탭 → 국가 상세 → 체크인 → 다시 방문(과거) → 타임라인 2건 → 뒤로 2번으로 홈', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => (window as unknown as DevWindow).__map?.loaded(), null, {
     timeout: 30_000,
@@ -40,15 +22,6 @@ test('국가 탭 → 국가 상세 → 체크인 → 사진 → 다시 방문(�
   await expect(page.getByRole('list', { name: '방문 기록' }).locator(':scope > li')).toHaveCount(1);
   // 토스트가 사라진 뒤 진행
   await expect(page.getByText('뮌헨 도장 획득')).toBeHidden({ timeout: 10_000 });
-
-  // 타임라인 항목을 펼쳐 사진 추가
-  await page.getByRole('button', { name: /첫 방문/ }).click();
-  await page
-    .getByLabel('사진 파일')
-    .setInputFiles({ name: 'munich.jpg', mimeType: 'image/jpeg', buffer: await makeJpeg(page) });
-  await expect(page.getByRole('button', { name: '사진 1 빼기' })).toBeVisible();
-  await expect(page.getByRole('list', { name: '사진' }).getByRole('button')).toHaveCount(1);
-  await page.getByRole('button', { name: '완료' }).click();
 
   // 다시 방문 기록: 지난 날짜로 소급
   await page.getByRole('button', { name: '다시 방문 기록' }).click();

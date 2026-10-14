@@ -44,7 +44,8 @@ export function Badges({ states }: { states: BadgeState[] }) {
           <ChevronRight aria-hidden />
         </button>
       </div>
-      <ul className={styles.row}>
+      {/* 가로로 넘치는 줄은 키보드로도 스크롤할 수 있게 포커스를 받는다 */}
+      <ul className={styles.row} tabIndex={0} aria-label="배지 목록">
         {row.map((s) => (
           <li key={s.badge.id} className={styles.cell}>
             <BadgeIcon state={s} />
@@ -61,7 +62,7 @@ export function Badges({ states }: { states: BadgeState[] }) {
               <span className={styles.name}>{s.badge.name}</span>
               <span className={styles.desc}>{s.badge.desc}</span>
               {!s.earned && (
-                <span className={styles.bar} aria-label={`진행 ${s.value}/${s.badge.goal}`}>
+                <span className={styles.bar} aria-hidden>
                   <span style={{ width: `${(s.value / s.badge.goal) * 100}%` }} />
                 </span>
               )}

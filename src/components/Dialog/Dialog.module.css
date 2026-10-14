@@ -92,6 +92,11 @@
   padding: var(--sp-3) var(--gutter) var(--sp-4);
 }
 
+.body:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .footer {
   display: flex;
   justify-content: flex-end;

@@ -1,14 +1,16 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ChevronRight,
   Database,
   Download,
+  HardDrive,
   House,
   Info,
   Scale,
   SunMoon,
   Trash2,
   Upload,
+  WifiOff,
   UserRound,
 } from 'lucide-react';
 import { useUI } from '../../app/store';
@@ -29,6 +31,8 @@ import { Dialog } from '../../components/Dialog/Dialog';
 import styles from './Settings.module.css';
 import ui from '../../components/Dialog/ui.module.css';
 import { loadTheme, setTheme, type ThemePref } from './theme';
+import { loadPrefetchSetting, savePrefetchSetting } from '../map/prefetch';
+import { estimateStorage, formatBytes, STORAGE_WARN_RATIO, type StorageUsage } from '../../lib/storage';
 
 const THEMES: { value: ThemePref; label: string }[] = [
   { value: 'auto', label: '자동' },
@@ -49,6 +53,17 @@ export function Settings({
   onEditProfile: () => void;
 }) {
   const [theme, setThemeState] = useState(loadTheme);
+  const [prefetch, setPrefetch] = useState(loadPrefetchSetting);
+  const [usage, setUsage] = useState<StorageUsage | null>(null);
+  // 기록 수가 바뀌면(사진 추가·삭제 포함) 다시 잰다
+  useEffect(() => {
+    let alive = true;
+    void estimateStorage().then((u) => alive && setUsage(u));
+    return () => {
+      alive = false;
+    };
+  }, [visitCount]);
+  const full = !!usage && usage.ratio >= STORAGE_WARN_RATIO;
   const [sheet, setSheet] = useState<Sheet>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -134,6 +149,27 @@ export function Settings({
             ))}
           </span>
         </li>
+        <li>
+          <label className={styles.row}>
+            <span className={styles.icon} aria-hidden>
+              <WifiOff />
+            </span>
+            <span className={styles.label}>
+              오프라인 지도 미리 받기
+              <span className={styles.hint}>체크인하면 와이파이에서 그 도시 둘레 지도를 저장</span>
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              className={styles.switch}
+              checked={prefetch}
+              onChange={(e) => {
+                savePrefetchSetting(e.target.checked);
+                setPrefetch(e.target.checked);
+              }}
+            />
+          </label>
+        </li>
       </ul>
 
       <ul className={styles.group}>
@@ -151,6 +187,22 @@ export function Settings({
           onClick={() => fileRef.current?.click()}
           disabled={busy}
         />
+        {usage && (
+          <li className={styles.row} data-danger={full}>
+            <span className={styles.icon} aria-hidden>
+              <HardDrive />
+            </span>
+            <span className={styles.label}>
+              저장 공간
+              <span className={styles.hint}>
+                {full
+                  ? '거의 찼어요. 백업을 내보낸 뒤 사진을 정리해 주세요'
+                  : `기기에서 이 앱이 쓸 수 있는 공간 ${formatBytes(usage.quota)}`}
+              </span>
+            </span>
+            <span className={styles.value}>{formatBytes(usage.usage)} 사용</span>
+          </li>
+        )}
         <Row
           icon={<Trash2 />}
           label="모든 기록 삭제"

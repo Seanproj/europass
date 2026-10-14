@@ -1,0 +1,26 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 평소엔 보이지 않고, 키보드 포커스일 때만 도시 둘레에 고리 */
+.marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  pointer-events: none;
+}
+
+.marker:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 8px var(--accent-soft);
+}

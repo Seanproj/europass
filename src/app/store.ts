@@ -19,7 +19,8 @@ export const HOME: Route = { kind: 'home' };
 export interface ToastState {
   id: number;
   message: string;
-  action?: { label: string; run: () => void };
+  /** 동작 버튼. 아이콘을 안 주면 되돌리기 화살표 */
+  action?: { label: string; run: () => void; icon?: LucideIcon };
   /** 배지 획득 토스트는 아이콘을 앞에 단다 */
   badge?: { icon: LucideIcon };
   /** 함께 거둘 토스트 묶음 (체크인 하나에서 나온 배지 토스트들 = 방문 id) */

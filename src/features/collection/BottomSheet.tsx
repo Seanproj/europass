@@ -19,6 +19,8 @@ const SNAP_LABEL: Record<SheetSnap, string> = { peek: '접힘', half: '반쯤 �
 /**
  * 항상 떠 있는 비모달 바텀시트. 지도와 상단 버튼은 계속 조작할 수 있어야 하므로
  * 대화상자(포커스 트랩, aria-hidden)가 아닌 region으로 만든다.
+ * 다만 끝까지 펼치면 지도를 덮으므로 그동안 App이 뒤쪽을 inert로 막아 포커스가 시트 안에만 머물고,
+ * Esc로 반쯤 접는다
  */
 export function BottomSheet({ label, snap, onSnapChange, header, children }: Props) {
   const viewport = useViewportHeight();
@@ -51,6 +53,13 @@ export function BottomSheet({ label, snap, onSnapChange, header, children }: Pro
       dragConstraints={{ top: 0, bottom: full - heights.peek }}
       dragElastic={0.06}
       dragMomentum={false}
+      onKeyDown={(e) => {
+        // 검색창 등 안쪽에서 먼저 처리한 Esc는 건너뛴다
+        if (e.key === 'Escape' && snap === 'full' && !e.defaultPrevented) {
+          e.preventDefault();
+          onSnapChange('half');
+        }
+      }}
       onDragEnd={(_, info) => {
         const target = nearestSnap(heights, full - y.get(), info.velocity.y);
         if (target === snap) {

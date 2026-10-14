@@ -1,5 +1,3 @@
-import exifr from 'exifr';
-
 /** 방문 한 건에 붙일 수 있는 사진 수 */
 export const MAX_PHOTOS = 10;
 /** 긴 변 최대 길이 */
@@ -34,6 +32,8 @@ export interface PhotoHints {
 /** EXIF에서 촬영일과 GPS를 읽는다 (압축하면 EXIF가 사라지므로 원본에서) */
 export async function readPhotoHints(file: Blob): Promise<PhotoHints> {
   try {
+    // 사진을 넣을 때만 불러온다. lite 빌드(JPEG·HEIC의 EXIF·GPS)로 충분
+    const { default: exifr } = await import('exifr/dist/lite.esm.mjs');
     const data = (await exifr.parse(file, { pick: ['DateTimeOriginal', 'CreateDate'], gps: true })) as
       { DateTimeOriginal?: Date; CreateDate?: Date; latitude?: number; longitude?: number } | undefined;
     if (!data) return {};

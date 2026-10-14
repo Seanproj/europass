@@ -75,6 +75,8 @@ export class FogLayer implements CustomLayerInterface {
   private program?: WebGLProgram;
   private buffer?: WebGLBuffer;
   private texture?: WebGLTexture;
+  /** 지난번에 그린 안개의 조건. 같으면(타일만 새로 온 프레임 등) 다시 그리지도 올리지도 않는다 */
+  private lastKey = '';
 
   constructor(private source: FogSource) {
     const img = new Image();
@@ -117,14 +119,20 @@ export class FogLayer implements CustomLayerInterface {
 
   render(gl: WebGL2RenderingContext) {
     if (!this.map || !this.program) return;
-    this.draw2d();
+    const holes = this.source.holes();
+    const key = this.frameKey(holes);
+    const changed = key !== this.lastKey;
+    if (changed) this.draw2d(holes);
 
     gl.useProgram(this.program);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.texture!);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    if (changed) {
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      this.lastKey = key;
+    }
     gl.uniform1i(gl.getUniformLocation(this.program, 'u_tex'), 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer!);
     const loc = gl.getAttribLocation(this.program, 'a_pos');
@@ -134,7 +142,16 @@ export class FogLayer implements CustomLayerInterface {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 
-  private draw2d() {
+  /** 안개 그림을 바꾸는 것: 카메라, 화면 크기, 색, 구름 텍스처 준비 여부, 구멍 */
+  private frameKey(holes: Hole[]): string {
+    const map = this.map!;
+    const c = map.getCenter();
+    const { clientWidth: w, clientHeight: h } = map.getCanvas();
+    const hs = holes.map((o) => `${o.x.toFixed(1)},${o.y.toFixed(1)},${o.r.toFixed(1)}`).join(';');
+    return `${c.lng},${c.lat},${map.getZoom()},${w},${h},${window.devicePixelRatio},${this.source.fogColor},${this.source.cloudColor},${!!this.clouds},${hs}`;
+  }
+
+  private draw2d(holes: Hole[]) {
     const map = this.map!;
     const { clientWidth: w, clientHeight: h } = map.getCanvas();
     const scale = Math.min(window.devicePixelRatio || 1, MAX_SCALE);
@@ -171,7 +188,7 @@ export class FogLayer implements CustomLayerInterface {
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'destination-out';
     const sprite = holeSprite();
-    for (const { x, y, r } of this.source.holes()) {
+    for (const { x, y, r } of holes) {
       if (r <= 0.5) continue;
       ctx.drawImage(sprite, x - r, y - r, r * 2, r * 2);
     }

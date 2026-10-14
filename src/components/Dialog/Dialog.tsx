@@ -53,7 +53,10 @@ export function Dialog({ open, title, onClose, children, footer }: Props) {
               <X aria-hidden />
             </button>
           </header>
-          <div className={styles.body}>{children}</div>
+          {/* 내용이 길면 이 칸이 스크롤된다. 키보드로도 스크롤할 수 있게 포커스를 받는다 */}
+          <div className={styles.body} tabIndex={0}>
+            {children}
+          </div>
           {footer && <div className={styles.footer}>{footer}</div>}
         </div>
       )}

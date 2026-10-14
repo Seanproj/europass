@@ -63,6 +63,11 @@
   scrollbar-width: none;
 }
 
+.track:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .track::-webkit-scrollbar {
   display: none;
 }
