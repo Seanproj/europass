@@ -11,6 +11,7 @@ import type { Visit } from '../../db/types';
 import { Badges } from './Badges';
 import { Passport } from './Passport';
 import { passport } from './passport';
+import { bookPages } from './passportBook';
 import { evaluateBadges } from './badges';
 import { ProfileEditor } from './ProfileEditor';
 import styles from './ProfilePage.module.css';
@@ -47,6 +48,7 @@ export function ProfilePage() {
   const badges = useMemo(() => evaluateBadges(visits), [visits]);
   const months = useMemo(() => timelineByMonth(visits), [visits]);
   const book = useMemo(() => passport(visits), [visits]);
+  const pages = useMemo(() => bookPages(visits), [visits]);
   const home = getCity(profile.homeCityId);
   // 연말 결산 배너: 12월 1일 ~ 1월 31일에만
   const wrapYear = wrapYearFor(todayISO());
@@ -143,7 +145,7 @@ export function ProfilePage() {
           )}
         </p>
 
-        <Passport data={book} />
+        <Passport data={book} pages={pages} />
         <Badges states={badges} />
         <Timeline months={months} />
         <Settings profile={profile} visitCount={visits.length} onEditProfile={() => setEditing(true)} />
