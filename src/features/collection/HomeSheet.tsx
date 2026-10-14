@@ -1,5 +1,6 @@
 import styles from './HomeSheet.module.css';
 import { useUI } from '../../app/store';
+import { Flag } from '../../components/Flag/Flag';
 import { SearchField } from '../checkin/SearchField';
 import { BottomSheet } from './BottomSheet';
 import type { Stats } from '../../lib/useStats';
@@ -43,7 +44,7 @@ export function HomeSheet({ stats }: Props) {
   );
 }
 
-/** 방문한 나라의 국기 줄 — 실제 국기(<Flag>)는 Phase 2에서 연결, 지금은 국가 코드 자리표시 */
+/** 방문한 나라의 국기 줄 */
 function FlagRow({ codes }: { codes: string[] }) {
   if (codes.length === 0) {
     return <p className={styles.flagHint}>첫 도장을 찍으면 여기에 국기가 모여요</p>;
@@ -54,7 +55,7 @@ function FlagRow({ codes }: { codes: string[] }) {
     <ul className={styles.flags} aria-label="방문한 나라">
       {shown.map((c) => (
         <li key={c} className={styles.flag}>
-          {c}
+          <Flag code={c} size={30} visited />
         </li>
       ))}
       {more > 0 && <li className={styles.more}>+{more}</li>}

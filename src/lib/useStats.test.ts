@@ -14,7 +14,12 @@ const v = (id: string, cityId: string): Visit => ({
 
 describe('computeStats', () => {
   it('재방문은 도시 수에 한 번만 센다', () => {
-    const s = computeStats([v('1', 'prague'), v('2', 'prague'), v('3', 'paris'), v('4', 'munich')]);
+    const s = computeStats([
+      v('1', 'cz-prague'),
+      v('2', 'cz-prague'),
+      v('3', 'fr-paris'),
+      v('4', 'de-munich'),
+    ]);
     expect(s).toMatchObject({ cities: 3, countries: 3, visits: 4 });
     expect(s.countryCodes.sort()).toEqual(['CZ', 'DE', 'FR']);
   });

@@ -1,0 +1,8 @@
+# 국기 퍼즐 대표 도시 조정. action: add(반드시 포함) | remove(제외)
+cityId,action
+gb-edinburgh,add
+gb-bath,remove
+it-florence,add
+it-pisa,remove
+it-venice,add
+it-monterosso-al-mare,remove

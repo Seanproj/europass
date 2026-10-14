@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { totalVisits, uniqueCityCount, uniqueCountryCount } from '../db/selectors';
 import type { Visit } from '../db/types';
-import { countryOfCity } from '../data/legacy-cities';
+import { countryOfCity } from '../data/cities';
 
 const EMPTY: Visit[] = [];
 

@@ -42,8 +42,8 @@ describe('importV0Backup', () => {
   it('v0 백업 JSON 문자열을 가져온다 (잘못된 항목은 건너뜀)', async () => {
     const result = await importV0Backup(db, JSON.stringify(backup));
     expect(result.added).toBe(2);
-    expect(await db.visits.where('cityId').equals('vienna').count()).toBe(2);
-    expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'frankfurt' });
+    expect(await db.visits.where('cityId').equals('at-vienna').count()).toBe(2);
+    expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'de-frankfurt' });
   });
 
   it('두 번 가져와도 중복되지 않는다', async () => {

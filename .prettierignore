@@ -4,3 +4,7 @@ docs
 node_modules
 package-lock.json
 .github/pull_request_template.md
+
+# 스크립트가 생성하는 데이터
+src/data/*.json
+data/.cache
