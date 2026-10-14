@@ -1,0 +1,152 @@
+/* 지도와 시트 위를 덮는 전체 화면 페이지 (토스트·도장 연출보다는 아래) */
+.page {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 96px);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 var(--sp-1);
+}
+
+.back {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.back svg {
+  width: 26px;
+  height: 26px;
+}
+
+.back:focus-visible,
+.edit:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: 0 var(--gutter);
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-display);
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  outline: none;
+}
+
+.home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--sp-1) 0 0;
+  color: var(--text-2);
+}
+
+.edit {
+  flex: none;
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text);
+  font: 600 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.edit svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 숫자 3개만 크게 */
+.numbers {
+  display: grid;
+  /* 거리는 자릿수가 많아 칸을 넓게 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: var(--sp-2);
+  margin: var(--sp-5) 0 0;
+  padding: 0 var(--gutter);
+}
+
+.numbers > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  padding: var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.numbers dt {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-caption);
+  color: var(--text-2);
+}
+
+.numbers dd {
+  margin: 0;
+  /* 360px 폭에서도 다섯 자리 거리가 잘리지 않게 화면 폭에 맞춰 줄인다 */
+  font-size: clamp(22px, 7vw, var(--fs-display));
+  font-weight: var(--fw-display);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.numbers small {
+  margin-left: 2px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text-2);
+}
+
+.summary {
+  margin: var(--sp-3) 0 0;
+  padding: 0 var(--gutter);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}

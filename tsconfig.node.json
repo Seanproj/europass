@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true
   },

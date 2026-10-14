@@ -26,6 +26,23 @@
   pointer-events: auto;
 }
 
+.badge {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-left: calc(var(--sp-1) * -1);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--toast-accent);
+  color: var(--tag-text);
+}
+
+.badge svg {
+  width: 18px;
+  height: 18px;
+}
+
 .message {
   flex: 1;
   min-width: 0;

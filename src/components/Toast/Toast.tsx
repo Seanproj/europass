@@ -6,7 +6,10 @@ import { useUI } from '../../app/store';
 
 const DURATION_MS = 5000;
 
-/** 화면 아래 토스트 한 개 (5초). 체크인의 "되돌리기"처럼 확인 대신 되돌릴 기회를 준다 */
+/**
+ * 화면 아래 토스트 한 개 (5초). 체크인의 "되돌리기"처럼 확인 대신 되돌릴 기회를 준다.
+ * 줄 선 토스트(새 배지)는 지금 것이 사라지면 차례로 나온다
+ */
 export function Toast() {
   const toast = useUI((s) => s.toast);
   const dismiss = useUI((s) => s.dismissToast);
@@ -35,6 +38,11 @@ export function Toast() {
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
           >
+            {toast.badge && (
+              <span className={styles.badge} aria-hidden>
+                <toast.badge.icon />
+              </span>
+            )}
             <span className={styles.message}>{toast.message}</span>
             {toast.action && (
               <button type="button" className={styles.action} onClick={toast.action.run}>

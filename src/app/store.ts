@@ -1,17 +1,27 @@
 import { create } from 'zustand';
+import type { LucideIcon } from 'lucide-react';
 
 /** 바텀시트 단계: peek(검색창 + 국기 줄) → half → full */
 export type SheetSnap = 'peek' | 'half' | 'full';
 export const SHEET_SNAPS: SheetSnap[] = ['peek', 'half', 'full'];
 
 /** 시트 안의 화면: 홈 → 국가 상세 → 도시 상세. URL 쿼리와 브라우저 뒤로가기는 nav.ts가 맞춘다 */
-export type Route = { kind: 'home' } | { kind: 'country'; code: string } | { kind: 'city'; id: string };
+export type Route =
+  | { kind: 'home' }
+  | { kind: 'country'; code: string }
+  | { kind: 'city'; id: string }
+  /** 전체 화면 프로필 페이지. 아래 시트는 홈 상태로 둔다 */
+  | { kind: 'profile' };
 export const HOME: Route = { kind: 'home' };
 
 export interface ToastState {
   id: number;
   message: string;
   action?: { label: string; run: () => void };
+  /** 배지 획득 토스트는 아이콘을 앞에 단다 */
+  badge?: { icon: LucideIcon };
+  /** 함께 거둘 토스트 묶음 (체크인 하나에서 나온 배지 토스트들 = 방문 id) */
+  group?: string;
 }
 
 /** 체크인 순간 화면 가운데에 찍히는 도장 */
@@ -30,7 +40,10 @@ interface UIState {
   searchOpen: boolean;
   setSearchOpen: (open: boolean) => void;
   toast: ToastState | null;
-  showToast: (t: Omit<ToastState, 'id'>) => void;
+  /** 다음 차례를 기다리는 토스트 (배지 토스트는 체크인 토스트 뒤에 줄 선다) */
+  toastQueue: ToastState[];
+  /** 지금 토스트를 바꾼다. queue면 지금 것이 사라진 뒤에 보여 준다 */
+  showToast: (t: Omit<ToastState, 'id'>, opts?: { queue?: boolean }) => void;
   dismissToast: (id?: number) => void;
   stampFx: StampFx | null;
   playStamp: (fx: Omit<StampFx, 'nonce'>) => void;
@@ -48,8 +61,19 @@ export const useUI = create<UIState>((set) => ({
   searchOpen: false,
   setSearchOpen: (searchOpen) => set(searchOpen ? { searchOpen, sheetSnap: 'full' } : { searchOpen }),
   toast: null,
-  showToast: (t) => set({ toast: { ...t, id: ++seq } }),
-  dismissToast: (id) => set((s) => (id === undefined || s.toast?.id === id ? { toast: null } : {})),
+  toastQueue: [],
+  showToast: (t, opts) =>
+    set((s) => {
+      const next = { ...t, id: ++seq };
+      if (opts?.queue && s.toast) return { toastQueue: [...s.toastQueue, next] };
+      return { toast: next };
+    }),
+  dismissToast: (id) =>
+    set((s) => {
+      if (id !== undefined && s.toast?.id !== id) return {};
+      const [head = null, ...rest] = s.toastQueue;
+      return { toast: head, toastQueue: rest };
+    }),
   stampFx: null,
   playStamp: (fx) => set({ stampFx: { ...fx, nonce: ++seq } }),
   clearStamp: (nonce) => set((s) => (s.stampFx?.nonce === nonce ? { stampFx: null } : {})),

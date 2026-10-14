@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { THEME_EVENT } from '../profile/theme';
 import { useLiveQuery } from 'dexie-react-hooks';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import styles from './MapView.module.css';
@@ -121,13 +122,17 @@ export function MapView() {
     if (ready && revealCity && r.kind === 'city' && r.id === revealCity) flyTo(r);
   }, [ready, revealCity]);
 
-  // 라이트/다크 전환
+  // 라이트/다크 전환 (시스템 설정 또는 프로필의 테마 설정)
   useEffect(() => {
     if (!ready) return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = () => ctrlRef.current?.setTokens(readMapTokens());
     mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
+    window.addEventListener(THEME_EVENT, onChange);
+    return () => {
+      mq.removeEventListener('change', onChange);
+      window.removeEventListener(THEME_EVENT, onChange);
+    };
   }, [ready]);
 
   if (!webgl) return <MapPlaceholder />;

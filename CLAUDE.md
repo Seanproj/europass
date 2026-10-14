@@ -9,10 +9,14 @@
 - `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 5 완료: 시트 탐색 · 방문 히스토리)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 6 완료: 프로필 · 배지 · 백업)
 - 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양은 도시 id 해시, 각도는 방문 id 해시).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
-  시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=와 브라우저 뒤로가기를 맞춤)
+  시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile과 브라우저 뒤로가기를 맞춤)
+- 프로필(`src/features/profile/`): 전체 화면 페이지 하나. 배지는 `badges.ts`의 데이터 정의 + `badgeSync.ts`(알림 기록은 settings 'badgesSeen',
+  체크인으로 새로 얻을 때만 토스트, 가져오기·v0 이전으로 얻은 것은 조용히). 토스트는 store의 큐로 체크인 토스트 뒤에 줄 선다.
+  테마는 localStorage + `<html data-theme>`, 바뀌면 `themechange` 이벤트로 지도가 다시 그린다
+- 백업(`src/db/backup.ts`): zip(backup.json + photos/) 내보내기·가져오기(v0 JSON 호환, 지우지 않고 합침), 모든 기록 삭제(프로필과 v0 이전 표시는 남김)
 - 도시 id는 `"cz-prague"` 형식. 조회는 `src/data/cities.ts`, 국기는 `src/components/Flag`, 국기 퍼즐 도형은 `src/data/flags.ts`
 - v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
 - 스택: zustand, dexie(+dexie-react-hooks), maplibre-gl(OpenFreeMap, Phase 3), motion, lucide-react,

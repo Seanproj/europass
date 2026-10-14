@@ -4,6 +4,10 @@
   overflow: hidden;
 }
 
+.layer {
+  display: contents;
+}
+
 .top {
   position: absolute;
   top: calc(env(safe-area-inset-top) + var(--sp-3));

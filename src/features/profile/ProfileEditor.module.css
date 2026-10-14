@@ -1,0 +1,61 @@
+.current {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-2);
+  font-weight: 600;
+}
+
+.hits {
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hit {
+  width: 100%;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2);
+  border: 0;
+  border-radius: var(--sp-3);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hit:hover,
+.hit[aria-pressed='true'] {
+  background: var(--bg);
+}
+
+.hit:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.hit svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+
+.hitName {
+  font-weight: 600;
+}
+
+.hitCountry {
+  flex: 1;
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
