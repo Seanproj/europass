@@ -5,15 +5,17 @@ import { Stamp } from '../../components/Stamp/Stamp';
 import styles from './Passport.module.css';
 import type { Passport as PassportData, PassportTally } from './passport';
 
-/** 처음에 보이는 도장 수 (3줄) */
+/** 처음에 보이는 도장 수 (3줄). 더 보기는 한 번에 PAGE개씩 (도장마다 SVG 필터가 있어 한꺼번에 그리지 않는다) */
 const PREVIEW = 9;
+const PAGE = 30;
 const fmt = new Intl.NumberFormat('ko-KR');
 
 /** 프로필의 "내 여권": 모은 도장 현황 + 도시마다 도장 하나 (첫 방문순) */
 export function Passport({ data }: { data: PassportData }) {
-  const [open, setOpen] = useState(false);
+  const [count, setCount] = useState(PREVIEW);
   const { stamps } = data;
-  const shown = open ? stamps : stamps.slice(0, PREVIEW);
+  const shown = stamps.slice(0, count);
+  const rest = stamps.length - shown.length;
   return (
     <section className={styles.section} aria-labelledby="passport-title">
       <h2 id="passport-title" className={styles.title}>
@@ -42,16 +44,18 @@ export function Passport({ data }: { data: PassportData }) {
               </li>
             ))}
           </ul>
-          {stamps.length > PREVIEW && (
-            <button
-              type="button"
-              className={styles.more}
-              aria-expanded={open}
-              onClick={() => setOpen((o) => !o)}
-            >
-              {open ? '접기' : `모두 보기 (${fmt.format(stamps.length)})`}
-              {open ? <ChevronUp aria-hidden /> : <ChevronDown aria-hidden />}
+          {rest > 0 ? (
+            <button type="button" className={styles.more} onClick={() => setCount((c) => c + PAGE)}>
+              더 보기 ({fmt.format(rest)})
+              <ChevronDown aria-hidden />
             </button>
+          ) : (
+            stamps.length > PREVIEW && (
+              <button type="button" className={styles.more} onClick={() => setCount(PREVIEW)}>
+                접기
+                <ChevronUp aria-hidden />
+              </button>
+            )
           )}
         </>
       )}

@@ -89,7 +89,8 @@ export async function checkInBySearch(page: Page, query: string) {
 /** 시트를 접는다 (기록 없이 시작하면 첫 도장 안내 때문에 반쯤 열려 있다) */
 export async function collapseSheet(page: Page) {
   const handle = page.getByRole('button', { name: /^시트 크기 바꾸기/ });
-  await expect(handle).toBeVisible();
+  // 시작 확인(v0 이전 뒤)이 끝나 반쯤 열린 다음에 접는다
+  await expect(handle).toHaveAttribute('aria-label', /반쯤 펼침/);
   for (let i = 0; i < 3; i++) {
     if ((await handle.getAttribute('aria-label'))?.includes('접힘')) return;
     await handle.click();

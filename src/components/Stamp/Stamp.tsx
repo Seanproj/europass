@@ -1,4 +1,4 @@
-import { useId, type CSSProperties } from 'react';
+import { useId, useMemo, type CSSProperties } from 'react';
 import type { City } from '../../data/types';
 import { koreanDate } from '../../lib/date';
 import { STAMP_C as C, type Outline } from './stampGeometry';
@@ -40,13 +40,14 @@ export function Stamp({
   const color = ghost ? 'var(--text-2)' : city.gem ? 'var(--gold)' : 'var(--accent)';
   const angle = visit ? stampAngle(visit.id) : 0;
   const dash = ghost ? '4 3' : undefined;
-  const parts = stampParts({
-    city,
-    date: visit?.date ?? null,
-    shape,
-    ornament: ornament ?? stampOrnament(city.id, shape),
-    nth: visit ? nth : undefined,
-  });
+  const date = visit?.date ?? null;
+  const shownNth = visit ? nth : undefined;
+  // 톱니·점 띠는 꼭짓점이 많아 다시 그릴 때마다 계산하지 않는다
+  const parts = useMemo(
+    () =>
+      stampParts({ city, date, shape, ornament: ornament ?? stampOrnament(city.id, shape), nth: shownNth }),
+    [city, date, shape, ornament, shownNth],
+  );
   const outline = (o: Outline, sw: number, key: number) => {
     const line = {
       fill: 'none',

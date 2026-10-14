@@ -1,10 +1,21 @@
 import { newId, removeVisits, type PassportDB } from '../../db/db';
 import type { Visit } from '../../db/types';
 import { todayISO } from '../../lib/date';
+import { byNewest, visitRank } from '../../db/selectors';
 
 export type CheckInResult =
-  /** 새 기록. nth = 이 도시의 몇 번째 방문인지 */
-  | { kind: 'added'; visit: Visit; nth: number; previous: Visit | undefined }
+  /**
+   * 새 기록. first = 이 도시의 첫 기록, nth = 날짜순으로 몇 번째 방문인지 (소급 기록이면 첫 기록이 아니어도 1일 수 있다).
+   * previous = 그 아래 깔릴 가장 최근 기록과 그 순번
+   */
+  | {
+      kind: 'added';
+      visit: Visit;
+      first: boolean;
+      nth: number;
+      previous: Visit | undefined;
+      previousNth: number;
+    }
   /** 같은 날 같은 도시는 새로 만들지 않고 기존 기록을 돌려준다 */
   | { kind: 'duplicate'; visit: Visit };
 
@@ -17,8 +28,16 @@ export async function checkIn(db: PassportDB, cityId: string, date = todayISO())
     const now = Date.now();
     const visit: Visit = { id: newId(), cityId, date, note: '', photos: [], createdAt: now, updatedAt: now };
     await db.visits.add(visit);
-    const previous = before.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt)[0];
-    return { kind: 'added', visit, nth: before.length + 1, previous };
+    const all = [...before, visit];
+    const previous = before.sort(byNewest)[0];
+    return {
+      kind: 'added',
+      visit,
+      first: before.length === 0,
+      nth: visitRank(all, visit),
+      previous,
+      previousNth: previous ? visitRank(all, previous) : 0,
+    };
   });
 }
 

@@ -1,5 +1,6 @@
 import { CITIES, getCity } from '../../data/cities';
 import type { City } from '../../data/types';
+import { visitsByCity } from '../../db/selectors';
 import type { Visit } from '../../db/types';
 
 export interface PassportStamp {
@@ -32,18 +33,12 @@ const TOTAL = {
 
 /** 내 여권: 도시마다 도장 하나, 첫 방문순. 모은 수 / 전체 (전체·금색·수도) */
 export function passport(visits: Visit[]): Passport {
-  const byCity = new Map<string, Visit[]>();
-  for (const v of visits) {
-    const list = byCity.get(v.cityId);
-    if (list) list.push(v);
-    else byCity.set(v.cityId, [v]);
-  }
   const stamps: PassportStamp[] = [];
-  for (const [id, list] of byCity) {
+  // 도시별 목록은 최신순
+  for (const [id, list] of visitsByCity(visits)) {
     const city = getCity(id);
     if (!city) continue;
-    const sorted = [...list].sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
-    stamps.push({ city, latest: sorted[sorted.length - 1]!, count: sorted.length, first: sorted[0]!.date });
+    stamps.push({ city, latest: list[0]!, count: list.length, first: list[list.length - 1]!.date });
   }
   stamps.sort((a, b) => a.first.localeCompare(b.first) || a.city.id.localeCompare(b.city.id));
   return {

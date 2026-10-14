@@ -35,7 +35,13 @@ export function StampBurst() {
             data-testid="stamp-burst"
           >
             {fx.previous && (
-              <Stamp city={city} visit={fx.previous} nth={fx.nth - 1} size={168} className={styles.under} />
+              <Stamp
+                city={city}
+                visit={fx.previous}
+                nth={fx.previous.nth}
+                size={168}
+                className={styles.under}
+              />
             )}
             <motion.div
               className={styles.stamp}

@@ -11,7 +11,7 @@
 
 ## 현재 상태
 
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 10 완료: 도장 여권 강화)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (v1.0.0 초안 완성, Phase 0~10. 변경 기록은 CHANGELOG.md)
 - 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트), 도장은 `src/components/Stamp`(모양·장식은 도시 id 해시, 각도는 방문 id 해시,
   수도 별·재방문 로마 숫자 표식은 `nth` prop. 기하는 `stampParts.ts` 하나를 SVG와 캔버스가 같이 그림. 견본은 개발 서버 `/stamps.html`).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.

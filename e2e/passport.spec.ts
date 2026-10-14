@@ -38,7 +38,7 @@ test('내 여권: 모은 수 / 전체, 도시마다 도장 하나(첫 방문순)
     await (window as unknown as DevWindow).__db.visits.bulkPut(rows);
   });
   await expect(cells).toHaveCount(9);
-  await book.getByRole('button', { name: '모두 보기 (11)' }).click();
+  await book.getByRole('button', { name: '더 보기 (2)' }).click();
   await expect(cells).toHaveCount(11);
   await book.getByRole('button', { name: '접기' }).click();
   await expect(cells).toHaveCount(9);

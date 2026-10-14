@@ -1,6 +1,6 @@
 import { CITIES, getCity, getCountry } from '../../data/cities';
 import type { City } from '../../data/types';
-import { byNewest } from '../../db/selectors';
+import { byNewest, visitsByCity, visitRank } from '../../db/selectors';
 import type { Profile, Visit } from '../../db/types';
 import { distanceKm } from '../checkin/search';
 import { piecesOf } from '../collection/progress';
@@ -13,18 +13,20 @@ export interface StampItem {
   nth?: number;
 }
 
-/** 최근 방문한 도시 n곳의 가장 최근 도장 (같은 도시는 한 번만) */
-export function recentStamps(visits: Visit[], n: number): StampItem[] {
+/**
+ * 최근 방문한 도시 n곳의 가장 최근 도장 (같은 도시는 한 번만).
+ * 재방문 순번은 history(기본은 visits) 전체 기준 — 한 해만 고른 목록이어도 도시 상세와 같은 숫자
+ */
+export function recentStamps(visits: Visit[], n: number, history: Visit[] = visits): StampItem[] {
   const out: StampItem[] = [];
   const seen = new Set<string>();
-  const count = new Map<string, number>();
-  for (const v of visits) count.set(v.cityId, (count.get(v.cityId) ?? 0) + 1);
+  const byCity = visitsByCity(history);
   for (const v of [...visits].sort(byNewest)) {
     if (seen.has(v.cityId)) continue;
     const city = getCity(v.cityId);
     if (!city) continue;
     seen.add(v.cityId);
-    out.push({ city, visit: { id: v.id, date: v.date }, nth: count.get(v.cityId) });
+    out.push({ city, visit: { id: v.id, date: v.date }, nth: visitRank(byCity.get(v.cityId) ?? [v], v) });
     if (out.length === n) break;
   }
   return out;
@@ -161,7 +163,7 @@ export function wrapData(all: Visit[], year: number, profile: Profile): WrapData
         name: getCountry(code)?.name.ko ?? code,
         visits: list.length,
         cities,
-        stamps: recentStamps(list, 6),
+        stamps: recentStamps(list, 6, all),
       };
     }
   }

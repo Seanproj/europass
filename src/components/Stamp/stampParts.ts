@@ -1,4 +1,3 @@
-import { getCountry } from '../../data/cities';
 import type { City } from '../../data/types';
 import { formatLat, formatLon } from '../../lib/date';
 import {
@@ -6,11 +5,14 @@ import {
   INNER_WIDTH,
   OUTER_WIDTH,
   STAMP_C as C,
+  STAR_GAP,
+  STAR_R,
+  corners,
   stampLayout,
   type Outline,
   type StampLine,
 } from './stampGeometry';
-import { fitMono, hash32, type StampShape } from './stampMath';
+import { fitMono, hash32, monoWidth, type StampShape } from './stampMath';
 
 /** 테두리 장식 (도시마다 고정): 없음 / 톱니 가장자리 / 점 띠 / 둘레 글자(원 전용) */
 export const STAMP_ORNAMENTS = ['plain', 'teeth', 'dots', 'arc'] as const;
@@ -45,19 +47,6 @@ export type StampPart =
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const pt = (x: number, y: number): [number, number] => [r1(x), r1(y)];
-
-/** 테두리를 다각형 꼭짓점 목록으로 (둥근 모서리는 무시) */
-function corners(o: Outline): [number, number][] | null {
-  if (o.kind === 'poly') return o.points;
-  if (o.kind === 'rect')
-    return [
-      [o.x, o.y],
-      [o.x + o.w, o.y],
-      [o.x + o.w, o.y + o.h],
-      [o.x, o.y + o.h],
-    ];
-  return null;
-}
 
 interface Sample {
   x: number;
@@ -135,7 +124,16 @@ function midline(a: Outline, b: Outline): Outline {
     return { kind: 'ellipse', rx: (a.rx + b.rx) / 2, ry: (a.ry + b.ry) / 2 };
   const pa = corners(a)!;
   const pb = corners(b)!;
-  return { kind: 'poly', points: pa.map(([x, y], i) => pt((x + pb[i]![0]) / 2, (y + pb[i]![1]) / 2)) };
+  // 사각은 모서리가 둥글어서 꼭짓점을 가운데 쪽으로 조금 당겨야 점이 바깥선에 붙지 않는다
+  const pull = a.kind === 'rect' ? 2 : 0;
+  return {
+    kind: 'poly',
+    points: pa.map(([x, y], i) => {
+      const mx = (x + pb[i]![0]) / 2;
+      const my = (y + pb[i]![1]) / 2;
+      return pt(mx + Math.sign(C - mx) * pull, my + Math.sign(C - my) * pull);
+    }),
+  };
 }
 
 /** 5각 별 (바깥 반지름 r) */
@@ -165,10 +163,6 @@ export function roman(n: number): string {
     }
   return out;
 }
-
-/** 고정폭 글자 폭 (stampMath.fitMono와 같은 계산) */
-const monoWidth = (text: string, size: number, spacing: number) =>
-  text.length * (size * 0.6 + size * spacing);
 
 const ARC_R = 57;
 const ARC_MAX = 2.6; // 둘레 글자가 차지할 최대 각도 (라디안)
@@ -246,8 +240,7 @@ export function stampParts({ city, date, shape, ornament: orn, nth }: StampParts
 
   if (ornament === 'arc') {
     // 위 둘레: 나라 / 아래 둘레: 좌표 / 가운데: 도시 · 구분선 · 날짜
-    const country = (getCountry(city.country)?.name.en ?? city.country).toUpperCase();
-    const top = arcText(country, true, [7.5, 6.5, 5.5], 0.3, 500);
+    const top = arcText(countryLine.text, true, [7.5, 6.5, 5.5], 0.3, 500);
     const bottom = arcText(
       `${formatLat(city.lat)} · ${formatLon(city.lon)}`,
       false,
@@ -269,7 +262,8 @@ export function stampParts({ city, date, shape, ornament: orn, nth }: StampParts
     if (city.capital) {
       const w = countryLine.fit ?? monoWidth(countryLine.text, countryLine.size, 0.3);
       const y = countryLine.y - countryLine.size * 0.36;
-      for (const s of [-1, 1]) parts.push({ kind: 'star', points: star(C + s * (w / 2 + 6), y, 2.8) });
+      for (const s of [-1, 1])
+        parts.push({ kind: 'star', points: star(C + s * (w / 2 + STAR_GAP), y, STAR_R) });
     }
   }
 

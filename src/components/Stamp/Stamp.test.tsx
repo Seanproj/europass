@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { Stamp } from './Stamp';
 import { STAMP_SHAPES, fitMono, hash32, stampAngle, stampShape } from './stampMath';
 import { STAMP_ORNAMENTS, roman, stampOrnament, stampParts } from './stampParts';
+import { FRAMES, halfWidthAt } from './stampGeometry';
+import { monoWidth } from './stampMath';
 import { CITIES, getCity } from '../../data/cities';
 
 const prague = getCity('cz-prague')!;
@@ -115,5 +117,35 @@ describe('도장 v3', () => {
   it('고스트 도장의 톱니는 평범한 테두리로', () => {
     const parts = stampParts({ city: prague, date: null, shape: 'circle', ornament: 'teeth' });
     expect(parts[0]).toMatchObject({ kind: 'outline', outline: { kind: 'circle' } });
+  });
+
+  it('모든 도시: 나라 이름과 수도 별이 안쪽 테두리를 넘지 않는다', () => {
+    const over: string[] = [];
+    for (const city of CITIES) {
+      const shape = stampShape(city.id);
+      const inner = FRAMES[shape].inner;
+      const parts = stampParts({ city, date: VISIT.date, shape, ornament: 'plain' });
+      const country = parts.find((p) => p.kind === 'text')!;
+      if (country.kind !== 'text') continue;
+      const half = Math.min(halfWidthAt(inner, country.y), halfWidthAt(inner, country.y - 5));
+      const w = country.fit ?? monoWidth(country.text, country.size, 0.3);
+      if (w / 2 > half - 2) over.push(`${city.id} 글자`);
+      for (const p of parts)
+        if (p.kind === 'star') {
+          const xs = p.points.map(([x]) => Math.abs(x - 80));
+          const ys = p.points.map(([, y]) => y);
+          const lim = Math.min(...ys.map((y) => halfWidthAt(inner, y)));
+          if (Math.max(...xs) > lim - 1) over.push(`${city.id} 별`);
+        }
+    }
+    expect(over).toEqual([]);
+  });
+
+  it('사각 점 띠: 모서리 점이 둥근 바깥선에 붙지 않는다', () => {
+    const parts = stampParts({ city: prague, date: VISIT.date, shape: 'rect', ornament: 'dots' });
+    const dots = parts.flatMap((p) => (p.kind === 'dot' ? [p] : []));
+    // 바깥 사각 (8, 26, 144×108, r 9): 왼쪽 위 모서리 원의 중심 (17, 35)
+    const corner = dots.reduce((a, b) => (a.x + a.y < b.x + b.y ? a : b));
+    expect(Math.hypot(corner.x - 17, corner.y - 35)).toBeLessThan(9 - 1.3 - corner.r - 0.5);
   });
 });
