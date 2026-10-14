@@ -27,6 +27,18 @@ export const ATTRIBUTIONS: Attribution[] = [
     url: 'https://www.naturalearthdata.com/',
   },
   {
+    name: 'OpenFreeMap · OpenMapTiles · OpenStreetMap',
+    usage: '지도 타일과 스타일',
+    license: 'OSM 데이터 ODbL, OpenMapTiles 스키마 BSD/CC-BY',
+    url: 'https://openfreemap.org/',
+  },
+  {
+    name: 'MapLibre GL JS',
+    usage: '지도 렌더링',
+    license: 'BSD-3-Clause',
+    url: 'https://maplibre.org/',
+  },
+  {
     name: 'flag-icons',
     usage: '국기 이미지',
     license: 'MIT',

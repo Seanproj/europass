@@ -11,11 +11,15 @@ export interface Stats {
   countries: number;
   visits: number;
   countryCodes: string[];
+  /** 도시별 방문 횟수 */
+  counts: Map<string, number>;
 }
 
 export function computeStats(visits: Visit[]): Stats {
   const codes = new Set<string>();
+  const counts = new Map<string, number>();
   for (const v of visits) {
+    counts.set(v.cityId, (counts.get(v.cityId) ?? 0) + 1);
     const c = countryOfCity(v.cityId);
     if (c) codes.add(c);
   }
@@ -24,6 +28,7 @@ export function computeStats(visits: Visit[]): Stats {
     countries: uniqueCountryCount(visits, countryOfCity),
     visits: totalVisits(visits),
     countryCodes: [...codes],
+    counts,
   };
 }
 

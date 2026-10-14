@@ -1,0 +1,78 @@
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 터치 영역 44px, 보이는 알약은 안쪽 */
+.tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  cursor: pointer;
+  visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px var(--sp-2) 2px 2px;
+  border-radius: var(--r-pill);
+  font: var(--fw-caption) var(--fs-caption) / 1 var(--font);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+/* 미방문: 흑백 국기 + 이름만 (배경 없음) */
+.tag[data-state='none'] .pill {
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+}
+
+.name {
+  font-size: 11px;
+  text-shadow: 0 0 3px var(--bg);
+}
+
+.tag[data-state='visited'] .pill {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.tag[data-state='complete'] .pill {
+  background: var(--tag-bg);
+  color: var(--tag-text);
+}
+
+.text {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.text b {
+  font-weight: 700;
+}
+
+.root[data-passive='true'] .tag {
+  pointer-events: none;
+}
+
+.tag:focus-visible .pill {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

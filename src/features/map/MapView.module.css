@@ -1,0 +1,37 @@
+.root {
+  position: absolute;
+  inset: 0;
+  background: var(--map-water);
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+/* 렌즈·도시명 태그 (지도 위, 탭은 지도가 받는다) */
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 출처 표기는 진행률 알약 아래 (바닥은 시트가 가린다) */
+.root :global(.maplibregl-ctrl-top-right),
+.root :global(.maplibregl-ctrl-bottom-right) {
+  top: calc(env(safe-area-inset-top) + 72px);
+  bottom: auto;
+  right: calc(env(safe-area-inset-right) + var(--gutter) - 10px);
+}
+
+.root :global(.maplibregl-ctrl-attrib) {
+  background: var(--glass);
+  color: var(--text-2);
+  font: var(--fs-caption) var(--font);
+}
+
+.root :global(.maplibregl-ctrl-attrib a) {
+  color: var(--text-2);
+}

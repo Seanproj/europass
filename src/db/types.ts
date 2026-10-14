@@ -25,3 +25,10 @@ export interface SettingRow<T = unknown> {
   key: SettingKey;
   value: T;
 }
+
+/** 렌즈 스냅샷 캐시. key = lensCacheKey(도시, 테마, 스타일 버전) */
+export interface LensCacheRow {
+  key: string;
+  blob: Blob;
+  createdAt: number;
+}

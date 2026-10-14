@@ -3,6 +3,7 @@ import { useUI } from '../../app/store';
 import { Flag } from '../../components/Flag/Flag';
 import { SearchField } from '../checkin/SearchField';
 import { BottomSheet } from './BottomSheet';
+import { SelectionCard } from './SelectionCard';
 import type { Stats } from '../../lib/useStats';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 export function HomeSheet({ stats }: Props) {
   const snap = useUI((s) => s.sheetSnap);
   const setSnap = useUI((s) => s.setSheetSnap);
+  const selection = useUI((s) => s.selection);
+  const select = useUI((s) => s.select);
 
   return (
     <BottomSheet
@@ -26,6 +29,9 @@ export function HomeSheet({ stats }: Props) {
         </>
       }
     >
+      {selection && (
+        <SelectionCard selection={selection} visits={stats.counts} onClose={() => select(null)} />
+      )}
       <section className={styles.mine}>
         <h2 className={styles.title}>나의 유럽</h2>
         <p className={styles.meta}>

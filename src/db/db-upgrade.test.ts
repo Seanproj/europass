@@ -53,10 +53,33 @@ describe('DB v1 → v2 업그레이드', () => {
     db.close();
   });
 
-  it('새로 만든 DB도 v2로 열린다', async () => {
+  it('새로 만든 DB는 최신 버전(v3)으로 열리고 렌즈 캐시 테이블이 있다', async () => {
     const db = createDB(NAME);
     await db.open();
-    expect(db.verno).toBe(2);
+    expect(db.verno).toBe(3);
+    await db.lensCache.put({ key: 'cz-prague|light|v1', blob: new Blob(['x']), createdAt: 1 });
+    expect(await db.lensCache.count()).toBe(1);
+    db.close();
+  });
+
+  it('v2 → v3 업그레이드에서 방문 기록과 설정이 그대로 남는다', async () => {
+    const v2 = new Dexie(NAME);
+    v2.version(2).stores({ visits: 'id, cityId, date, [cityId+date]', settings: 'key' });
+    await v2.table('visits').put({
+      id: 'a',
+      cityId: 'cz-prague',
+      date: '2026-01-01',
+      note: '메모',
+      photos: [],
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    await v2.table('settings').put({ key: 'profile', value: { name: 'Sean', homeCityId: 'de-frankfurt' } });
+    v2.close();
+    const db = createDB(NAME);
+    expect(await db.visits.get('a')).toMatchObject({ cityId: 'cz-prague', note: '메모' });
+    expect((await db.settings.get('profile'))?.value).toEqual({ name: 'Sean', homeCityId: 'de-frankfurt' });
+    expect(await db.lensCache.count()).toBe(0);
     db.close();
   });
 });
