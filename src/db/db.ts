@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Profile, SettingRow, Visit } from './types';
+import type { LensCacheRow, Profile, SettingRow, Visit } from './types';
 import { mapV0CityId } from './v0-city-map';
 
 export const DB_NAME = 'euro-passport-v1';
@@ -7,6 +7,7 @@ export const DB_NAME = 'euro-passport-v1';
 export type PassportDB = Dexie & {
   visits: EntityTable<Visit, 'id'>;
   settings: EntityTable<SettingRow, 'key'>;
+  lensCache: EntityTable<LensCacheRow, 'key'>;
 };
 
 export function createDB(name = DB_NAME): PassportDB {
@@ -36,6 +37,12 @@ export function createDB(name = DB_NAME): PassportDB {
         await settings.put({ ...profile, value: { ...value, homeCityId: mapV0CityId(value.homeCityId) } });
       }
     });
+  // v3: 렌즈(도시 상세 지도 스냅샷) 캐시 테이블 추가. 사용자 데이터가 아니라 언제 지워도 다시 만들어진다
+  db.version(3).stores({
+    visits: 'id, cityId, date, [cityId+date]',
+    settings: 'key',
+    lensCache: 'key',
+  });
   return db;
 }
 

@@ -3,7 +3,7 @@
 독일에서 출발하는 **유럽 도시 도장깨기** 여행 기록장.
 안개 덮인 유럽 지도에서, 방문한 도시 주변만 상세 지도가 열립니다.
 
-> **현재 상태:** v1을 단계별로 개발 중이에요 (Phase 1 완료: 기술 기반과 화면 골격). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
+> **현재 상태:** v1을 단계별로 개발 중이에요 (Phase 3 완료: 안개 지도). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
 
 ## 문서
 
@@ -61,7 +61,7 @@ v0에 남긴 기록은 v1을 처음 열 때 자동으로 옮겨집니다 (v0 데
 - 도시의 한글·영문·현지 이름: [Wikidata](https://www.wikidata.org/) (CC0)
 - 나라 경계, 국기 퍼즐 조각: [Natural Earth](https://www.naturalearthdata.com/) (public domain), world-atlas / d3 / topojson-client (ISC)
 - 국기 이미지: [flag-icons](https://github.com/lipis/flag-icons) (MIT)
-- 예정: OpenFreeMap · OpenStreetMap 타일 (ODbL)
+- 지도 타일: [OpenFreeMap](https://openfreemap.org/) · © OpenMapTiles · © OpenStreetMap 기여자 (ODbL), 렌더링: MapLibre GL JS (BSD-3-Clause)
 
 앱 정보 화면용 목록은 `src/data/attributions.ts`에 있어요.
 

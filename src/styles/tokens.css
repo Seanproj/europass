@@ -16,6 +16,10 @@
   --glass: rgb(255 255 255 / 0.72);
   --toast-accent: #f0625a;
   --flag-black: #1b1b1b;
+  /* 지도 위 도시명 태그 (라이트·다크 공통) */
+  --tag-bg: rgb(21 23 26 / 0.78);
+  --tag-text: #ffffff;
+  --tag-badge: rgb(255 255 255 / 0.24);
   /* 렌즈 안 상세 지도 전용 */
   --d-bg: #fbf7ef;
   --d-street: #e6dccb;

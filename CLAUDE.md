@@ -9,13 +9,17 @@
 - `docs/design/concept.html` — 시각 시안 / `docs/design/refs/` — 레퍼런스 이미지 (화면 작업의 시각 기준)
 
 ## 현재 상태
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 2 완료: 도시 856곳 · 41개국, 국기 퍼즐 조각)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (Phase 3 완료: 안개 지도 · 국기 퍼즐 · 렌즈)
 - 도시 id는 `"cz-prague"` 형식. 조회는 `src/data/cities.ts`, 국기는 `src/components/Flag`, 국기 퍼즐 도형은 `src/data/flags.ts`
 - v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
 - 스택: zustand, dexie(+dexie-react-hooks), maplibre-gl(OpenFreeMap, Phase 3), motion, lucide-react,
   CSS Modules + `src/styles/tokens.css`, vitest, Playwright
 - 바텀시트는 motion 기반 자체 구현(`src/features/collection/BottomSheet.tsx`). vaul은 Radix Dialog 기반이라
   상시 열린 비모달 시트에서도 포커스를 가두고 나머지 화면을 스크린리더에서 숨겨서 쓰지 않음
+- 지도(`src/features/map/`): 지도 인스턴스는 `MapController` 하나. 안개는 2D 캔버스를 텍스처로 올리는 커스텀 레이어(`fog/`),
+  렌즈·도시명 태그는 지도 위 오버레이 캔버스, 나라 태그만 DOM. 색은 `tokens.ts`가 tokens.css에서 읽는다.
+  개발 서버에서는 `window.__map`, `window.__db`로 카메라와 DB를 조작할 수 있음 (Playwright 확인용)
+- 클라우드 환경의 Allowed domains에 tiles.openfreemap.org를 추가해 둠. 타일 서버에 닿지 않으면 지도는 최소 스타일(배경 + 국기 퍼즐 육지)로 뜬다
 - TypeScript 7은 typescript-eslint가 아직 지원하지 않아 6.0 사용
 
 ## 명령어 (v1, Phase 1 이후)

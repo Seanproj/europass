@@ -1,6 +1,8 @@
 import styles from './MapPlaceholder.module.css';
 
-/** Phase 3에서 MapLibre 안개 지도로 교체될 자리 */
+/** WebGL이 없는 환경(테스트, 오래된 기기)에서 지도 대신 보이는 바탕 */
 export function MapPlaceholder() {
-  return <div className={styles.map} role="img" aria-label="유럽 지도 (준비 중)" />;
+  return (
+    <div className={styles.map} role="img" aria-label="유럽 지도 (이 기기에서는 지도를 그릴 수 없어요)" />
+  );
 }

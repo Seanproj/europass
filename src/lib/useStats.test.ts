@@ -26,5 +26,6 @@ describe('computeStats', () => {
 
   it('기록이 없으면 0', () => {
     expect(computeStats([])).toMatchObject({ cities: 0, countries: 0, visits: 0, countryCodes: [] });
+    expect(computeStats([]).counts.size).toBe(0);
   });
 });
