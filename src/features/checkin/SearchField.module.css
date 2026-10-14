@@ -22,6 +22,42 @@
   cursor: text;
 }
 
+.form {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 0 var(--sp-4);
+  color: var(--text-2);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: var(--fw-body) 16px var(--font);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+/* 브라우저 기본 지우기 버튼은 닫기 버튼과 겹쳐서 숨김 */
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.input::placeholder {
+  color: var(--text-2);
+}
+
+.field:focus-within {
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
 .trigger span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -51,4 +87,8 @@
 .locate svg {
   width: 20px;
   height: 20px;
+}
+
+.close {
+  color: var(--text-2);
 }

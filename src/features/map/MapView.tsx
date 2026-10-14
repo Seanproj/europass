@@ -99,6 +99,12 @@ export function MapView() {
     if (ready) ctrlRef.current?.setHome(homeId);
   }, [ready, homeId]);
 
+  // 체크인·상세에서 고른 도시로 이동 (reveal이면 도착한 뒤 안개 구멍이 열린다)
+  const focus = useUI((s) => s.focus);
+  useEffect(() => {
+    if (ready && focus) ctrlRef.current?.flyToCity(focus.cityId, { reveal: focus.reveal });
+  }, [ready, focus]);
+
   // 라이트/다크 전환
   useEffect(() => {
     if (!ready) return;

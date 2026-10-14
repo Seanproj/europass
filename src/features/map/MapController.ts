@@ -85,6 +85,7 @@ export class MapController {
   private painted = new Set<string>();
   private progress = new Map<string, CountryProgress>();
   private openedAt = new Map<string, number>();
+  private pendingReveal = new Set<string>();
   private initialized = false;
   private featureIdsByRegion = new Map<string, number[]>();
   private lensSources = new Map<string, LensResult>();
@@ -207,9 +208,32 @@ export class MapController {
     );
   }
 
-  flyToCity(id: string) {
+  /**
+   * 도시로 날아간다. reveal이면 도착할 때까지 그 도시의 구멍·렌즈를 닫아 두었다가 도착하면 연다 (체크인 연출)
+   */
+  flyToCity(id: string, { reveal = false } = {}) {
     const c = getCity(id);
-    if (c) this.map.flyTo({ center: [c.lon, c.lat], zoom: Math.max(this.map.getZoom(), 11), duration: 900 });
+    if (!c) return;
+    if (reveal) {
+      this.pendingReveal.add(id);
+      const open = () => {
+        if (!this.pendingReveal.delete(id)) return;
+        this.openedAt.set(id, performance.now());
+        this.map.triggerRepaint();
+      };
+      this.map.once('moveend', open);
+      // 이동이 취소되거나 이벤트가 안 와도 열리게
+      setTimeout(open, 2500);
+    }
+    const h = this.map.getContainer().clientHeight;
+    this.map.flyTo({
+      center: [c.lon, c.lat],
+      zoom: 9,
+      // 아래 절반은 시트가 덮으므로 위쪽 영역 가운데에 오게
+      padding: { top: 60, bottom: Math.round(h * 0.55), left: 0, right: 0 },
+      duration: 1100,
+      essential: true,
+    });
   }
 
   // ── 스타일과 레이어 ──────────────────────────────────
@@ -276,6 +300,7 @@ export class MapController {
   // ── 매 프레임 ───────────────────────────────────────
 
   private openScale(cityId: string, now: number): number {
+    if (this.pendingReveal.has(cityId)) return 0;
     const t0 = this.openedAt.get(cityId);
     if (t0 === undefined) return 1;
     const p = openProgress(now - t0);

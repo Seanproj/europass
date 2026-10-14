@@ -16,6 +16,8 @@ export interface City {
   regionId: string;
   /** GeoNames ID. 큐레이션으로 좌표를 직접 넣은 곳은 없음 */
   geonameid?: number;
+  /** 히든젬: 상징 도시가 아닌 작은 큐레이션 여행지. 도장이 금색 */
+  gem?: true;
 }
 
 export type RegionGroup = 'west' | 'central' | 'east' | 'south' | 'north' | 'british-isles' | 'balkans';

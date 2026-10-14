@@ -10,6 +10,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // e2e는 Playwright로 따로 실행
+    exclude: ['**/node_modules/**', 'e2e/**'],
     css: { modules: { classNameStrategy: 'non-scoped' } },
   },
 });

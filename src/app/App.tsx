@@ -6,6 +6,8 @@ import { ProgressPill } from '../features/collection/ProgressPill';
 import { HomeSheet } from '../features/collection/HomeSheet';
 import { ProfileButton } from '../features/profile/ProfileButton';
 import { useStats } from '../lib/useStats';
+import { Toast } from '../components/Toast/Toast';
+import { StampBurst } from '../features/checkin/StampBurst';
 
 // 지도(MapLibre 약 1MB)는 따로 불러와 시트와 알약이 먼저 뜨게 한다
 const MapView = lazy(() => import('../features/map/MapView').then((m) => ({ default: m.MapView })));
@@ -23,6 +25,8 @@ export function App() {
           <ProfileButton />
         </header>
         <HomeSheet stats={stats} />
+        <StampBurst />
+        <Toast />
       </div>
     </MotionConfig>
   );
