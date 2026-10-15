@@ -52,9 +52,9 @@ RLS 규칙: 로그인한 사람은 **자기 행만** 읽고 쓸 수 있습니다
 
 대시보드 **Authentication → URL Configuration**
 
-- **Site URL**: `https://sean1027lee-hub.github.io/Euro_Travel/`
+- **Site URL**: `https://seanproj.github.io/europass/`
 - **Redirect URLs**에 추가:
-  - `https://sean1027lee-hub.github.io/Euro_Travel/`
+  - `https://seanproj.github.io/europass/`
   - `http://localhost:5173/` (로컬 개발용)
 
 앱은 로그인 후 지금 보고 있는 주소(`origin + pathname`)로 돌아오므로 위 주소가 정확히 등록되어 있어야 합니다.
@@ -72,7 +72,7 @@ RLS 규칙: 로그인한 사람은 **자기 행만** 읽고 쓸 수 있습니다
 2. **APIs & Services → OAuth consent screen**: 외부(External), 앱 이름 `Euro Passport`, 지원 이메일 입력
 3. **APIs & Services → Credentials → Create credentials → OAuth client ID**
    - 유형: **Web application**
-   - **Authorized JavaScript origins**: `https://sean1027lee-hub.github.io`
+   - **Authorized JavaScript origins**: `https://seanproj.github.io`
    - **Authorized redirect URIs**: `https://<프로젝트 ref>.supabase.co/auth/v1/callback`
      (Supabase의 Google provider 화면에 정확한 주소가 표시됩니다)
 4. 만들어진 **Client ID**와 **Client secret**을 Supabase **Authentication → Sign In / Providers → Google**에 넣고 켠다
@@ -95,7 +95,7 @@ RLS 규칙: 로그인한 사람은 **자기 행만** 읽고 쓸 수 있습니다
 1. 휴대폰과 PC에서 사이트를 열고 프로필 → 설정 → **기기 간 동기화**
 2. 같은 계정으로 로그인 → 상태가 "켜짐 · 마지막 동기화 방금"이 되는지
 3. 한쪽에서 체크인 → 다른 쪽에서 "지금 동기화" 또는 앱을 다시 열면 도장이 나타나는지
-4. 공개 주소(handle)를 저장하고 **공개**를 켠 뒤, 로그인하지 않은 브라우저(시크릿 창)에서 `https://sean1027lee-hub.github.io/Euro_Travel/?u=<handle>`
+4. 공개 주소(handle)를 저장하고 **공개**를 켠 뒤, 로그인하지 않은 브라우저(시크릿 창)에서 `https://seanproj.github.io/europass/?u=<handle>`
 
 Supabase 대시보드 **Table Editor → visits**에서 실제로 올라간 행도 볼 수 있습니다.
 

@@ -7,7 +7,7 @@
 > **현재 상태:** v1.0.0 초안 완성 (Phase 0~10). 바뀐 내용은 [CHANGELOG.md](CHANGELOG.md),
 > 기기 간 동기화를 켜는 방법은 [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md). 예전 v0 앱은 `/v0/`에서 계속 쓸 수 있어요.
 
-**사이트:** <https://sean1027lee-hub.github.io/Euro_Travel/> — 휴대폰에서 열고 "홈 화면에 추가"하면 앱처럼 쓸 수 있어요.
+**사이트:** <https://seanproj.github.io/europass/> — 휴대폰에서 열고 "홈 화면에 추가"하면 앱처럼 쓸 수 있어요.
 
 ## 문서
 
