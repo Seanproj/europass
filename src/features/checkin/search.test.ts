@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { CITIES, getCity } from '../../data/cities';
+import { CITIES, COUNTRIES, getCity } from '../../data/cities';
 import { buildIndex, cityNear, distanceKm, nearestCities, normalize, searchCities } from './search';
 
-const index = buildIndex(CITIES);
+const index = buildIndex(CITIES, COUNTRIES);
 const ids = (q: string, n = 3) =>
   searchCities(index, q)
     .slice(0, n)
@@ -33,6 +33,46 @@ describe('도시 검색', () => {
 
   it('완전 일치가 앞선다', () => {
     expect(ids('bath')[0]).toBe('gb-bath');
+  });
+
+  it('나라 이름(한글·영어·별칭)이면 그 나라 도시를 큰 도시부터', () => {
+    for (const q of ['독일', 'germany', 'Deutschland']) {
+      const hits = searchCities(index, q, 60);
+      expect(hits.length, q).toBeGreaterThan(10);
+      expect(
+        hits.every((h) => h.city.country === 'DE'),
+        q,
+      ).toBe(true);
+      expect(hits[0]!.city.tier, q).toBe(1);
+      expect(hits[0]!.country, q).toBe('DE');
+    }
+    // 초성도: 이름이 맞는 도시 뒤에 독일 도시들
+    expect(searchCities(index, 'ㄷㅇ', 60).some((h) => h.country === 'DE')).toBe(true);
+    expect(ids('스페인')[0]).toBe('es-madrid');
+    // 영문 3자 미만은 나라로 보지 않는다 ("uk"는 Banja L-uk-a 같은 도시 이름 일치만)
+    expect(searchCities(index, 'uk', 60).some((h) => h.country)).toBe(false);
+    expect(searchCities(index, 'england', 60).every((h) => h.city.country === 'GB')).toBe(true);
+    expect(searchCities(index, 'czech', 60)[0]!.city.id).toBe('cz-prague');
+  });
+
+  it('도시 이름 일치가 나라 도시보다 먼저 (룩셈부르크 → 도시 룩셈부르크, 그다음 나머지)', () => {
+    const hits = searchCities(index, '룩셈부르크', 60);
+    expect(hits[0]).toMatchObject({ city: { id: 'lu-luxembourg' } });
+    expect(hits[0]!.country).toBeUndefined();
+    expect(hits.slice(1).every((h) => h.country === 'LU')).toBe(true);
+    expect(new Set(hits.map((h) => h.city.id)).size).toBe(hits.length);
+  });
+
+  it('한 글자나 일부만 맞는 나라 이름으로는 도시를 쏟아내지 않는다', () => {
+    expect(searchCities(index, '독', 60).some((h) => h.country)).toBe(false);
+    expect(searchCities(index, 'many', 60).some((h) => h.country)).toBe(false);
+  });
+
+  it('한/영 전환을 잊고 쳐도 찾는다', () => {
+    expect(ids('vkfl')[0]).toBe('fr-paris'); // 파리
+    expect(ids('vmfkgk')[0]).toBe('cz-prague'); // 프라하
+    expect(ids('ㅔㄱㅁㅎㅕㄷ')[0]).toBe('cz-prague'); // prague
+    expect(ids('dlxkfldk')).toEqual([]); // "이타리아"는 오타라 결과 없음
   });
 
   it('빈 검색어는 결과 없음', () => {
