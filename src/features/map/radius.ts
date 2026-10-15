@@ -25,10 +25,32 @@ export function lensRadius(tier: Tier, visits: number): number {
   return Math.min(LENS_MAX_RADIUS, LENS_RADIUS[tier] * revisitFactor(visits));
 }
 
-/** 안개 구멍 반경(px) = max(실제 반경을 화면 px로, 렌즈 최소 반경) */
+// ── 줌 단계 ──────────────────────────────────────────
+// 유럽 전체(z<5): 도시마다 작은 도장 배지 · 나라 크기(z5~7): 실제 거리만큼의 렌즈 · 도시 크기(z8~): 실제 안개 구멍
+// (렌즈를 화면 px로 고정하면 줌아웃할 때 서로 겹쳐 관계없는 도시 지도 조각이 이어 붙은 것처럼 보였다)
+
+/** 도장 배지 한 변(px) */
+export const STAMP_SIZE = 36;
+
+/** 도장 배지 → 렌즈로 바뀌는 비율: z5 이하 0(도장만), z6 이상 1(렌즈만) */
+export function lensMix(zoom: number): number {
+  return Math.min(Math.max(zoom - 5, 0), 1);
+}
+
+/** 렌즈가 보여 주는 실제 반경(km). 안개 구멍보다 조금 넓게 */
+const LENS_KM: Record<Tier, number> = { 1: 30, 2: 22, 3: 16 };
+
+/** 줌에 따른 렌즈 반지름(px): 실제 거리만큼, 도장 배지 크기 이상 · 기본 렌즈 크기 이하 */
+export function lensRadiusAt(tier: Tier, visits: number, lat: number, zoom: number): number {
+  const real = (LENS_KM[tier] * 1000 * revisitFactor(visits)) / metersPerPixel(lat, zoom);
+  return Math.min(lensRadius(tier, visits), Math.max(STAMP_SIZE / 2, real));
+}
+
+/** 안개 구멍 반경(px) = max(실제 반경을 화면 px로, 지금 보이는 도장·렌즈 크기) */
 export function holeRadiusPx(tier: Tier, visits: number, lat: number, zoom: number): number {
   const realPx = (HOLE_KM[tier] * 1000 * revisitFactor(visits)) / metersPerPixel(lat, zoom);
-  return Math.max(realPx, lensRadius(tier, visits));
+  const shown = zoom < 5 ? STAMP_SIZE * 0.45 : lensRadiusAt(tier, visits, lat, zoom);
+  return Math.max(realPx, shown);
 }
 
 /** 새 방문 구멍이 0 → 목표 반경으로 열리는 진행도 (700ms ease-out) */

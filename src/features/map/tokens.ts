@@ -12,6 +12,8 @@ export interface MapTokens {
   line: string;
   surface: string;
   accent: string;
+  /** 히든젬 도장 잉크 */
+  gold: string;
   flagBlack: string;
   tagBg: string;
   tagText: string;
@@ -23,6 +25,8 @@ export interface MapTokens {
   dPark: string;
   dRoof: string;
   font: string;
+  /** 도장 글자 */
+  mono: string;
 }
 
 const VARS: Record<Exclude<keyof MapTokens, 'theme'>, string> = {
@@ -35,6 +39,7 @@ const VARS: Record<Exclude<keyof MapTokens, 'theme'>, string> = {
   line: '--line',
   surface: '--surface',
   accent: '--accent',
+  gold: '--gold',
   flagBlack: '--flag-black',
   tagBg: '--tag-bg',
   tagText: '--tag-text',
@@ -46,6 +51,7 @@ const VARS: Record<Exclude<keyof MapTokens, 'theme'>, string> = {
   dPark: '--d-park',
   dRoof: '--d-roof',
   font: '--font',
+  mono: '--mono',
 };
 
 export function currentTheme(): MapTheme {

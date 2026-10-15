@@ -142,6 +142,20 @@ export function MapView() {
     if (ready) ctrlRef.current?.setVisits(counts);
   }, [ready, counts]);
 
+  // 유럽 전체 줌의 도장 배지: 도시마다 가장 최근 방문
+  const stamps = useMemo(() => {
+    const m = new Map<string, { id: string; date: string; nth: number }>();
+    for (const v of visits) {
+      const prev = m.get(v.cityId);
+      const nth = (prev?.nth ?? 0) + 1;
+      m.set(v.cityId, !prev || v.date >= prev.date ? { id: v.id, date: v.date, nth } : { ...prev, nth });
+    }
+    return m;
+  }, [visits]);
+  useEffect(() => {
+    if (ready) ctrlRef.current?.setStamps(stamps);
+  }, [ready, stamps]);
+
   // 그날 처음 열면 다녀온 곳의 안개가 처음 간 순서대로 톡톡 열린다. 어디든 누르면 건너뛴다
   const replay = useUI((s) => s.replay);
   useEffect(() => {
