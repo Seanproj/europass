@@ -16,11 +16,15 @@ export function Toast() {
 
   // 손가락·마우스·포커스가 토스트에 있는 동안은 시간을 멈춘다 (되돌리기를 누르려는 중에 사라지지 않게)
   const [held, setHeld] = useState(false);
+  // 도장 "쾅"과 기념 연출이 화면에 있는 동안도 멈춘다 (연출을 보고 나서도 되돌릴 시간이 남게)
+  const busy = useUI((s) => !!s.stampFx || !!s.pendingCelebration);
+  const id = toast?.id;
+  const paused = !toast || toast.paused || held || busy;
   useEffect(() => {
-    if (!toast || held) return;
-    const t = setTimeout(() => dismiss(toast.id), DURATION_MS);
+    if (id === undefined || paused) return;
+    const t = setTimeout(() => dismiss(id), DURATION_MS);
     return () => clearTimeout(t);
-  }, [toast, dismiss, held]);
+  }, [id, paused, dismiss]);
 
   return (
     <div className={styles.region} role="status" aria-live="polite">
