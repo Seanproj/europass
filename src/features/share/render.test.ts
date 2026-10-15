@@ -182,9 +182,7 @@ describe('연말 결산', () => {
   });
 
   it('장마다 읽어 줄 글', () => {
-    expect(wrapAlt('numbers', d)).toBe(
-      '2026년의 여행: 도시 8곳, 나라 5개, 방문 9번, ' + `${d.km.toLocaleString('ko-KR')}km 이동`,
-    );
+    expect(wrapAlt('numbers', d)).toBe(`2026년의 여행: 도시 8곳, 나라 5개, 방문 9번, 유럽에서 ${d.days}일`);
     expect(wrapAlt('farthest', d)).toMatch(/^가장 먼 곳: 트롬쇠, 프랑크푸르트에서 [\d,]+km$/);
     expect(wrapAlt('country', d)).toBe('가장 많이 간 나라: 룩셈부르크, 3번 방문, 도시 3곳');
     expect(wrapAlt('months', d)).toContain('7월 3번');

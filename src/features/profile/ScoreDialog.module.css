@@ -1,0 +1,81 @@
+.lead {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--text-2);
+  word-break: keep-all;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.table thead th {
+  padding: 0 0 var(--sp-2);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-caption);
+  color: var(--text-2);
+  text-align: left;
+}
+
+.table thead th:last-child,
+.sub,
+.total {
+  text-align: right;
+}
+
+.table tbody th,
+.table tbody td {
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  font-weight: 500;
+}
+
+.table tbody td.sub {
+  text-align: right;
+  font-weight: 650;
+}
+
+.calc {
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.zero {
+  opacity: 0.55;
+}
+
+.table tfoot th,
+.table tfoot td {
+  padding: var(--sp-3) 0 0;
+  border-top: 2px solid var(--text);
+  font-weight: 700;
+  text-align: left;
+}
+
+.table tfoot td.total {
+  font-size: var(--fs-title);
+  color: var(--accent);
+  text-align: right;
+}
+
+.notes {
+  margin: var(--sp-4) 0 0;
+  padding: 0 0 0 var(--sp-4);
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+  line-height: 1.6;
+  word-break: keep-all;
+}

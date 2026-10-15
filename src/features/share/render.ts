@@ -164,9 +164,9 @@ function panel(ctx: Ctx, t: CardTheme, y: number, w: number, h: number) {
 
 function summaryNumbers(d: SummaryCardData): [string, string][] {
   return [
-    [num.format(d.stats.cities), '도시'],
-    [num.format(d.stats.countries), '나라'],
-    [num.format(d.stats.km), '이동거리 km'],
+    [num.format(d.stats.score), '여권 점수'],
+    [num.format(d.stats.days), '유럽에서 보낸 날'],
+    [`${num.format(d.stats.pieces.painted)}/${num.format(d.stats.pieces.total)}`, '국기 조각'],
   ];
 }
 
@@ -506,7 +506,7 @@ export function drawWrapSlide(
       [num.format(d.cities), '도시'],
       [num.format(d.countries), '나라'],
       [num.format(d.visits), '번의 방문'],
-      [num.format(d.km), 'km 이동'],
+      [num.format(d.days), '일을 유럽에서'],
     ];
     // 한 줄에 하나씩 (거리는 자릿수가 많아 반 칸에 안 들어간다)
     cells.forEach(([v, label], i) => {
@@ -608,7 +608,7 @@ export function drawWrapSlide(
 export function wrapAlt(slide: WrapSlide, d: WrapData): string {
   if (slide === 'numbers') {
     if (d.visits === 0) return `${d.year}년: 아직 기록이 없어요`;
-    return `${d.year}년의 여행: 도시 ${d.cities}곳, 나라 ${d.countries}개, 방문 ${d.visits}번, ${num.format(d.km)}km 이동`;
+    return `${d.year}년의 여행: 도시 ${d.cities}곳, 나라 ${d.countries}개, 방문 ${d.visits}번, 유럽에서 ${num.format(d.days)}일`;
   }
   if (slide === 'farthest' && d.farthest) {
     const from = d.home ? `${d.home.name.ko}에서 ` : '';
