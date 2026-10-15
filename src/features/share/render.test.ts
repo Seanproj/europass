@@ -189,6 +189,16 @@ describe('연말 결산', () => {
     expect(wrapAlt('collection', d)).toContain('올해의 도장 8개: 트롬쇠, 프라하');
   });
 
+  it('출발지를 정하지 않으면 "가장 먼 곳" 장이 없고, 한국이면 서울 기준 거리', () => {
+    const none = wrapData(VISITS, 2026, { ...PROFILE, homeCityId: '' });
+    expect(none.farthest).toBeNull();
+    expect(wrapSlides(none)).toEqual(['numbers', 'country', 'months', 'collection']);
+    const kr = wrapData(VISITS, 2026, { ...PROFILE, homeCityId: 'kr' });
+    expect(kr.farthest).not.toBeNull();
+    expect(wrapAlt('farthest', kr)).toMatch(/^가장 먼 곳: .+, 한국에서 [\d,]+km$/);
+    expect(kr.farthest!.km).toBeGreaterThan(8000);
+  });
+
   it('기록 없는 해는 첫 장 하나', () => {
     const empty = wrapData(VISITS, 2020, PROFILE);
     expect(wrapSlides(empty)).toEqual(['numbers']);

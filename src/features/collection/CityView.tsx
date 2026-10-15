@@ -3,6 +3,7 @@ import { Camera, MoreHorizontal, Plus, X } from 'lucide-react';
 import styles from './CityView.module.css';
 import { Flag } from '../../components/Flag/Flag';
 import { CITIES, getCity, getCountry } from '../../data/cities';
+import { homePlace } from '../../data/home';
 import type { City } from '../../data/types';
 import { db } from '../../db/db';
 import { stayNights, totalStayDays } from '../../db/selectors';
@@ -51,7 +52,7 @@ export function CityView({ cityId, visits, homeId, onCheckIn }: Props) {
   );
   if (!city) return null;
   const country = getCountry(city.country);
-  const home = homeId && homeId !== cityId ? getCity(homeId) : undefined;
+  const home = homeId && homeId !== cityId ? homePlace(homeId) : null;
   const photoIndex = (visit: Visit, i: number) => {
     let n = 0;
     for (const v of visits) {
@@ -87,7 +88,8 @@ export function CityView({ cityId, visits, homeId, onCheckIn }: Props) {
       )}
       {visits.length === 1 && home && (
         <p className={styles.hint}>
-          {home.name.ko}에서 <b>{Math.round(distanceKm(home.lat, home.lon, city.lat, city.lon))}km</b>
+          {home.name}에서{' '}
+          <b>{Math.round(distanceKm(home.lat, home.lon, city.lat, city.lon)).toLocaleString('ko-KR')}km</b>
         </p>
       )}
 

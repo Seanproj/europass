@@ -39,6 +39,7 @@
 - 지도는 첫 화면이 그려진 뒤(idle) 불러온다(`App.tsx`). index.html의 정적 뼈대가 그 전까지 보인다
 - 오류 안내: 저장소를 못 열면 `StorageError` 화면, 용량 90% 넘으면 토스트 + 설정의 저장 공간(`app/storageWatch.ts`), 타일 실패 토스트
 - 백업(`src/db/backup.ts`): zip(backup.json + photos/) 내보내기·가져오기(v0 JSON 호환, 지우지 않고 합침), 모든 기록 삭제(프로필과 v0 이전 표시는 남김)
+- 출발지(Profile.homeCityId)는 `''`(정하지 않음) · `'kr'`(한국, 서울 좌표) · 유럽 도시 id. 읽을 때는 `src/data/home.ts`의 `homePlace()`.
 - 도시 id는 `"cz-prague"` 형식. 조회는 `src/data/cities.ts`, 국기는 `src/components/Flag`, 국기 퍼즐 도형은 `src/data/flags.ts`
 - v0: `legacy/v0/`에 보관. 배포 시 `/v0/`로 함께 올라가고, v0 기록은 v1 첫 실행 때 자동으로 옮겨짐
 - 스택: zustand, dexie(+dexie-react-hooks), maplibre-gl(OpenFreeMap, Phase 3), motion, lucide-react,

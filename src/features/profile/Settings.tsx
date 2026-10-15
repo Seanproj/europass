@@ -16,7 +16,6 @@ import {
   UserRound,
 } from 'lucide-react';
 import { useUI } from '../../app/store';
-import { getCity } from '../../data/cities';
 import { ATTRIBUTIONS } from '../../data/attributions';
 import { LICENSES } from '../../data/licenses';
 import {
@@ -34,6 +33,7 @@ import { useCloud } from '../../cloud/controller';
 import { CloudSheet } from '../cloud/CloudSheet';
 import { cloudSummary } from '../cloud/status';
 import { Dialog } from '../../components/Dialog/Dialog';
+import { homeLabel } from '../../data/home';
 import styles from './Settings.module.css';
 import ui from '../../components/Dialog/ui.module.css';
 import { loadTheme, setTheme, type ThemePref } from './theme';
@@ -128,12 +128,7 @@ export function Settings({
 
       <ul className={styles.group}>
         <Row icon={<UserRound />} label="이름" value={profile.name} onClick={onEditProfile} />
-        <Row
-          icon={<House />}
-          label="홈 도시"
-          value={getCity(profile.homeCityId)?.name.ko ?? profile.homeCityId}
-          onClick={onEditProfile}
-        />
+        <Row icon={<House />} label="출발지" value={homeLabel(profile.homeCityId)} onClick={onEditProfile} />
         <li className={styles.row}>
           <span className={styles.icon} aria-hidden>
             <SunMoon />

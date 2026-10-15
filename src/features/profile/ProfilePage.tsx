@@ -6,6 +6,7 @@ import { goBack, navigate } from '../../app/nav';
 import { wrapYearFor } from '../share/cardData';
 import { Flag } from '../../components/Flag/Flag';
 import { getCity } from '../../data/cities';
+import { homePlace } from '../../data/home';
 import { db } from '../../db/db';
 import type { Visit } from '../../db/types';
 import { Badges } from './Badges';
@@ -53,7 +54,7 @@ export function ProfilePage() {
   const months = useMemo(() => timelineByMonth(visits), [visits]);
   const book = useMemo(() => passport(visits), [visits]);
   const pages = useMemo(() => bookPages(visits), [visits]);
-  const home = getCity(profile.homeCityId);
+  const home = homePlace(profile.homeCityId);
   // 연말 결산 배너: 12월 1일 ~ 1월 31일에만
   const wrapYear = wrapYearFor(todayISO());
 
@@ -100,7 +101,7 @@ export function ProfilePage() {
             {home && (
               <p className={styles.home}>
                 <Flag code={home.country} size={18} visited alt="" />
-                <span>{home.name.ko}에서 출발</span>
+                <span>{home.name}에서 출발</span>
               </p>
             )}
           </div>
