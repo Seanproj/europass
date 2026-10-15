@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import styles from './PhotoViewer.module.css';
 import { useBlobUrl } from './useBlobUrl';
@@ -33,7 +34,8 @@ export function PhotoViewer({ photos, start, onClose }: Props) {
   }, [n, onClose]);
 
   const startX = useRef(0);
-  return (
+  // 바텀시트(transform) 안에서 열리므로 body로 꺼내야 화면 전체를 덮는다
+  return createPortal(
     <div
       className={styles.viewer}
       role="dialog"
@@ -76,6 +78,7 @@ export function PhotoViewer({ photos, start, onClose }: Props) {
           </button>
         </>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }

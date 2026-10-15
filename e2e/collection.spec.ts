@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { collapseSheet } from './support/app';
+import { collapseSheet, makeJpeg, type DevWindow as DbWindow } from './support/app';
 
 type DevWindow = Window & { __map: { loaded(): boolean } };
 
@@ -79,4 +79,41 @@ test('날짜: 지난 날짜 + 머문 기간으로 다시 방문 기록, 방문�
   // 기간 줄이기
   await old.getByRole('group', { name: '머문 기간' }).getByRole('button', { name: '하루 줄이기' }).click();
   await expect(old).toContainText('2014.02.10 – 02.11 · 1박 2일');
+});
+
+test('사진 보기: 시트 안에서 열어도 화면 전체를 덮고 사진이 가운데', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => (window as unknown as DevWindow).__map?.loaded(), null, {
+    timeout: 30_000,
+  });
+  const jpeg = await makeJpeg(page);
+  await page.evaluate(
+    async (bytes) => {
+      const photo = new Blob([new Uint8Array(bytes)], { type: 'image/jpeg' });
+      await (window as unknown as DbWindow).__db.visits.bulkPut([
+        {
+          id: 'ph1',
+          cityId: 'cz-prague',
+          date: '2026-05-01',
+          note: '',
+          photos: [photo],
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ]);
+    },
+    [...jpeg],
+  );
+  await page.goto('/?city=cz-prague');
+  await page.getByRole('button', { name: '사진 1 보기' }).click();
+
+  const viewer = page.getByRole('dialog', { name: /사진/ });
+  await expect(viewer).toBeVisible();
+  const vp = page.viewportSize()!;
+  // 바텀시트의 transform 안에 갇히지 않고 화면 전체
+  expect(await viewer.boundingBox()).toEqual({ x: 0, y: 0, width: vp.width, height: vp.height });
+  const img = (await viewer.locator('img').boundingBox())!;
+  expect(Math.abs(img.y + img.height / 2 - vp.height / 2)).toBeLessThan(2);
+  await page.keyboard.press('Escape');
+  await expect(viewer).toHaveCount(0);
 });

@@ -117,7 +117,7 @@ button.row:disabled {
 
 .segment button {
   min-width: 52px;
-  min-height: 40px;
+  min-height: var(--tap);
   padding: 0 var(--sp-2);
   border: 0;
   border-radius: var(--r-pill);
