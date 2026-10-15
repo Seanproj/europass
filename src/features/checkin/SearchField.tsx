@@ -28,7 +28,8 @@ export function SearchField({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (active) inputRef.current?.focus();
+    // 브라우저가 입력창을 보이게 하려고 화면을 밀지 않게 (시트가 키보드 위치에 맞춰 올라간다)
+    if (active) inputRef.current?.focus({ preventScroll: true });
   }, [active]);
 
   return (

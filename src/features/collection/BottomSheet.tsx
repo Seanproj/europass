@@ -2,7 +2,7 @@ import { animate, motion, useDragControls, useMotionValue, useReducedMotion } fr
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import styles from './BottomSheet.module.css';
 import type { SheetSnap } from '../../app/store';
-import { readSafeArea, useViewportHeight } from '../../lib/useViewportHeight';
+import { readSafeArea, useViewport } from '../../lib/useViewportHeight';
 import { nearestSnap, nextSnap, snapHeights } from './sheetMath';
 
 interface Props {
@@ -23,9 +23,14 @@ const SNAP_LABEL: Record<SheetSnap, string> = { peek: '접힘', half: '반쯤 �
  * Esc로 반쯤 접는다
  */
 export function BottomSheet({ label, snap, onSnapChange, header, children }: Props) {
-  const viewport = useViewportHeight();
+  const { height: viewport, keyboard } = useViewport();
   const [safe] = useState(readSafeArea);
-  const heights = useMemo(() => snapHeights(viewport, safe.top, safe.bottom), [viewport, safe]);
+  // 키보드가 떠 있으면 홈 인디케이터 여백은 필요 없다
+  const safeBottom = keyboard ? 0 : safe.bottom;
+  const heights = useMemo(
+    () => snapHeights(viewport, safe.top, safeBottom),
+    [viewport, safe.top, safeBottom],
+  );
   const full = heights.full;
   // y = 시트를 아래로 내린 거리. 0이면 full
   const y = useMotionValue(full - heights[snap]);
@@ -46,7 +51,8 @@ export function BottomSheet({ label, snap, onSnapChange, header, children }: Pro
     <motion.section
       className={styles.sheet}
       aria-label={label}
-      style={{ height: full, y }}
+      // 키보드가 뜨면 시트를 키보드 위로 올린다 (검색어가 키보드에 가리지 않게)
+      style={{ height: full, y, bottom: keyboard }}
       drag="y"
       dragListener={false}
       dragControls={controls}
