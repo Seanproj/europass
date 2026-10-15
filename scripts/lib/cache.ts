@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const CACHE_DIR = join(ROOT, 'data', '.cache');
 
-const USER_AGENT = 'euro-passport-data-build/1.0 (https://github.com/sean1027lee-hub/euro_travel)';
+const USER_AGENT = 'euro-passport-data-build/1.0 (https://github.com/seanproj/europass)';
 
 /** 원천 파일을 data/.cache에 받아 두고 재사용한다 */
 export async function cachedDownload(url: string, fileName: string): Promise<Buffer> {

@@ -9,7 +9,7 @@ import { lightToken } from './scripts/lib/tokens.ts';
 const BG = lightToken('--bg');
 
 export default defineConfig({
-  // GitHub Pages 하위 경로(/Euro_Travel/)에서도 동작하도록 상대 경로
+  // GitHub Pages 하위 경로(/europass/)에서도 동작하도록 상대 경로
   base: './',
   // e2e에서 개발 서버를 둘 띄울 때(클라우드 모의) 의존성 캐시가 겹치지 않게
   ...(process.env.VITE_CACHE_DIR ? { cacheDir: process.env.VITE_CACHE_DIR } : {}),
