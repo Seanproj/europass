@@ -85,7 +85,10 @@ function footer(ctx: Ctx, t: CardTheme, w: number, y: number, left: string, date
   });
 }
 
-/** 숫자 3개 (값 + 이름). 거리는 자릿수가 많아 칸을 넓게 */
+/**
+ * 숫자 3개 (값 + 이름). 마지막 칸(국기 조각 "45/216")은 자릿수가 많아 조금 넓게.
+ * 값이 칸보다 길면 말줄임 대신 세 숫자를 함께 줄여 칸에 맞춘다 (여권 점수 "12,345")
+ */
 function numbers(
   ctx: Ctx,
   t: CardTheme,
@@ -95,21 +98,27 @@ function numbers(
   w: number,
   size: number,
 ) {
-  const weights = items.map((_, i) => (i === items.length - 1 ? 1.6 : 1));
+  const weights = items.map((_, i) => (i === items.length - 1 ? 1.3 : 1));
   const unit = w / weights.reduce((a, b) => a + b, 0);
+  const cols = weights.map((k) => unit * k);
+  ctx.font = `700 ${size}px ${t.font}`;
+  const fit = Math.min(
+    1,
+    ...items.map(([value], i) => (cols[i]! - 48) / Math.max(1, ctx.measureText(value).width)),
+  );
+  const s = Math.floor(size * fit);
   let cx = x;
   items.forEach(([value, label], i) => {
-    const col = unit * weights[i]!;
     text(ctx, value, cx, y, {
-      size,
+      size: s,
       weight: 700,
       color: t.text,
       family: t.font,
-      spacing: -size * 0.02,
-      maxWidth: col - 16,
+      spacing: -s * 0.02,
+      maxWidth: cols[i]! - 16,
     });
     text(ctx, label, cx, y + size * 0.55, { size: Math.round(size * 0.3), color: t.text2, family: t.font });
-    cx += col;
+    cx += cols[i]!;
   });
 }
 
