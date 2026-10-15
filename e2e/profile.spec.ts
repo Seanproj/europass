@@ -66,8 +66,8 @@ test('체크인 토스트 다음에 배지 토스트가 한 번 나온다', asyn
   await page.getByRole('list', { name: '검색 결과' }).getByRole('button').first().click();
   await expect(page.getByText('프라하 도장 획득')).toBeVisible();
   await expect(page.getByText('배지 획득 · 첫 도장')).toBeHidden();
-  // 체크인 토스트(5초)가 사라지면 다음 차례로
-  await expect(page.getByText('배지 획득 · 첫 도장')).toBeVisible({ timeout: 8_000 });
+  // 체크인 토스트가 사라지면 다음 차례로. 토스트는 도장 연출(약 2초)과 첫 나라 기념 연출이 끝난 뒤부터 5초를 센다
+  await expect(page.getByText('배지 획득 · 첫 도장')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('배지 획득 · 첫 도장')).toBeHidden({ timeout: 8_000 });
 });
 
