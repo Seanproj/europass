@@ -65,7 +65,10 @@ async function startScreen() {
   } else {
     if (!s.onboarded) markIntroSeen();
     // 링크로 도시·나라·프로필을 바로 연 경우에는 끼어들지 않는다
-    if (ui.route.kind === 'home' && shouldReplay(lastOpened?.value as string | undefined, today, s.hasVisits)) {
+    if (
+      ui.route.kind === 'home' &&
+      shouldReplay(lastOpened?.value as string | undefined, today, s.hasVisits)
+    ) {
       useUI.setState({ replay: replayOrder(visits) });
       const hello = greeting(visits, today, passportScore(visits).total);
       if (hello) ui.showToast({ message: hello }, { queue: true });

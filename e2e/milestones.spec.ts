@@ -9,6 +9,11 @@ test('새 나라 첫 도장: 도장 연출이 끝난 뒤 기념 카드, 같은 �
   await openApp(page);
   await checkInBySearch(page, '프라하');
   const card = page.getByTestId('celebration');
+  // 검색에서 체크인하면 시트를 반쯤 내려 지도의 연출이 보이게
+  await expect(page.getByRole('button', { name: /^시트 크기 바꾸기/ })).toHaveAttribute(
+    'aria-label',
+    /반쯤 펼침/,
+  );
   // 도장이 먼저, 기념은 도장이 사라진 다음
   await expect(page.getByTestId('stamp-burst')).toBeVisible();
   await expect(card).toBeHidden();

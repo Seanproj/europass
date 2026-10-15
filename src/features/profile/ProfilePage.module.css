@@ -148,6 +148,10 @@
 }
 
 .scoreButton {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  text-align: left;
   padding: 0;
   border: 0;
   background: none;

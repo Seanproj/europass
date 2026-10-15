@@ -38,6 +38,8 @@ export function useCheckIn() {
 
     const { visit, first, nth, previous, previousNth } = result;
     if (first) useUI.setState({ revealCity: cityId });
+    // 검색에서 체크인하면 시트가 끝까지 펼쳐져 있어 지도의 안개 걷힘·도장 연출이 가려진다. 반쯤 내려 지도를 보이게
+    if (useUI.getState().sheetSnap === 'full') useUI.setState({ sheetSnap: 'half', searchOpen: false });
     navigate({ kind: 'city', id: cityId });
     ui.playStamp({
       cityId,
