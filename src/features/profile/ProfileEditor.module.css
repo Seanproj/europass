@@ -59,3 +59,17 @@
   gap: var(--sp-2);
   margin-top: var(--sp-5);
 }
+
+.none {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* "정하지 않음" 줄의 국기 자리 (이름 줄을 맞춘다) */
+.noFlag {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}

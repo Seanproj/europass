@@ -97,3 +97,32 @@ test('프로필: 숫자 · 배지(모두 보기) · 타임라인, 뒤로 가면 
   await expect(main).toBeHidden();
   await expect(page).toHaveURL(/\/$/);
 });
+
+test('출발지: 정하지 않음 · 한국 · 유럽 도시 중에서 고른다', async ({ page }) => {
+  await openApp(page);
+  await page.goto('/?profile');
+  const main = page.getByRole('main');
+  await expect(main).toBeVisible();
+  // 처음에는 정하지 않음: "…에서 출발" 줄이 없다
+  await expect(main.getByText(/에서 출발$/)).toHaveCount(0);
+
+  const choose = async (pick: (d: import('@playwright/test').Locator) => Promise<void>) => {
+    await main.getByRole('button', { name: '편집' }).click();
+    const dialog = page.getByRole('dialog');
+    await pick(dialog);
+    await dialog.getByRole('button', { name: '저장' }).click();
+    await expect(dialog).toBeHidden();
+  };
+
+  await choose((d) => d.getByRole('button', { name: '한국' }).click());
+  await expect(main.getByText('한국에서 출발')).toBeVisible();
+
+  await choose(async (d) => {
+    await d.getByRole('searchbox').fill('뮌헨');
+    await d.getByRole('list', { name: '출발지 후보' }).getByRole('button').first().click();
+  });
+  await expect(main.getByText('뮌헨에서 출발')).toBeVisible();
+
+  await choose((d) => d.getByRole('button', { name: '정하지 않음' }).click());
+  await expect(main.getByText(/에서 출발$/)).toHaveCount(0);
+});

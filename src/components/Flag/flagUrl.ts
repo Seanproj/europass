@@ -1,6 +1,6 @@
-// flag-icons의 1x1 SVG. 데이터셋에 있는 나라만 번들에 넣는다 (countries.json과 목록을 맞출 것)
+// flag-icons의 1x1 SVG. 데이터셋에 있는 나라 + 출발지 한국(kr)만 번들에 넣는다 (countries.json과 목록을 맞출 것)
 const FLAG_URLS = import.meta.glob<string>(
-  '../../../node_modules/flag-icons/flags/1x1/{ad,al,at,ba,be,bg,ch,cy,cz,de,dk,ee,es,fi,fr,gb,gr,hr,hu,ie,is,it,li,lt,lu,lv,mc,me,mk,mt,nl,no,pl,pt,ro,rs,se,si,sk,sm,xk}.svg',
+  '../../../node_modules/flag-icons/flags/1x1/{ad,al,at,ba,be,bg,ch,cy,cz,de,dk,ee,es,fi,fr,gb,gr,hr,hu,ie,is,it,kr,li,lt,lu,lv,mc,me,mk,mt,nl,no,pl,pt,ro,rs,se,si,sk,sm,xk}.svg',
   { eager: true, query: '?url', import: 'default' },
 );
 

@@ -1,4 +1,5 @@
 import { CITIES, getCity, getCountry } from '../../data/cities';
+import { homePlace, type HomePlace } from '../../data/home';
 import type { City } from '../../data/types';
 import { byNewest, visitsByCity, visitRank } from '../../db/selectors';
 import type { Profile, Visit } from '../../db/types';
@@ -157,7 +158,8 @@ export interface WrapData {
   km: number;
   /** 홈에서 가장 먼 곳 */
   farthest: (StampItem & { km: number }) | null;
-  home: City | undefined;
+  /** 출발지 (정하지 않았으면 null, 그러면 "가장 먼 곳" 장은 없다) */
+  home: HomePlace | null;
   /** 가장 많이 방문한 나라 */
   topCountry: { code: string; name: string; visits: number; cities: number; stamps: StampItem[] } | null;
   /** 1~12월 방문 수 */
@@ -168,7 +170,7 @@ export interface WrapData {
 
 export function wrapData(all: Visit[], year: number, profile: Profile): WrapData {
   const visits = all.filter((v) => v.date.startsWith(`${year}-`));
-  const home = getCity(profile.homeCityId);
+  const home = homePlace(profile.homeCityId);
   const stats = profileStats(visits, profile.homeCityId);
 
   let farthest: WrapData['farthest'] = null;
@@ -181,7 +183,8 @@ export function wrapData(all: Visit[], year: number, profile: Profile): WrapData
     months[Number(v.date.slice(5, 7)) - 1]!++;
     byCountry.set(city.country, [...(byCountry.get(city.country) ?? []), v]);
     if (!firstByCity.has(city.id)) firstByCity.set(city.id, v);
-    const km = home ? distanceKm(home.lat, home.lon, city.lat, city.lon) : 0;
+    if (!home) continue;
+    const km = distanceKm(home.lat, home.lon, city.lat, city.lon);
     if (!farthest || km > farthest.km)
       farthest = { city, visit: { id: v.id, date: v.date }, km: Math.round(km) };
   }

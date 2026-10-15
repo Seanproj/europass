@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Check } from 'lucide-react';
 import { Flag } from '../../components/Flag/Flag';
-import { CITIES, getCity, getCountry } from '../../data/cities';
+import { CITIES, getCountry } from '../../data/cities';
 import { db } from '../../db/db';
 import type { Profile } from '../../db/types';
 import { buildIndex, searchCities } from '../checkin/search';
+import { HOME_KOREA, HOME_NONE, homePlace } from '../../data/home';
 import { Dialog } from '../../components/Dialog/Dialog';
 import styles from './ProfileEditor.module.css';
 import ui from '../../components/Dialog/ui.module.css';
@@ -12,7 +13,7 @@ import { saveProfile } from './profile';
 
 let index: ReturnType<typeof buildIndex> | undefined;
 
-/** 이름과 홈 도시 편집. 홈 도시는 이동거리 계산과 "가까운 도시" 기준 */
+/** 이름과 출발지 편집. 출발지는 선택: 정하지 않음 · 한국 · 유럽 도시 하나 ("가까운 도시"·도시까지 거리의 기준) */
 export function ProfileEditor({
   open,
   profile,
@@ -38,7 +39,7 @@ function EditorForm({ profile, onDone }: { profile: Profile; onDone: () => void 
     index ??= buildIndex(CITIES);
     return searchCities(index, query, 8);
   }, [query]);
-  const homeCity = getCity(home);
+  const current = homePlace(home);
 
   return (
     <form
@@ -60,27 +61,55 @@ function EditorForm({ profile, onDone }: { profile: Profile; onDone: () => void 
       />
 
       <label className={ui.label} htmlFor="profile-home">
-        홈 도시
+        출발지 (선택)
       </label>
-      {homeCity && (
-        <p className={styles.current}>
-          <Flag code={homeCity.country} size={20} visited alt="" />
-          <span>
-            {homeCity.name.ko} · {getCountry(homeCity.country)?.name.ko}
-          </span>
-        </p>
-      )}
+      <p className={styles.current}>
+        {current ? (
+          <>
+            <Flag code={current.country} size={20} visited alt="" />
+            <span>
+              {current.name}
+              {current.city && ` · ${getCountry(current.country)?.name.ko}`}
+            </span>
+          </>
+        ) : (
+          <span className={styles.none}>정하지 않음</span>
+        )}
+      </p>
+      <ul className={styles.hits} aria-label="출발지 빠른 선택">
+        {[
+          { id: HOME_NONE, label: '정하지 않음', flag: null },
+          { id: HOME_KOREA, label: '한국', flag: 'KR' },
+        ].map((o) => (
+          <li key={o.id || 'none'}>
+            <button
+              type="button"
+              className={styles.hit}
+              aria-pressed={home === o.id}
+              onClick={() => {
+                setHome(o.id);
+                setQuery('');
+              }}
+            >
+              {o.flag ? <Flag code={o.flag} size={20} visited alt="" /> : <span className={styles.noFlag} />}
+              <span className={styles.hitName}>{o.label}</span>
+              <span className={styles.hitCountry} />
+              {home === o.id && <Check aria-hidden />}
+            </button>
+          </li>
+        ))}
+      </ul>
       <input
         id="profile-home"
         className={ui.input}
         type="search"
-        placeholder="다른 도시 검색"
+        placeholder="유럽 도시 검색"
         value={query}
         autoComplete="off"
         onChange={(e) => setQuery(e.target.value)}
       />
       {hits.length > 0 && (
-        <ul className={styles.hits} aria-label="홈 도시 후보">
+        <ul className={styles.hits} aria-label="출발지 후보">
           {hits.map(({ city }) => (
             <li key={city.id}>
               <button

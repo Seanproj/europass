@@ -449,9 +449,10 @@ export function drawMilestoneCard(
 export const WRAP_SLIDES = ['numbers', 'farthest', 'country', 'months', 'collection'] as const;
 export type WrapSlide = (typeof WRAP_SLIDES)[number];
 
-/** 기록이 없는 해는 첫 장만 */
+/** 기록이 없는 해는 첫 장만. 출발지를 정하지 않았으면 "가장 먼 곳"은 뺀다 */
 export function wrapSlides(d: WrapData): WrapSlide[] {
-  return d.visits === 0 ? ['numbers'] : [...WRAP_SLIDES];
+  if (d.visits === 0) return ['numbers'];
+  return WRAP_SLIDES.filter((s) => s !== 'farthest' || d.farthest);
 }
 
 const MONTHS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
@@ -535,7 +536,7 @@ export function drawWrapSlide(
       align: 'center',
       maxWidth: inner,
     });
-    const from = d.home ? `${d.home.name.ko}에서 ` : '';
+    const from = d.home ? `${d.home.name}에서 ` : '';
     text(ctx, `${from}${num.format(d.farthest.km)}km`, w / 2, 1350, {
       size: 44,
       color: t.text2,
@@ -611,7 +612,7 @@ export function wrapAlt(slide: WrapSlide, d: WrapData): string {
     return `${d.year}년의 여행: 도시 ${d.cities}곳, 나라 ${d.countries}개, 방문 ${d.visits}번, ${num.format(d.km)}km 이동`;
   }
   if (slide === 'farthest' && d.farthest) {
-    const from = d.home ? `${d.home.name.ko}에서 ` : '';
+    const from = d.home ? `${d.home.name}에서 ` : '';
     return `가장 먼 곳: ${d.farthest.city.name.ko}, ${from}${num.format(d.farthest.km)}km`;
   }
   if (slide === 'country' && d.topCountry) {
