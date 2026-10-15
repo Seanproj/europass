@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Visit } from '../../db/types';
-import { cityCardData, countryCardData, summaryCardData, wrapData } from './cardData';
+import { cityCardData, countryCardData, milestoneCardData, summaryCardData, wrapData } from './cardData';
 import { RecordingContext, summarize } from './recorder';
 import {
   drawCityCard,
   drawCountryCard,
   drawFeedCard,
+  drawMilestoneCard,
   drawStoryCard,
   drawWrapSlide,
   wrapAlt,
@@ -111,6 +112,45 @@ describe('공유 카드 렌더 (그리기 호출 스냅샷)', () => {
     const berlin = cityCardData('de-berlin', [visit('de-berlin', '2026-01-01')], 'Sean', TODAY)!;
     const b = record((c) => drawCityCard(c, berlin, THEME, null));
     expect(summarize(b.ops).content.some((op) => op.includes('"베를린과 나"'))).toBe(true);
+  });
+});
+
+describe('기념 카드', () => {
+  const stampAt = { cityId: 'lu-vianden', visit: { id: 'v-lu', date: '2026-07-03' }, nth: 1 };
+
+  it('국기 완성: 큰 국기 + 제목 + 함께 이룬 기념 + 그 순간의 도장', () => {
+    const d = milestoneCardData(
+      [
+        { id: 'flag:LU', kind: 'flag', country: 'LU', pieces: 3 },
+        { id: 'count:10', kind: 'count', count: 10 },
+      ],
+      stampAt,
+      'Sean',
+      '2026-07-03',
+    )!;
+    const s = summarize(record((c) => drawMilestoneCard(c, d, THEME, img('flag-lu'))).ops);
+    expect(s).toMatchSnapshot();
+    expect(s.content).toContain('fillText("국기 완성", 540, 139)');
+    expect(s.content).toContain('fillText("룩셈부르크 국기 완성", 540, 700)');
+    expect(s.content).toContain('fillText("조각 3개를 모두 모았어요 · 10번째 도장", 540, 770)');
+    expect(s.content.some((op) => op.includes('drawImage("flag-lu"'))).toBe(true);
+    expect(s.content.some((op) => op.includes('"VEIANEN"'))).toBe(true);
+  });
+
+  it('도장 개수: 국기 대신 큰 숫자', () => {
+    const d = milestoneCardData([{ id: 'count:25', kind: 'count', count: 25 }], stampAt, 'Sean', TODAY)!;
+    const s = summarize(record((c) => drawMilestoneCard(c, d, THEME, null)).ops);
+    expect(s.content).toContain('fillText("25", 540, 510)');
+    expect(s.content).toContain('fillText("25번째 도장", 540, 700)');
+    expect(s.content.some((op) => op.includes('drawImage'))).toBe(false);
+  });
+
+  it('기념이 없거나 모르는 도시면 카드를 만들지 않는다', () => {
+    expect(milestoneCardData([], stampAt, 'Sean', TODAY)).toBeNull();
+    const nowhere = { ...stampAt, cityId: 'xx-nowhere' };
+    expect(
+      milestoneCardData([{ id: 'count:10', kind: 'count', count: 10 }], nowhere, 'Sean', TODAY),
+    ).toBeNull();
   });
 });
 

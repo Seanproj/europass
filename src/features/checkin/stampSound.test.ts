@@ -67,6 +67,15 @@ describe('도장 소리', () => {
     expect(loadSoundSetting()).toBe(true);
   });
 
+  it('기념 소리는 세 음, 같은 설정을 따른다', async () => {
+    const { playMilestoneSound, saveSoundSetting } = await import('./stampSound');
+    expect(playMilestoneSound()).toBe(true);
+    expect(audio.log).toEqual(['new', 'osc.start', 'osc.start', 'osc.start']);
+    saveSoundSetting(false);
+    expect(playMilestoneSound()).toBe(false);
+    expect(audio.log).toHaveLength(4);
+  });
+
   it('오디오를 못 쓰는 브라우저에서는 조용히 넘어간다', async () => {
     vi.stubGlobal('AudioContext', undefined);
     const { playStampSound } = await import('./stampSound');

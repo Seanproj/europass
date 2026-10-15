@@ -42,7 +42,8 @@ test('체크인 소리: 기본으로 나고, 설정에서 끄면 나지 않는�
   await openApp(page);
   await checkInBySearch(page, '프라하');
   await expect(page.getByText('프라하 도장 획득')).toBeVisible();
-  await expect.poll(() => sounds(page)).toBe(1);
+  // 도장 "쾅" 1번 + 첫 나라 기념 "딩-동-댕" 3음 (Phase 15)
+  await expect.poll(() => sounds(page)).toBe(4);
 
   await page.goto('/?profile');
   const toggle = page.getByRole('switch', { name: /도장 소리/ });

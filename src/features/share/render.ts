@@ -5,7 +5,14 @@ import { drawCover, roundRectPath, type Ctx } from '../../lib/canvas';
 import { dotDate } from '../../lib/date';
 import type { ProjectedPuzzle } from '../map/puzzle/data';
 import { puzzleColor } from '../map/puzzle/puzzle';
-import type { CityCardData, CountryCardData, StampItem, SummaryCardData, WrapData } from './cardData';
+import type {
+  CityCardData,
+  CountryCardData,
+  MilestoneCardData,
+  StampItem,
+  SummaryCardData,
+  WrapData,
+} from './cardData';
 import type { CardTheme } from './theme';
 
 /** 카드 크기 (px) */
@@ -350,6 +357,90 @@ export function drawCityCard(ctx: Ctx, d: CityCardData, t: CardTheme, photo: Can
     text(ctx, `${nth}`, listX, ry, { size: 26, weight: 700, color: t.text2, family: t.mono });
     text(ctx, dotDate(v.date), listX + 52, ry, { size: 32, weight: 600, color: t.text, family: t.font });
   });
+  footer(ctx, t, w, h - 64, d.owner, d.date);
+}
+
+/**
+ * 기념 카드 4:5 — 머리글 알약 + 큰 국기(또는 큰 숫자) + 제목 + 그 순간의 도장.
+ * 국기 둘레와 숫자 뒤에는 도장 잉크색 빛살
+ */
+export function drawMilestoneCard(
+  ctx: Ctx,
+  d: MilestoneCardData,
+  t: CardTheme,
+  flag: CanvasImageSource | null,
+) {
+  const { w, h } = FEED;
+  const cx = w / 2;
+  ctx.fillStyle = t.bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // 빛살: 가운데에서 퍼지는 가는 쐐기 24개
+  const heroY = 400;
+  ctx.save();
+  ctx.fillStyle = t.accent;
+  ctx.globalAlpha = 0.1;
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, heroY);
+    ctx.lineTo(cx + Math.cos(a - 0.05) * 520, heroY + Math.sin(a - 0.05) * 520);
+    ctx.lineTo(cx + Math.cos(a + 0.05) * 520, heroY + Math.sin(a + 0.05) * 520);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // 머리글 알약
+  ctx.font = `700 32px ${t.font}`;
+  const pillW = ctx.measureText(d.text.label).width + 64;
+  ctx.fillStyle = t.accent;
+  roundRectPath(ctx, cx - pillW / 2, 96, pillW, 64, 32);
+  ctx.fill();
+  text(ctx, d.text.label, cx, 139, {
+    size: 32,
+    weight: 700,
+    color: t.onAccent,
+    family: t.font,
+    align: 'center',
+  });
+
+  if (d.country) {
+    // 국기 둘레 바탕 고리
+    ctx.fillStyle = t.surface;
+    ctx.beginPath();
+    ctx.arc(cx, heroY, 176, 0, Math.PI * 2);
+    ctx.fill();
+    flagCircle(ctx, flag, cx, heroY, 160, t);
+  } else if (d.count !== null) {
+    text(ctx, num.format(d.count), cx, heroY + 110, {
+      size: 320,
+      weight: 800,
+      color: t.accent,
+      family: t.font,
+      align: 'center',
+      spacing: -12,
+    });
+  }
+
+  text(ctx, d.text.title, cx, 700, {
+    size: 84,
+    weight: 700,
+    color: t.text,
+    family: t.font,
+    align: 'center',
+    maxWidth: w - PAD * 2,
+  });
+  const sub = [d.text.sub, ...d.also].join(' · ');
+  text(ctx, sub, cx, 770, {
+    size: 36,
+    color: t.text2,
+    family: t.font,
+    align: 'center',
+    maxWidth: w - PAD * 2,
+  });
+
+  stamp(ctx, t, d.stamp, cx, 1000, 300, 1, t.bg);
   footer(ctx, t, w, h - 64, d.owner, d.date);
 }
 

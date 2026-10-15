@@ -4,7 +4,8 @@ import { todayISO } from '../../lib/date';
 import type { Profile, Visit } from '../../db/types';
 import { loadPuzzleData, projectPuzzle } from '../map/puzzle/data';
 import { captureMap } from '../map/snapshot';
-import { cityCardData, countryCardData, summaryCardData, type WrapData } from './cardData';
+import type { Milestone } from '../checkin/milestones';
+import { cityCardData, countryCardData, milestoneCardData, summaryCardData, type WrapData } from './cardData';
 import { RecordingContext } from './recorder';
 import {
   FEED,
@@ -12,6 +13,7 @@ import {
   drawCityCard,
   drawCountryCard,
   drawFeedCard,
+  drawMilestoneCard,
   drawStoryCard,
   drawWrapSlide,
   type WrapSlide,
@@ -84,6 +86,19 @@ export async function makeCityCard(cityId: string, visits: Visit[], profile: Pro
   const photo = data.photo ? await createImageBitmap(data.photo).catch(() => null) : null;
   const theme = readCardTheme();
   return renderPng(FEED, (ctx) => drawCityCard(ctx, data, theme, photo));
+}
+
+/** 특별한 순간의 기념 카드 */
+export async function makeMilestoneCard(
+  milestones: Milestone[],
+  stamp: { cityId: string; visit: { id: string; date: string }; nth: number },
+  profile: Profile,
+): Promise<Blob> {
+  const data = milestoneCardData(milestones, stamp, profile.name, stamp.visit.date);
+  if (!data) throw new Error('알 수 없는 기념');
+  const flag = data.country ? await loadImage(flagUrl(data.country)) : null;
+  const theme = readCardTheme();
+  return renderPng(FEED, (ctx) => drawMilestoneCard(ctx, data, theme, flag));
 }
 
 /** 연말 결산 한 장 */

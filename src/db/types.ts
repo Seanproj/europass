@@ -25,7 +25,8 @@ export interface Profile {
 
 /** settings는 키-값 테이블이라 키를 늘려도 스키마 버전을 올릴 필요가 없다 */
 /** memoryDismissed: 회상 카드를 닫은 날 (YYYY-MM-DD) — 그날은 다시 띄우지 않는다 */
-export type SettingKey = 'profile' | 'migratedFromV0' | 'badgesSeen' | 'sync' | 'memoryDismissed';
+export type SettingKey =
+  'profile' | 'migratedFromV0' | 'badgesSeen' | 'sync' | 'memoryDismissed' | 'milestonesSeen';
 
 export interface SettingRow<T = unknown> {
   key: SettingKey;
