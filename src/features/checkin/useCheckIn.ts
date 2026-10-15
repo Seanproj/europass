@@ -8,6 +8,7 @@ import { checkIn, undoCheckIn } from './checkin';
 import { takeNewBadges, unseeBadges } from '../profile/badgeSync';
 import { prefetchCityTiles } from '../map/prefetch';
 import { playStampSound } from './stampSound';
+import { takeNewMilestones, unseeMilestones } from './milestoneSync';
 import { reportWriteError } from '../../app/storageWatch';
 
 /**
@@ -49,6 +50,7 @@ export function useCheckIn() {
     // 설정을 켰고 와이파이면 이 도시 둘레 지도를 오프라인용으로 받아 둔다
     void prefetchCityTiles(city.lat, city.lon);
     let badgeIds: string[] = [];
+    let milestoneIds: string[] = [];
     let undone = false;
     ui.showToast({
       // 지난 날짜로 소급하면 첫 기록이 아니어도 날짜순 1번째일 수 있다
@@ -61,21 +63,32 @@ export function useCheckIn() {
         label: '되돌리기',
         run: () => {
           undone = true;
-          void undoCheckIn(db, visit.id).then(() => unseeBadges(db, badgeIds));
+          void undoCheckIn(db, visit.id).then(() =>
+            Promise.all([unseeBadges(db, badgeIds), unseeMilestones(db, milestoneIds)]),
+          );
           // 이 체크인으로 줄 선 배지 토스트도 함께 거둔다
           useUI.setState((s) => ({ toastQueue: s.toastQueue.filter((t) => t.group !== visit.id) }));
           const s = useUI.getState();
           s.dismissToast();
+          s.dismissCelebration(visit.id);
           if (s.stampFx?.visit.id === visit.id) s.clearStamp(s.stampFx.nonce);
         },
       },
     });
 
+    // 특별한 순간(새 나라, N번째 도장, 국기 완성)은 도장 "쾅"이 끝난 뒤 큰 연출로
+    const milestones = await takeNewMilestones(db, visit.id).catch(() => []);
+    milestoneIds = milestones.map((m) => m.id);
     // 새 배지는 체크인 토스트가 사라진 다음 차례로
     const badges = await takeNewBadges(db).catch(() => []);
     badgeIds = badges.map((b) => b.id);
-    // 배지를 세는 사이에 되돌렸으면 알리지 않고 "안 알림"으로 돌린다
-    if (undone) return void unseeBadges(db, badgeIds);
+    // 세는 사이에 되돌렸으면 알리지 않고 "안 알림"으로 돌린다
+    if (undone) {
+      await unseeMilestones(db, milestoneIds);
+      return void unseeBadges(db, badgeIds);
+    }
+    if (milestones.length)
+      useUI.getState().celebrate({ cityId, visit: { id: visit.id, date: visit.date }, nth, milestones });
     for (const b of badges) {
       useUI
         .getState()

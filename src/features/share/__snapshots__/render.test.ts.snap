@@ -257,6 +257,52 @@ exports[`공유 카드 렌더 (그리기 호출 스냅샷) > 피드 4:5 1`] = `
 }
 `;
 
+exports[`기념 카드 > 국기 완성: 큰 국기 + 제목 + 함께 이룬 기념 + 그 순간의 도장 1`] = `
+{
+  "content": [
+    "fillText("국기 완성", 540, 139)",
+    "drawImage("flag-lu", 380, 240, 320, 320)",
+    "fillText("룩셈부르크 국기 완성", 540, 700)",
+    "fillText("조각 3개를 모두 모았어요 · 10번째 도장", 540, 770)",
+    "fillText("LUXEMBOURG", 80, 46)",
+    "fillText("VEIANEN", 80, 65.4)",
+    "fillText("3 JUL 2026", 80, 80.92)",
+    "fillText("49.9350° N", 80, 100.32)",
+    "fillText("6.2089° E", 80, 110.02)",
+    "fillText("Sean", 72, 1286)",
+    "fillText("Euro Passport · 2026.07.03", 1008, 1286)",
+  ],
+  "counts": {
+    "arc": 162,
+    "arcTo": 12,
+    "beginPath": 190,
+    "clip": 1,
+    "closePath": 27,
+    "drawImage": 1,
+    "fill": 186,
+    "fillRect": 2,
+    "fillStyle": 12,
+    "fillText": 10,
+    "font": 9,
+    "globalAlpha": 3,
+    "letterSpacing": 10,
+    "lineJoin": 1,
+    "lineTo": 49,
+    "lineWidth": 3,
+    "moveTo": 28,
+    "restore": 3,
+    "rotate": 1,
+    "save": 3,
+    "scale": 1,
+    "setLineDash": 4,
+    "stroke": 3,
+    "strokeStyle": 1,
+    "textAlign": 3,
+    "translate": 2,
+  },
+}
+`;
+
 exports[`연말 결산 > collection 1`] = `
 {
   "content": [

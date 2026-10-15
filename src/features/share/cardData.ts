@@ -2,6 +2,7 @@ import { CITIES, getCity, getCountry } from '../../data/cities';
 import type { City } from '../../data/types';
 import { byNewest, visitsByCity, visitRank } from '../../db/selectors';
 import type { Profile, Visit } from '../../db/types';
+import { milestoneCountry, milestoneText, type Milestone, type MilestoneText } from '../checkin/milestones';
 import { distanceKm } from '../checkin/search';
 import { piecesOf } from '../collection/progress';
 import { profileStats, type ProfileStats } from '../profile/stats';
@@ -108,6 +109,41 @@ export function cityCardData(
     owner,
     visits: own.map((v) => ({ id: v.id, date: v.date })).reverse(),
     photo: own.find((v) => v.photos.length > 0)?.photos[0],
+  };
+}
+
+export interface MilestoneCardData {
+  text: MilestoneText;
+  /** 국기를 크게 보여 줄 나라 (도장 개수 기념이면 null) */
+  country: string | null;
+  /** 도장 개수 기념의 숫자 */
+  count: number | null;
+  /** 이 기념을 만든 도장 */
+  stamp: StampItem;
+  /** 같은 체크인에서 함께 이룬 기념 (제목만) */
+  also: string[];
+  owner: string;
+  date: string;
+}
+
+/** 기념 카드: 주인공 기념(첫 번째) + 그 순간의 도장 */
+export function milestoneCardData(
+  milestones: Milestone[],
+  stamp: { cityId: string; visit: { id: string; date: string }; nth: number },
+  owner: string,
+  date: string,
+): MilestoneCardData | null {
+  const [main, ...rest] = milestones;
+  const city = getCity(stamp.cityId);
+  if (!main || !city) return null;
+  return {
+    text: milestoneText(main, city.name.ko),
+    country: milestoneCountry(main),
+    count: main.kind === 'count' ? main.count : null,
+    stamp: { city, visit: stamp.visit, nth: stamp.nth },
+    also: rest.map((m) => milestoneText(m, city.name.ko).title),
+    owner,
+    date,
   };
 }
 

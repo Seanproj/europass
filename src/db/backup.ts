@@ -167,7 +167,8 @@ export async function deleteAllData(db: PassportDB): Promise<void> {
   await db.transaction('rw', db.visits, db.lensCache, db.settings, async () => {
     await db.visits.clear();
     await db.lensCache.clear();
-    // 새로 시작하면 배지도 다시 알린다
+    // 새로 시작하면 배지와 기념도 다시 알린다
     await db.settings.put({ key: 'badgesSeen', value: [] });
+    await db.settings.delete('milestonesSeen');
   });
 }

@@ -10,6 +10,7 @@ import { useNavSync } from './nav';
 import { useUI } from './store';
 import { Toast } from '../components/Toast/Toast';
 import { StampBurst } from '../features/checkin/StampBurst';
+import { Celebration } from '../features/checkin/Celebration';
 
 // 지도(MapLibre 약 1MB)는 따로 불러와 시트와 알약이 먼저 뜨게 한다
 const MapView = lazy(() => import('../features/map/MapView').then((m) => ({ default: m.MapView })));
@@ -67,6 +68,7 @@ export function App() {
           </AnimatePresence>
         </Suspense>
         <StampBurst />
+        <Celebration />
         <Toast />
       </div>
     </MotionConfig>
