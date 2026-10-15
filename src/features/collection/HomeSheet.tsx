@@ -14,6 +14,7 @@ import { CityView } from './CityView';
 import { CountryView } from './CountryView';
 import { FlagRings } from './FlagRings';
 import { HomeView } from './HomeView';
+import { memoryFor } from './onThisDay';
 import { NavAction, NavHeader } from './NavHeader';
 import { Share2 } from 'lucide-react';
 import { todayISO } from '../../lib/date';
@@ -41,6 +42,21 @@ export function HomeSheet() {
   const homeId = (profile?.value as Profile | undefined)?.homeCityId;
 
   const byCity = useMemo(() => visitsByCity(visits), [visits]);
+  // 회상 카드: 1년 이상 전 오늘 앞뒤 3일의 기록. 오늘 닫았으면 숨김 (불러오는 중에는 깜빡이지 않게 숨김)
+  const today = todayISO();
+  const memory = useMemo(() => memoryFor(visits, today), [visits, today]);
+  const dismissed = useLiveQuery(
+    () => db.settings.get('memoryDismissed').then((r) => (r?.value as string | undefined) ?? null),
+    [],
+    'loading' as const,
+  );
+  const cityShare = (cityId: string): ShareFormat => ({
+    id: `city-${cityId}`,
+    label: '도시 카드',
+    aspect: 4 / 5,
+    fileName: `euro-passport-${cityId}-${todayISO()}.png`,
+    make: async () => makeCityCard(cityId, await db.visits.toArray(), await getProfile(db)),
+  });
   const counts = useMemo(() => new Map([...byCity].map(([id, list]) => [id, list.length])), [byCity]);
   const countries = useMemo(
     () => sortCountries([...countryProgress(visits, getCity).values()], (c) => getCountry(c)?.name.ko ?? c),
@@ -98,7 +114,15 @@ export function HomeSheet() {
         onPick={pick}
       />
     ) : (
-      <HomeView countries={countries} byCity={byCity} homeId={homeId} onSearch={() => setSearchOpen(true)} />
+      <HomeView
+        countries={countries}
+        byCity={byCity}
+        homeId={homeId}
+        onSearch={() => setSearchOpen(true)}
+        memory={dismissed !== 'loading' && dismissed !== today ? memory : null}
+        onShareCity={(cityId) => setShare(cityShare(cityId))}
+        onDismissMemory={() => void db.settings.put({ key: 'memoryDismissed', value: today })}
+      />
     );
   } else if (route.kind === 'country') {
     const country = getCountry(route.code);
@@ -140,15 +164,7 @@ export function HomeSheet() {
             <NavAction
               label={`${city.name.ko} 카드 공유`}
               icon={<Share2 aria-hidden />}
-              onClick={() =>
-                setShare({
-                  id: `city-${id}`,
-                  label: '도시 카드',
-                  aspect: 4 / 5,
-                  fileName: `euro-passport-${id}-${todayISO()}.png`,
-                  make: async () => makeCityCard(id, await db.visits.toArray(), await getProfile(db)),
-                })
-              }
+              onClick={() => setShare(cityShare(id))}
             />
           ) : undefined
         }
