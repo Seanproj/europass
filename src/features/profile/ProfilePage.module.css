@@ -109,8 +109,8 @@
 /* 숫자 3개만 크게 */
 .numbers {
   display: grid;
-  /* 거리는 자릿수가 많아 칸을 넓게 */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr);
+  /* 국기 조각(87/250)은 자릿수가 많아 칸을 조금 넓게 */
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.2fr);
   gap: var(--sp-2);
   margin: var(--sp-5) 0 0;
   padding: 0 var(--gutter);
@@ -131,6 +131,45 @@
   font-size: var(--fs-caption);
   font-weight: var(--fw-caption);
   color: var(--text-2);
+  /* 좁은 화면에서는 "유럽에서 / 보낸 날" 두 줄로 */
+  word-break: keep-all;
+}
+
+/* 여권 점수 칸은 통째로 눌러 계산표를 연다 */
+.scoreCell {
+  position: relative;
+}
+
+.info {
+  width: 12px;
+  height: 12px;
+  margin-left: 3px;
+  vertical-align: -2px;
+}
+
+.scoreButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.scoreButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+}
+
+.scoreButton:focus-visible {
+  outline: none;
+}
+
+.scoreButton:focus-visible::after {
+  outline: 2px solid var(--accent);
 }
 
 .numbers dd {

@@ -21,7 +21,7 @@
   도시 상세 맨 위 도장은 누르면 가장 최근 방문의 엽서로 뒤집힌다(`collection/Postcard.tsx`, 도장 스택도 여기).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
   시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile, ?wrap=과 브라우저 뒤로가기를 맞춤)
-- 프로필(`src/features/profile/`): 전체 화면 페이지 하나. "내 여권" 도감은 `passport.ts`(도시마다 도장 하나, 첫 방문순), 연도별로 넘기는 여권은 `passportBook.ts`(한 장에 6개, 2×3 자리 + 방문 id로 비껴 찍기)와 `PassportBook.tsx`. 배지는 `badges.ts`의 데이터 정의 + `badgeSync.ts`(알림 기록은 settings 'badgesSeen',
+- 프로필(`src/features/profile/`): 전체 화면 페이지 하나. 숫자 3개는 `score.ts`(여권 점수 규칙표 SCORE_RULES · 유럽에서 보낸 날(겹치는 날 한 번, 방문당 90일까지) · 국기 조각)와 계산표 `ScoreDialog`. "내 여권" 도감은 `passport.ts`(도시마다 도장 하나, 첫 방문순), 연도별로 넘기는 여권은 `passportBook.ts`(한 장에 6개, 2×3 자리 + 방문 id로 비껴 찍기)와 `PassportBook.tsx`. 배지는 `badges.ts`의 데이터 정의 + `badgeSync.ts`(알림 기록은 settings 'badgesSeen',
   체크인으로 새로 얻을 때만 토스트, 가져오기·v0 이전으로 얻은 것은 조용히). 토스트는 store의 큐로 체크인 토스트 뒤에 줄 선다.
   테마는 localStorage + `<html data-theme>`, 바뀌면 `themechange` 이벤트로 지도가 다시 그린다
 - 공유(`src/features/share/`): 카드 그리기는 순수 함수(`render.ts`, 2D 컨텍스트 + 데이터 + 테마)라 `RecordingContext`로

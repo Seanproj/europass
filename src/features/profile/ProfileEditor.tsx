@@ -12,7 +12,7 @@ import { saveProfile } from './profile';
 
 let index: ReturnType<typeof buildIndex> | undefined;
 
-/** 이름과 홈 도시 편집. 홈 도시는 이동거리 계산과 "가까운 도시" 기준 */
+/** 이름과 홈 도시 편집. 홈 도시는 "가까운 도시"·도시까지 거리의 기준 */
 export function ProfileEditor({
   open,
   profile,
