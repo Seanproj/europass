@@ -29,6 +29,8 @@ export interface ToastState {
   badge?: { icon: LucideIcon };
   /** 함께 거둘 토스트 묶음 (체크인 하나에서 나온 배지 토스트들 = 방문 id) */
   group?: string;
+  /** 시간을 아직 재지 않는다 (체크인 연출·기념 판정이 끝날 때까지 되돌리기 토스트를 붙잡아 둔다) */
+  paused?: boolean;
 }
 
 /** 체크인 순간 화면 가운데에 찍히는 도장 */
@@ -63,8 +65,11 @@ interface UIState {
   /** 다음 차례를 기다리는 토스트 (배지 토스트는 체크인 토스트 뒤에 줄 선다) */
   toastQueue: ToastState[];
   /** 지금 토스트를 바꾼다. queue면 지금 것이 사라진 뒤에 보여 준다 */
-  showToast: (t: Omit<ToastState, 'id'>, opts?: { queue?: boolean }) => void;
+  /** 띄운 토스트의 id를 돌려준다 */
+  showToast: (t: Omit<ToastState, 'id'>, opts?: { queue?: boolean }) => number;
   dismissToast: (id?: number) => void;
+  /** paused로 띄운 토스트의 시간을 재기 시작한다 */
+  resumeToast: (id: number) => void;
   stampFx: StampFx | null;
   playStamp: (fx: Omit<StampFx, 'nonce'>) => void;
   clearStamp: (nonce: number) => void;
@@ -91,12 +96,16 @@ export const useUI = create<UIState>((set) => ({
   setSearchOpen: (searchOpen) => set(searchOpen ? { searchOpen, sheetSnap: 'full' } : { searchOpen }),
   toast: null,
   toastQueue: [],
-  showToast: (t, opts) =>
-    set((s) => {
-      const next = { ...t, id: ++seq };
-      if (opts?.queue && s.toast) return { toastQueue: [...s.toastQueue, next] };
-      return { toast: next };
-    }),
+  showToast: (t, opts) => {
+    const next = { ...t, id: ++seq };
+    set((s) => (opts?.queue && s.toast ? { toastQueue: [...s.toastQueue, next] } : { toast: next }));
+    return next.id;
+  },
+  resumeToast: (id) =>
+    set((s) => ({
+      toast: s.toast?.id === id ? { ...s.toast, paused: false } : s.toast,
+      toastQueue: s.toastQueue.map((t) => (t.id === id ? { ...t, paused: false } : t)),
+    })),
   dismissToast: (id) =>
     set((s) => {
       if (id !== undefined && s.toast?.id !== id) return {};

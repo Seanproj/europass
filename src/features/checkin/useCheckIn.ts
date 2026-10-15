@@ -52,7 +52,9 @@ export function useCheckIn() {
     let badgeIds: string[] = [];
     let milestoneIds: string[] = [];
     let undone = false;
-    ui.showToast({
+    // 기념 판정이 끝날 때까지 시간을 재지 않는다 (아래 finally에서 시작)
+    const toastId = ui.showToast({
+      paused: true,
       // 지난 날짜로 소급하면 첫 기록이 아니어도 날짜순 1번째일 수 있다
       message: first
         ? `${city.name.ko} 도장 획득`
@@ -76,26 +78,34 @@ export function useCheckIn() {
       },
     });
 
-    // 특별한 순간(새 나라, N번째 도장, 국기 완성)은 도장 "쾅"이 끝난 뒤 큰 연출로
-    const milestones = await takeNewMilestones(db, visit.id).catch(() => []);
-    milestoneIds = milestones.map((m) => m.id);
-    // 새 배지는 체크인 토스트가 사라진 다음 차례로
-    const badges = await takeNewBadges(db).catch(() => []);
-    badgeIds = badges.map((b) => b.id);
-    // 세는 사이에 되돌렸으면 알리지 않고 "안 알림"으로 돌린다
-    if (undone) {
-      await unseeMilestones(db, milestoneIds);
-      return void unseeBadges(db, badgeIds);
+    try {
+      await announce();
+    } finally {
+      useUI.getState().resumeToast(toastId);
     }
-    if (milestones.length)
-      useUI.getState().celebrate({ cityId, visit: { id: visit.id, date: visit.date }, nth, milestones });
-    for (const b of badges) {
-      useUI
-        .getState()
-        .showToast(
-          { message: `배지 획득 · ${b.name}`, badge: { icon: b.icon }, group: visit.id },
-          { queue: true },
-        );
+
+    async function announce() {
+      // 특별한 순간(새 나라, N번째 도장, 국기 완성)은 도장 "쾅"이 끝난 뒤 큰 연출로
+      const milestones = await takeNewMilestones(db, visit.id).catch(() => []);
+      milestoneIds = milestones.map((m) => m.id);
+      // 새 배지는 체크인 토스트가 사라진 다음 차례로
+      const badges = await takeNewBadges(db).catch(() => []);
+      badgeIds = badges.map((b) => b.id);
+      // 세는 사이에 되돌렸으면 알리지 않고 "안 알림"으로 돌린다
+      if (undone) {
+        await unseeMilestones(db, milestoneIds);
+        return void unseeBadges(db, badgeIds);
+      }
+      if (milestones.length)
+        useUI.getState().celebrate({ cityId, visit: { id: visit.id, date: visit.date }, nth, milestones });
+      for (const b of badges) {
+        useUI
+          .getState()
+          .showToast(
+            { message: `배지 획득 · ${b.name}`, badge: { icon: b.icon }, group: visit.id },
+            { queue: true },
+          );
+      }
     }
   }, []);
 }
