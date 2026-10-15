@@ -1,0 +1,359 @@
+/* 처음 한 번 보는 여권 발급 화면. 지도와 시트를 모두 덮는다 */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(env(safe-area-inset-top) + var(--sp-6)) var(--gutter)
+    calc(env(safe-area-inset-bottom) + var(--sp-6));
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.skip {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + var(--sp-2));
+  right: var(--sp-2);
+  min-height: var(--tap);
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text-2);
+  font: 600 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.stage {
+  width: min(340px, 100%);
+  perspective: 1200px;
+}
+
+/* ── 표지 ── 여권 표지 색: 포인트 색을 어둡게 (버건디) */
+.cover {
+  width: 100%;
+  aspect-ratio: 88 / 125;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-5);
+  padding: var(--sp-6);
+  border: 0;
+  border-radius: 10px 18px 18px 10px;
+  background: color-mix(in srgb, var(--accent) 62%, black);
+  box-shadow:
+    inset 6px 0 0 color-mix(in srgb, var(--accent) 45%, black),
+    var(--shadow);
+  color: var(--gold);
+  transform-origin: left center;
+  cursor: pointer;
+}
+
+.cover:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.coverTop {
+  font: 600 11px var(--mono);
+  letter-spacing: 0.3em;
+  /* 작은 글자는 금색을 밝게 (어두운 표지 위 대비 4.5:1 이상) */
+  color: color-mix(in srgb, var(--gold) 45%, white);
+}
+
+.emblem {
+  width: 46%;
+}
+
+.coverTitle {
+  margin: 0;
+  font: 700 26px/1.25 var(--mono);
+  letter-spacing: 0.22em;
+  text-align: center;
+  outline: none;
+}
+
+.coverHint {
+  margin-top: var(--sp-2);
+  font: 500 var(--fs-caption) var(--font);
+  color: color-mix(in srgb, var(--gold) 45%, white);
+}
+
+/* ── 안쪽 페이지 ── */
+.page {
+  width: 100%;
+  min-height: min(480px, 70vh);
+  padding: var(--sp-5) var(--sp-5) var(--sp-6);
+  border-radius: 10px 18px 18px 10px;
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    var(--shadow);
+  transform-origin: left center;
+}
+
+.pageTop {
+  margin: 0 0 var(--sp-4);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px dashed var(--line);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--text-2);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: var(--fw-display);
+  color: var(--text);
+  outline: none;
+}
+
+.lead {
+  margin: var(--sp-1) 0 var(--sp-4);
+  font-size: 13px;
+  color: var(--text-2);
+  word-break: keep-all;
+}
+
+.label {
+  display: block;
+  margin: var(--sp-3) 0 var(--sp-1);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-caption);
+  color: var(--text-2);
+}
+
+.input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--sp-3);
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fw-body) var(--fs-body) var(--font);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.chip {
+  min-height: var(--tap);
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text);
+  font: 600 14px var(--font);
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--surface);
+}
+
+.chip:focus-visible,
+.hit:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible,
+.link:focus-visible,
+.skip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hits {
+  margin: var(--sp-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hit {
+  width: 100%;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2);
+  border: 0;
+  border-radius: var(--sp-2);
+  background: none;
+  color: var(--text);
+  font: 600 var(--fs-body) var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.hit small {
+  flex: 1;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.hit[aria-pressed='true'] {
+  background: var(--bg);
+}
+
+.hit svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+
+.meta {
+  display: flex;
+  gap: var(--sp-5);
+  margin: var(--sp-4) 0 0;
+}
+
+.meta dt {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.meta dd {
+  margin: 2px 0 0;
+  font: 600 13px var(--mono);
+  color: var(--text);
+}
+
+.issueRow {
+  position: relative;
+  margin-top: var(--sp-5);
+}
+
+.primary,
+.secondary {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 0;
+  border-radius: var(--r-pill);
+  font: 650 var(--fs-body) var(--font);
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--accent);
+  /* 라이트는 흰 글자, 다크는 어두운 글자 (포인트 색 위 대비 4.5:1 이상) */
+  color: var(--surface);
+}
+
+.primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.secondary {
+  margin-top: var(--sp-2);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.primary svg,
+.secondary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.link {
+  display: block;
+  min-height: var(--tap);
+  margin: var(--sp-2) auto 0;
+  padding: 0 var(--sp-4);
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: 500 14px var(--font);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* 발급 도장: 버튼 오른쪽 위에 비스듬히 찍힌다 */
+.seal {
+  position: absolute;
+  right: -8px;
+  bottom: 18px;
+  width: 116px;
+  height: 116px;
+  color: var(--accent);
+  pointer-events: none;
+}
+
+.sealSvg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 0 var(--surface));
+}
+
+.sealSmall {
+  font: 600 9px var(--mono);
+  letter-spacing: 0.08em;
+  fill: currentColor;
+}
+
+.sealBig {
+  font: 700 19px var(--mono);
+  letter-spacing: 0.12em;
+  fill: currentColor;
+}
+
+/* ── 첫 도장 ── */
+.near {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--bg);
+  text-align: center;
+}
+
+.near p {
+  margin: 0;
+  color: var(--text);
+}
+
+.note {
+  margin: var(--sp-2) 0 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}

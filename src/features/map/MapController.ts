@@ -321,6 +321,24 @@ export class MapController {
   }
 
   /**
+   * 안개 리플레이: 다녀온 도시들의 구멍·렌즈를 모두 닫았다가 order 순서대로 차례로 연다 (spanMs 동안).
+   * 돌려준 함수를 부르면 남은 것을 한 번에 연다 (탭해서 건너뛰기)
+   */
+  replay(order: string[], spanMs = 1800): () => void {
+    const now = performance.now();
+    const ids = order.filter((id) => this.visits.has(id));
+    const step = ids.length > 1 ? spanMs / (ids.length - 1) : 0;
+    // 아직 차례가 안 온 도시는 시작 시각이 미래라 openProgress가 0 (닫힌 채)
+    ids.forEach((id, i) => this.openedAt.set(id, now + i * step));
+    this.map.triggerRepaint();
+    return () => {
+      const t = performance.now();
+      for (const [id, t0] of this.openedAt) if (t0 > t) this.openedAt.set(id, t - 10_000);
+      this.map.triggerRepaint();
+    };
+  }
+
+  /**
    * 도시로 날아간다. reveal이면 도착할 때까지 그 도시의 구멍·렌즈를 닫아 두었다가 도착하면 연다 (체크인 연출)
    */
   flyToCity(id: string, { reveal = false } = {}) {

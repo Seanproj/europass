@@ -18,6 +18,8 @@
   특별한 순간(새 나라 첫 도장, 도장 10·25·50·100개째, 국기 완성)은 `checkin/milestones.ts`(순수 판정: 체크인 뒤 − 앞 − 알린 것)와 `milestoneSync.ts`(settings 'milestonesSeen'),
   연출은 `checkin/Celebration.tsx`(store의 celebrate(): 도장 연출이 끝난 뒤 차례, 되돌리기가 방문 id로 거둠), 기념 카드는 share `drawMilestoneCard`.
   시작할 때 기록이 없거나 회상 카드가 있으면 시트를 반쯤 연다(`main.tsx`의 openSheetOnStart).
+  시작 연출은 `main.tsx`의 startScreen + `features/onboarding/`: 처음 쓰는 사람은 여권 발급 오프닝(`PassportIntro.tsx`, 본 기록은 localStorage `euro-passport:intro-seen`,
+  e2e는 `e2e/support/storage-state.json`으로 본 상태에서 시작), 기록이 있으면 그날 처음 열 때(settings 'lastOpened') 안개 리플레이(`MapController.replay`) + 인사 토스트.
   도시 상세 맨 위 도장은 누르면 가장 최근 방문의 엽서로 뒤집힌다(`collection/Postcard.tsx`, 도장 스택도 여기).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
   시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile, ?wrap=과 브라우저 뒤로가기를 맞춤)

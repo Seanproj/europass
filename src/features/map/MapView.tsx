@@ -142,6 +142,19 @@ export function MapView() {
     if (ready) ctrlRef.current?.setVisits(counts);
   }, [ready, counts]);
 
+  // 그날 처음 열면 다녀온 곳의 안개가 처음 간 순서대로 톡톡 열린다. 어디든 누르면 건너뛴다
+  const replay = useUI((s) => s.replay);
+  useEffect(() => {
+    const ctrl = ctrlRef.current;
+    if (!ready || !ctrl || !replay || counts.size === 0) return;
+    useUI.setState({ replay: null });
+    if (publicView || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const finish = ctrl.replay(replay);
+    window.addEventListener('pointerdown', finish, { once: true, capture: true });
+    const t = setTimeout(() => window.removeEventListener('pointerdown', finish, true), 3000);
+    return () => clearTimeout(t);
+  }, [ready, replay, counts, publicView]);
+
   useEffect(() => {
     if (ready) ctrlRef.current?.setHome(homeId);
   }, [ready, homeId]);

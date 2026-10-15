@@ -15,6 +15,9 @@ import { isAuthRedirect } from './cloud/backend';
 import { useUI } from './app/store';
 import { memoryFor } from './features/collection/onThisDay';
 import { todayISO } from './lib/date';
+import { greeting, replayOrder, shouldReplay, shouldShowIntro } from './features/onboarding/start';
+import { passportScore } from './features/profile/score';
+import { introSeen, markIntroSeen } from './features/onboarding/introFlag';
 
 applyTheme(loadTheme());
 setupPWA();
@@ -44,6 +47,33 @@ async function openSheetOnStart() {
   if (ui.route.kind === 'home' && ui.sheetSnap === 'peek') ui.setSheetSnap('half');
 }
 
+/**
+ * 시작 연출: 처음 쓰는 사람은 여권 발급 오프닝, 기록이 있으면 그날 처음 열 때 안개 리플레이 + 인사 한 줄.
+ * 기존 사용자(기록·프로필이 있음)는 오프닝을 본 것으로 표시해 둔다
+ */
+async function startScreen() {
+  const [visits, profile, lastOpened] = await Promise.all([
+    db.visits.toArray(),
+    db.settings.get('profile'),
+    db.settings.get('lastOpened'),
+  ]);
+  const today = todayISO();
+  const ui = useUI.getState();
+  const s = { onboarded: introSeen(), hasVisits: visits.length > 0, hasProfile: !!profile };
+  if (shouldShowIntro(s)) {
+    useUI.setState({ intro: true });
+  } else {
+    if (!s.onboarded) markIntroSeen();
+    // 링크로 도시·나라·프로필을 바로 연 경우에는 끼어들지 않는다
+    if (ui.route.kind === 'home' && shouldReplay(lastOpened?.value as string | undefined, today, s.hasVisits)) {
+      useUI.setState({ replay: replayOrder(visits) });
+      const hello = greeting(visits, today, passportScore(visits).total);
+      if (hello) ui.showToast({ message: hello }, { queue: true });
+    }
+  }
+  await db.settings.put({ key: 'lastOpened', value: today });
+}
+
 async function startCloudIfEnabled(beforeRender: boolean) {
   if (!cloudEnabled || isAuthRedirect() !== beforeRender) return;
   const { startCloud } = await import('./cloud/controller');
@@ -63,6 +93,8 @@ openStorage().then(
     migrateFromV0(db)
       .catch((err) => console.error('[migrate-v0]', err))
       .then(() => openSheetOnStart())
+      .then(() => startScreen())
+      .catch((err) => console.error('[start]', err))
       .then(() => markBadgesSeen(db))
       .catch((err) => console.error('[badges]', err))
       .then(() => warnIfStorageFull())

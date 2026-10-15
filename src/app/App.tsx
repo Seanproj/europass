@@ -21,6 +21,10 @@ const ProfilePage = lazy(() =>
 const PublicSheet = lazy(() =>
   import('../features/cloud/PublicSheet').then((m) => ({ default: m.PublicSheet })),
 );
+// 처음 한 번만 보는 여권 발급 오프닝
+const PassportIntro = lazy(() =>
+  import('../features/onboarding/PassportIntro').then((m) => ({ default: m.PassportIntro })),
+);
 const WrapPage = lazy(() => import('../features/share/WrapPage').then((m) => ({ default: m.WrapPage })));
 
 export function App() {
@@ -28,7 +32,8 @@ export function App() {
   useNavSync();
   const route = useUI((s) => s.route);
   const profileOpen = route.kind === 'profile';
-  const pageOpen = profileOpen || route.kind === 'wrap';
+  const intro = useUI((s) => s.intro);
+  const pageOpen = profileOpen || route.kind === 'wrap' || intro;
   const sheetFull = useUI((s) => s.sheetSnap === 'full');
   const mapStarted = useMapStart();
   return (
@@ -65,6 +70,7 @@ export function App() {
           <AnimatePresence>
             {profileOpen && <ProfilePage key="profile" />}
             {route.kind === 'wrap' && <WrapPage key="wrap" year={route.year} />}
+            {intro && <PassportIntro key="intro" />}
           </AnimatePresence>
         </Suspense>
         <StampBurst />
