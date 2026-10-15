@@ -1,0 +1,17 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [{ "name": "euro-passport:intro-seen", "value": "1" }]
+    },
+    {
+      "origin": "http://localhost:5175",
+      "localStorage": [{ "name": "euro-passport:intro-seen", "value": "1" }]
+    },
+    {
+      "origin": "http://localhost:4173",
+      "localStorage": [{ "name": "euro-passport:intro-seen", "value": "1" }]
+    }
+  ]
+}

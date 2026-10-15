@@ -82,6 +82,10 @@ interface UIState {
   dismissCelebration: (visitId?: string) => void;
   /** 다음에 도시 상세로 갈 때 지도가 도착한 뒤 안개 구멍을 열 도시 (첫 체크인 연출) */
   revealCity: string | null;
+  /** 처음 쓰는 사람에게 여권 발급 오프닝을 보여 준다 */
+  intro: boolean;
+  /** 그날 처음 열면 지도가 안개를 이 순서(도시 id)대로 다시 연다. 지도가 시작하면 비운다 */
+  replay: string[] | null;
   /** 공개 프로필을 보는 동안 지도에 그릴 그 사람의 기록 (없으면 내 기록) */
   publicView: { visits: Visit[]; homeCityId: string } | null;
 }
@@ -135,5 +139,7 @@ export const useUI = create<UIState>((set) => ({
       return { celebration: keep(s.celebration), pendingCelebration: keep(s.pendingCelebration) };
     }),
   revealCity: null,
+  intro: false,
+  replay: null,
   publicView: null,
 }));

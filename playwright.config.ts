@@ -15,6 +15,8 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     trace: 'retain-on-failure',
+    // 여권 발급 오프닝은 이미 본 것으로 시작 (오프닝 자체는 e2e/intro.spec.ts가 빈 상태로 확인)
+    storageState: 'e2e/support/storage-state.json',
   },
   projects: [
     {

@@ -153,6 +153,27 @@ const screens = [
     },
   ],
   [
+    '14b-score',
+    async (p) => {
+      await p.keyboard.press('Escape');
+      await p.goto(BASE + '/?profile');
+      await p.getByRole('button', { name: /계산 보기/ }).click();
+      await p.waitForTimeout(600);
+    },
+  ],
+  [
+    '14c-celebration',
+    async (p) => {
+      await p.goto(BASE + '/');
+      await p.waitForFunction(() => window.__map?.loaded(), null, { timeout: 30000 });
+      await p.getByRole('button', { name: /어디 다녀오셨어요/ }).click();
+      await p.getByRole('searchbox', { name: '도시 검색' }).fill('베를린');
+      await p.getByRole('list', { name: '검색 결과' }).getByRole('button').first().click();
+      await p.getByTestId('celebration').waitFor({ timeout: 10000 });
+      await p.waitForTimeout(1500);
+    },
+  ],
+  [
     '15-wrap',
     async (p) => {
       await p.goto(BASE + '/?wrap=2026');
@@ -162,6 +183,35 @@ const screens = [
 ];
 
 for (const [tag, w, h, theme] of runs) {
+  // 여권 발급 오프닝 (빈 브라우저): 표지와 신원 페이지
+  {
+    const ictx = await b.newContext({
+      viewport: { width: w, height: h },
+      deviceScaleFactor: 1,
+      colorScheme: theme,
+      hasTouch: tag !== 'desk',
+      isMobile: tag !== 'desk',
+    });
+    const ip = await ictx.newPage();
+    await ip.goto(BASE + '/');
+    const cover = ip.getByRole('button', { name: /눌러서 여권 받기/ });
+    await cover.waitFor({ timeout: 30000 });
+    await ip.waitForTimeout(900);
+    await ip.screenshot({ path: `${OUT}/${tag}-00-intro-cover.png` });
+    await cover.click();
+    await ip.waitForTimeout(900);
+    const r = await new AxeBuilder({ page: ip }).withTags(['wcag2a', 'wcag2aa']).analyze();
+    report.push({
+      tag,
+      name: '00-intro',
+      overflow: await ip.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      small: [],
+      axe: r.violations.map((v) => `${v.id}(${v.nodes.length})`),
+      errors: [],
+    });
+    await ip.screenshot({ path: `${OUT}/${tag}-00-intro-id.png` });
+    await ictx.close();
+  }
   const ctx = await b.newContext({
     viewport: { width: w, height: h },
     deviceScaleFactor: 1,
@@ -169,6 +219,7 @@ for (const [tag, w, h, theme] of runs) {
     hasTouch: tag !== 'desk',
     isMobile: tag !== 'desk',
   });
+  await ctx.addInitScript(() => localStorage.setItem('euro-passport:intro-seen', '1'));
   const p = await ctx.newPage();
   const errors = [];
   p.on('console', (m) => {

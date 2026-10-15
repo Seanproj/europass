@@ -53,8 +53,12 @@
   white-space: nowrap;
 }
 
-.zero {
-  opacity: 0.55;
+/* 0인 항목은 흐린 글자로 (반투명은 대비가 모자라서 색으로) */
+.zero th,
+.zero td,
+.table tbody .zero td.sub {
+  color: var(--text-2);
+  font-weight: 500;
 }
 
 .table tfoot th,
