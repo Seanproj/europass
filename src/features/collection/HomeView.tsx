@@ -6,6 +6,9 @@ import { Flag } from '../../components/Flag/Flag';
 import { Stamp } from '../../components/Stamp/Stamp';
 import { getCity, getCountry } from '../../data/cities';
 import type { Visit } from '../../db/types';
+import { visitRank } from '../../db/selectors';
+import { MemoryCard } from './MemoryCard';
+import type { Memory } from './onThisDay';
 import { dotDate } from '../../lib/date';
 import { europePercent, type CountryProgress } from './progress';
 
@@ -16,12 +19,24 @@ interface Props {
   /** 기록이 없을 때 고스트 도장으로 보여줄 홈 도시 */
   homeId?: string;
   onSearch: () => void;
+  /** 회상 카드 (1년 전 오늘). 없으면 null */
+  memory?: Memory | null;
+  onShareCity?: (cityId: string) => void;
+  onDismissMemory?: () => void;
 }
 
 type Tab = 'countries' | 'cities';
 
 /** 시트 홈: 요약 + [나라 | 도시] 세그먼트 하나 */
-export function HomeView({ countries, byCity, homeId, onSearch }: Props) {
+export function HomeView({
+  countries,
+  byCity,
+  homeId,
+  onSearch,
+  memory,
+  onShareCity,
+  onDismissMemory,
+}: Props) {
   const [tab, setTab] = useState<Tab>('countries');
   const visitedCountries = countries.filter((c) => c.cities > 0).length;
   const cityCount = byCity.size;
@@ -29,6 +44,15 @@ export function HomeView({ countries, byCity, homeId, onSearch }: Props) {
   return (
     <section className={styles.home}>
       {/* 기록이 없을 때는 안내가 먼저 (반쯤 펼친 시트에서 "도시 찾기"까지 바로 보이게) */}
+      {memory && (
+        <MemoryCard
+          memory={memory}
+          nth={visitRank(byCity.get(memory.visit.cityId) ?? [memory.visit], memory.visit)}
+          onOpen={() => navigate({ kind: 'city', id: memory.visit.cityId })}
+          onShare={() => onShareCity?.(memory.visit.cityId)}
+          onDismiss={() => onDismissMemory?.()}
+        />
+      )}
       {cityCount === 0 && <FirstStamp homeId={homeId} onSearch={onSearch} />}
       <h2 className={styles.title}>나의 유럽</h2>
       <p className={styles.meta}>

@@ -11,9 +11,11 @@
 
 ## 현재 상태
 
-- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (v1.0.0 초안 완성, Phase 0~10 + 11 엽서 + 12 여권 넘기기 + 13 도장 소리. 변경 기록은 CHANGELOG.md, 다음 계획은 DEVELOPMENT_PROMPTS의 Phase 14~15)
+- v1: Vite + React 19 + TypeScript 6(strict) 앱이 루트에 있음 (v1.0.0 초안 완성, Phase 0~10 + 11 엽서 + 12 여권 넘기기 + 13 도장 소리 + 14 1년 전 오늘. 변경 기록은 CHANGELOG.md, 다음 계획은 DEVELOPMENT_PROMPTS의 Phase 15)
 - 체크인은 `src/features/checkin/`(검색·`checkIn()`·되돌리기 토스트, 도장 소리는 `stampSound.ts`의 Web Audio 합성 + 설정 localStorage), 도장은 `src/components/Stamp`(모양·장식은 도시 id 해시, 각도는 방문 id 해시,
   수도 별·재방문 로마 숫자 표식은 `nth` prop. 기하는 `stampParts.ts` 하나를 SVG와 캔버스가 같이 그림. 견본은 개발 서버 `/stamps.html`).
+  시트 홈 맨 위 회상 카드(1년 이상 전 오늘 앞뒤 3일 기록)는 `collection/onThisDay.ts`(날짜 계산)와 `MemoryCard.tsx`, 닫은 날은 settings 'memoryDismissed'.
+  시작할 때 기록이 없거나 회상 카드가 있으면 시트를 반쯤 연다(`main.tsx`의 openSheetOnStart).
   도시 상세 맨 위 도장은 누르면 가장 최근 방문의 엽서로 뒤집힌다(`collection/Postcard.tsx`, 도장 스택도 여기).
   화면 사이 신호(시트 상태, 화면 경로, 토스트, 도장 연출)는 `src/app/store.ts` 하나로 주고받는다.
   시트 화면 이동은 `src/app/nav.ts`의 `navigate()`/`goBack()`만 쓴다 (URL ?country=, ?city=, ?profile, ?wrap=과 브라우저 뒤로가기를 맞춤)
