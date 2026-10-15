@@ -80,6 +80,18 @@ describe('공유 카드 렌더 (그리기 호출 스냅샷)', () => {
     expect(summarize(ctx.ops)).toMatchSnapshot();
   });
 
+  it('여권 점수가 네 자리를 넘어도 말줄임 없이 칸에 맞춘다 (스토리 카드)', () => {
+    const d = summaryCardData(VISITS, PROFILE, TODAY);
+    const big = {
+      ...d,
+      stats: { ...d.stats, score: 12_345, days: 1_234, pieces: { ...d.stats.pieces, painted: 188 } },
+    };
+    const s = summarize(record((c) => drawStoryCard(c, big, THEME, null)).ops);
+    expect(s.content.some((op) => op.includes('fillText("12,345"'))).toBe(true);
+    expect(s.content.some((op) => op.includes('fillText("188/216"'))).toBe(true);
+    expect(s.content.some((op) => op.includes('…'))).toBe(false);
+  });
+
   it('기록이 없을 때', () => {
     const ctx = record((c) => drawFeedCard(c, summaryCardData([], PROFILE, TODAY), THEME, null));
     expect(summarize(ctx.ops).content).toContain('fillText("첫 도장을 기다리는 중", 540, 1030)');
