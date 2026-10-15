@@ -47,7 +47,7 @@ export function summaryCardData(visits: Visit[], profile: Profile, date: string)
   return {
     name: profile.name,
     date,
-    stats: profileStats(visits, profile.homeCityId),
+    stats: profileStats(visits),
     stamps: recentStamps(visits, 6),
   };
 }
@@ -155,7 +155,8 @@ export interface WrapData {
   visits: number;
   cities: number;
   countries: number;
-  km: number;
+  /** 그해 유럽에서 보낸 날 */
+  days: number;
   /** 홈에서 가장 먼 곳 */
   farthest: (StampItem & { km: number }) | null;
   /** 출발지 (정하지 않았으면 null, 그러면 "가장 먼 곳" 장은 없다) */
@@ -171,7 +172,7 @@ export interface WrapData {
 export function wrapData(all: Visit[], year: number, profile: Profile): WrapData {
   const visits = all.filter((v) => v.date.startsWith(`${year}-`));
   const home = homePlace(profile.homeCityId);
-  const stats = profileStats(visits, profile.homeCityId);
+  const stats = profileStats(visits);
 
   let farthest: WrapData['farthest'] = null;
   const months = Array.from({ length: 12 }, () => 0);
@@ -213,7 +214,7 @@ export function wrapData(all: Visit[], year: number, profile: Profile): WrapData
     visits: stats.visits,
     cities: stats.cities,
     countries: stats.countries,
-    km: stats.km,
+    days: stats.days,
     farthest,
     home,
     topCountry,

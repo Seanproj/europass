@@ -87,7 +87,7 @@ export function PublicSheet({ handle }: { handle: string }) {
 
 function PublicBody({ data }: { data: PublicProfileData }) {
   const visits = useMemo(() => toVisits(data), [data]);
-  const stats = useMemo(() => profileStats(visits, data.homeCityId), [visits, data.homeCityId]);
+  const stats = useMemo(() => profileStats(visits), [visits]);
   const badges = useMemo(() => evaluateBadges(visits), [visits]);
   const stamps = useMemo(() => recentStamps(visits, Infinity), [visits]);
   const log = data.visits
@@ -97,8 +97,8 @@ function PublicBody({ data }: { data: PublicProfileData }) {
   return (
     <div className={styles.body}>
       <p className={styles.meta}>
-        도시 <b>{num.format(stats.cities)}</b> · 나라 <b>{num.format(stats.countries)}</b> · 이동거리{' '}
-        <b>{num.format(stats.km)}</b>km
+        여권 점수 <b>{num.format(stats.score)}</b> · 유럽에서 <b>{num.format(stats.days)}</b>일 · 도시{' '}
+        <b>{num.format(stats.cities)}</b> · 나라 <b>{num.format(stats.countries)}</b>
       </p>
       <Badges states={badges} />
       <section aria-labelledby="public-stamps" className={styles.section}>

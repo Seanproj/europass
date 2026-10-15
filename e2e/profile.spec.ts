@@ -84,6 +84,18 @@ test('프로필: 숫자 · 배지(모두 보기) · 타임라인, 뒤로 가면 
   // 360px에서도 가로 스크롤 없음 (배지 줄만 안에서 스크롤)
   expect(await main.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
 
+  // 여권 점수: 칸을 누르면 계산표, 합계가 칸의 숫자와 같다
+  const scoreButton = main.getByRole('button', { name: /^여권 점수 .*점, 계산 보기$/ });
+  const shown = (await scoreButton.textContent())!.trim();
+  await expect(main.getByText('유럽에서 보낸 날')).toBeVisible();
+  await expect(main.getByText('국기 조각')).toBeVisible();
+  await scoreButton.click();
+  const table = page.getByRole('dialog', { name: '여권 점수' });
+  await expect(table.getByRole('rowheader', { name: '도시' })).toBeVisible();
+  await expect(table.getByRole('row', { name: /합계/ })).toContainText(shown);
+  await table.getByRole('button', { name: '닫기' }).click();
+  await expect(table).toBeHidden();
+
   await main.getByRole('button', { name: '모두 보기' }).click();
   const grid = page.getByRole('dialog', { name: /배지/ });
   await expect(grid).toBeVisible();

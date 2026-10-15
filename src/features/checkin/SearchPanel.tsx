@@ -2,12 +2,14 @@ import { useMemo } from 'react';
 import { Check, LocateFixed, Loader2 } from 'lucide-react';
 import styles from './SearchPanel.module.css';
 import { Flag } from '../../components/Flag/Flag';
-import { CITIES, getCity, getCountry } from '../../data/cities';
+import { CITIES, COUNTRIES, getCity, getCountry } from '../../data/cities';
 import type { City } from '../../data/types';
 import { buildIndex, cityNear, nearestCities, searchCities } from './search';
 import type { GeoState } from './useGeolocation';
 
-const INDEX = buildIndex(CITIES);
+const INDEX = buildIndex(CITIES, COUNTRIES);
+/** 나라 이름으로 찾으면 도시가 많아서 넉넉히 */
+const LIMIT = 60;
 
 interface Props {
   query: string;
@@ -20,14 +22,27 @@ interface Props {
 
 /** 검색 결과, 또는 검색어가 없을 때 현재 위치 · 홈 근처 추천 */
 export function SearchPanel({ query, visits, homeId, geo, onLocate, onPick }: Props) {
-  const results = useMemo(() => searchCities(INDEX, query), [query]);
+  const results = useMemo(() => searchCities(INDEX, query, LIMIT), [query]);
 
   if (query.trim()) {
+    // 도시 이름이 맞은 것 먼저, 그다음 나라 이름으로 찾은 도시를 나라별로 묶어서
+    const direct = results.filter((h) => !h.country);
+    const groups = new Map<string, City[]>();
+    for (const h of results)
+      if (h.country) (groups.get(h.country) ?? groups.set(h.country, []).get(h.country)!).push(h.city);
+    const row = (city: City) => (
+      <CityRow key={city.id} city={city} visits={visits.get(city.id) ?? 0} onPick={onPick} />
+    );
     return results.length ? (
       <ul className={styles.list} aria-label="검색 결과">
-        {results.map(({ city }) => (
-          <CityRow key={city.id} city={city} visits={visits.get(city.id) ?? 0} onPick={onPick} />
-        ))}
+        {direct.map((h) => row(h.city))}
+        {[...groups].map(([code, cities]) => [
+          <li key={`group-${code}`} className={styles.group}>
+            <Flag code={code} size={16} visited alt="" />
+            {getCountry(code)?.name.ko ?? code}의 도시 · 큰 도시부터
+          </li>,
+          ...cities.map(row),
+        ])}
       </ul>
     ) : (
       <p className={styles.empty}>"{query.trim()}"에 맞는 도시가 없어요</p>

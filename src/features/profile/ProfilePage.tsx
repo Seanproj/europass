@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { motion } from 'motion/react';
-import { ChevronLeft, ChevronRight, Pencil, Share2, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Pencil, Share2, Sparkles } from 'lucide-react';
 import { goBack, navigate } from '../../app/nav';
 import { wrapYearFor } from '../share/cardData';
 import { Flag } from '../../components/Flag/Flag';
@@ -19,6 +19,8 @@ import styles from './ProfilePage.module.css';
 import { Settings } from './Settings';
 import { profileStats, timelineByMonth } from './stats';
 import { Timeline } from './Timeline';
+import { ScoreDialog } from './ScoreDialog';
+import { passportScore } from './score';
 import { getProfile, useProfile } from './profile';
 import { ShareDialog, type ShareFormat } from '../share/ShareDialog';
 import { makeSummaryCard } from '../share/share';
@@ -45,7 +47,9 @@ export function ProfilePage() {
   const profile = useProfile();
   const [editing, setEditing] = useState(false);
   const [sharing, setSharing] = useState(false);
-  const stats = useMemo(() => profileStats(visits, profile.homeCityId), [visits, profile.homeCityId]);
+  const [scoreOpen, setScoreOpen] = useState(false);
+  const stats = useMemo(() => profileStats(visits), [visits]);
+  const score = useMemo(() => passportScore(visits), [visits]);
   const badges = useMemo(() => evaluateBadges(visits), [visits]);
   const months = useMemo(() => timelineByMonth(visits), [visits]);
   const book = useMemo(() => passport(visits), [visits]);
@@ -113,20 +117,37 @@ export function ProfilePage() {
           </div>
         </header>
 
+        {/* 어디 사는지와 상관없이 친구와 비교할 수 있는 숫자 3개. 여권 점수는 눌러서 계산을 본다 */}
         <dl className={styles.numbers}>
-          <div>
-            <dt>도시</dt>
-            <dd>{fmt.format(stats.cities)}</dd>
-          </div>
-          <div>
-            <dt>나라</dt>
-            <dd>{fmt.format(stats.countries)}</dd>
-          </div>
-          <div>
-            <dt>이동거리</dt>
+          <div className={styles.scoreCell}>
+            <dt>
+              여권 점수
+              <Info aria-hidden className={styles.info} />
+            </dt>
             <dd>
-              {fmt.format(stats.km)}
-              <small>km</small>
+              <button
+                type="button"
+                className={styles.scoreButton}
+                onClick={() => setScoreOpen(true)}
+                aria-label={`여권 점수 ${fmt.format(stats.score)}점, 계산 보기`}
+              >
+                {fmt.format(stats.score)}
+              </button>
+            </dd>
+          </div>
+          <div>
+            {/* 좁으면 "유럽에서 / 보낸 날"로 끊기게 */}
+            <dt>유럽에서 보낸{'\u00a0'}날</dt>
+            <dd>
+              {fmt.format(stats.days)}
+              <small>일</small>
+            </dd>
+          </div>
+          <div>
+            <dt>국기 조각</dt>
+            <dd>
+              {fmt.format(stats.pieces.painted)}
+              <small>/{fmt.format(stats.pieces.total)}</small>
             </dd>
           </div>
         </dl>
@@ -135,7 +156,8 @@ export function ProfilePage() {
             '아직 방문 기록이 없어요'
           ) : (
             <>
-              총 {fmt.format(stats.visits)}번의 방문
+              도시 {fmt.format(stats.cities)}곳 · 나라 {fmt.format(stats.countries)}개 · 총{' '}
+              {fmt.format(stats.visits)}번의 방문
               {stats.top.length > 0 && (
                 <>
                   {' · 가장 많이 간 도시 '}
@@ -151,6 +173,7 @@ export function ProfilePage() {
         <Timeline months={months} />
         <Settings profile={profile} visitCount={visits.length} onEditProfile={() => setEditing(true)} />
       </div>
+      <ScoreDialog open={scoreOpen} score={score} onClose={() => setScoreOpen(false)} />
       <ProfileEditor open={editing} profile={profile} onClose={() => setEditing(false)} />
       <ShareDialog
         open={sharing}

@@ -1,37 +1,47 @@
 import { getCity } from '../../data/cities';
 import type { Visit } from '../../db/types';
-import { distanceKm } from '../checkin/search';
+import { passportScore, type FlagPieces } from './score';
 
 export interface ProfileStats {
   cities: number;
   countries: number;
-  /** 홈 도시 기준 왕복 거리를 방문마다 더한 값 (km, 반올림) */
-  km: number;
+  /** 여권 점수 (score.ts) */
+  score: number;
+  /** 유럽에서 보낸 날 (겹치는 날은 한 번) */
+  days: number;
+  /** 국기 퍼즐 조각 */
+  pieces: FlagPieces;
   visits: number;
   /** 두 번 이상 간 도시 중 많이 간 순서 3곳 */
   top: { cityId: string; count: number }[];
 }
 
-export function profileStats(visits: Visit[], homeCityId: string): ProfileStats {
-  const home = getCity(homeCityId);
+export function profileStats(visits: Visit[]): ProfileStats {
   const counts = new Map<string, number>();
   const latest = new Map<string, string>();
   const countries = new Set<string>();
-  let km = 0;
   for (const v of visits) {
     counts.set(v.cityId, (counts.get(v.cityId) ?? 0) + 1);
     if ((latest.get(v.cityId) ?? '') < v.date) latest.set(v.cityId, v.date);
     const city = getCity(v.cityId);
     if (!city) continue;
     countries.add(city.country);
-    if (home) km += 2 * distanceKm(home.lat, home.lon, city.lat, city.lon);
   }
   const top = [...counts]
     .filter(([, count]) => count >= 2)
     .sort(([a, x], [b, y]) => y - x || (latest.get(b) ?? '').localeCompare(latest.get(a) ?? ''))
     .slice(0, 3)
     .map(([cityId, count]) => ({ cityId, count }));
-  return { cities: counts.size, countries: countries.size, km: Math.round(km), visits: visits.length, top };
+  const score = passportScore(visits);
+  return {
+    cities: counts.size,
+    countries: countries.size,
+    score: score.total,
+    days: score.days,
+    pieces: score.pieces,
+    visits: visits.length,
+    top,
+  };
 }
 
 export interface TimelineEntry {

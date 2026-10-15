@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Check } from 'lucide-react';
 import { Flag } from '../../components/Flag/Flag';
-import { CITIES, getCountry } from '../../data/cities';
+import { CITIES, COUNTRIES, getCountry } from '../../data/cities';
 import { db } from '../../db/db';
 import type { Profile } from '../../db/types';
 import { buildIndex, searchCities } from '../checkin/search';
@@ -36,7 +36,7 @@ function EditorForm({ profile, onDone }: { profile: Profile; onDone: () => void 
   const [home, setHome] = useState(profile.homeCityId);
   const [query, setQuery] = useState('');
   const hits = useMemo(() => {
-    index ??= buildIndex(CITIES);
+    index ??= buildIndex(CITIES, COUNTRIES);
     return searchCities(index, query, 8);
   }, [query]);
   const current = homePlace(home);

@@ -15,30 +15,15 @@ const visit = (cityId: string, date: string): Visit => ({
 
 describe('profileStats', () => {
   it('도시(고유)·나라·총 방문 수', () => {
-    const s = profileStats(
-      [
-        visit('cz-prague', '2025-01-01'),
-        visit('cz-prague', '2025-02-01'),
-        visit('cz-brno', '2025-03-01'),
-        visit('fr-paris', '2025-04-01'),
-      ],
-      'de-frankfurt',
-    );
-    expect(s).toMatchObject({ cities: 3, countries: 2, visits: 4 });
-  });
-
-  it('이동거리: 홈 기준 왕복을 방문마다 합산', () => {
-    const one = profileStats([visit('de-berlin', '2025-01-01')], 'de-frankfurt').km;
-    // 프랑크푸르트–베를린 직선 약 424km → 왕복 약 848km
-    expect(one).toBeGreaterThan(800);
-    expect(one).toBeLessThan(900);
-    const twice = profileStats(
-      [visit('de-berlin', '2025-01-01'), visit('de-berlin', '2025-02-01')],
-      'de-frankfurt',
-    ).km;
-    expect(Math.abs(twice - one * 2)).toBeLessThanOrEqual(1);
-    // 홈 도시 방문은 0km
-    expect(profileStats([visit('de-frankfurt', '2025-01-01')], 'de-frankfurt').km).toBe(0);
+    const s = profileStats([
+      visit('cz-prague', '2025-01-01'),
+      visit('cz-prague', '2025-02-01'),
+      visit('cz-brno', '2025-03-01'),
+      visit('fr-paris', '2025-04-01'),
+    ]);
+    expect(s).toMatchObject({ cities: 3, countries: 2, visits: 4, days: 4 });
+    // 도시 3×10 + 나라 2×50 + 보낸 날 4×5 + 재방문 1×5
+    expect(s.score).toBe(30 + 100 + 20 + 5);
   });
 
   it('가장 많이 간 도시: 2번 이상, 많이 간 순, 같으면 최근 순, 최대 3곳', () => {
@@ -52,7 +37,7 @@ describe('profileStats', () => {
       visit('it-rome', '2024-02-01'),
       visit('es-madrid', '2025-01-01'),
     ];
-    expect(profileStats(vs, 'de-frankfurt').top).toEqual([
+    expect(profileStats(vs).top).toEqual([
       { cityId: 'cz-prague', count: 3 },
       { cityId: 'at-vienna', count: 2 },
       { cityId: 'fr-paris', count: 2 },
