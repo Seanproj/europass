@@ -40,15 +40,20 @@ async function synced(page: Page) {
   await expect(sheet.getByText(/켜짐 · 마지막 동기화 방금$/)).toBeVisible({ timeout: 15_000 });
 }
 
-const count = (page: Page, cityId: string) =>
-  page.evaluate(
+/** 그 도시 기록 수. 화면을 옮긴 직후에는 지도가 뜰 때까지 __db가 없으므로 먼저 기다린다 */
+const count = async (page: Page, cityId: string) => {
+  await page.waitForFunction(() => !!(window as unknown as DevWindow).__db);
+  return page.evaluate(
     (id) => (window as unknown as DevWindow).__db.visits.where('cityId').equals(id).count(),
     cityId,
   );
+};
 
 test('두 기기: 첫 로그인 업로드 → 다른 기기에서 받기(사진 포함) → 양방향 → 삭제 전파', async ({
   browser,
 }) => {
+  // 앱 두 개(지도 WebGL 둘)를 띄워 오가므로 첫 실행(개발 서버 컴파일)에서는 60초를 넘길 수 있다
+  test.setTimeout(150_000);
   const a = await device(browser);
   const b = await device(browser);
 
@@ -70,6 +75,7 @@ test('두 기기: 첫 로그인 업로드 → 다른 기기에서 받기(사진 
   await login(b.page, 'sean@example.com');
   await synced(b.page);
   await expect.poll(() => count(b.page, 'cz-prague')).toBe(1);
+  await b.page.waitForFunction(() => !!(window as unknown as DevWindow).__db);
   const photo = await b.page.evaluate(async () => {
     const db = (window as unknown as DevWindow).__db as unknown as {
       visits: { toArray(): Promise<{ photos: Blob[] }[]> };

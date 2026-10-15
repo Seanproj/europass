@@ -49,7 +49,7 @@
 - 바텀시트는 motion 기반 자체 구현(`src/features/collection/BottomSheet.tsx`). vaul은 Radix Dialog 기반이라
   상시 열린 비모달 시트에서도 포커스를 가두고 나머지 화면을 스크린리더에서 숨겨서 쓰지 않음
 - 지도(`src/features/map/`): 지도 인스턴스는 `MapController` 하나. 안개는 2D 캔버스를 텍스처로 올리는 커스텀 레이어(`fog/`),
-  렌즈·도시명 태그는 지도 위 오버레이 캔버스, 나라 태그만 DOM. 색은 `tokens.ts`가 tokens.css에서 읽는다.
+  렌즈·도시명 태그는 지도 위 오버레이 캔버스, 나라 태그만 DOM. 줌 단계(`radius.ts`): z<5 도장 배지(`MapController.stampImage`), z5~6 섞임, 렌즈는 실제 거리(`lensRadiusAt`) + 겹침 정리(`lens/declutter.ts`), z7~8부터 실제 안개 구멍. 색은 `tokens.ts`가 tokens.css에서 읽는다.
   개발 서버에서는 `window.__map`, `window.__db`로 카메라와 DB를 조작할 수 있음 (Playwright 확인용)
 - 클라우드 환경의 Allowed domains에 tiles.openfreemap.org를 추가해 둠. 타일 서버에 닿지 않으면 지도는 최소 스타일(배경 + 국기 퍼즐 육지)로 뜬다
 - TypeScript 7은 typescript-eslint가 아직 지원하지 않아 6.0 사용

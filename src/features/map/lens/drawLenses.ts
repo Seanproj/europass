@@ -10,6 +10,8 @@ export interface LensItem {
   name: string;
   visits: number;
   home: boolean;
+  /** 다른 렌즈와 겹쳐 렌즈 대신 점으로 그린다 */
+  dot?: boolean;
 }
 
 export interface TagColors {
@@ -18,27 +20,39 @@ export interface TagColors {
   badge: string;
   home: string;
   font: string;
+  /** 겹쳐서 점으로 줄인 도시 */
+  dot: string;
 }
 
 const TAG_H = 22;
 const TAG_PAD = 9;
 const BADGE_R = 8;
 
-/** 렌즈와 도시명 태그를 오버레이 캔버스에 그린다. 반환: 태그 충돌 판정용 원 */
+/**
+ * 렌즈와 도시명 태그를 오버레이 캔버스에 그린다. 반환: 태그 충돌 판정용 원.
+ * imageAlpha: 렌즈 그림만의 불투명도 (도장 배지에서 렌즈로 바뀌는 중), 태그는 alpha
+ */
 export function drawLenses(
   ctx: CanvasRenderingContext2D,
   items: LensItem[],
   alpha: number,
   c: TagColors,
+  imageAlpha = alpha,
 ): Circle[] {
   const circles: Circle[] = [];
   if (alpha <= 0) return circles;
   ctx.save();
-  ctx.globalAlpha = alpha;
+  ctx.globalAlpha = imageAlpha;
   for (const it of items) {
-    if (it.image) ctx.drawImage(it.image, it.x - it.r, it.y - it.r, it.r * 2, it.r * 2);
-    circles.push({ x: it.x, y: it.y, r: it.r });
+    if (it.dot) {
+      ctx.fillStyle = c.dot;
+      ctx.beginPath();
+      ctx.arc(it.x, it.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (it.image) ctx.drawImage(it.image, it.x - it.r, it.y - it.r, it.r * 2, it.r * 2);
+    circles.push({ x: it.x, y: it.y, r: it.dot ? 8 : it.r });
   }
+  ctx.globalAlpha = alpha;
   ctx.font = `600 12px ${c.font}`;
   ctx.textBaseline = 'middle';
   // 태그끼리 겹치면 홈 도시 → 자주 간 도시 → 큰 도시 순으로 남긴다
@@ -70,7 +84,9 @@ function measure(ctx: CanvasRenderingContext2D, text: string): number {
 
 function tagRect(ctx: CanvasRenderingContext2D, it: LensItem): Rect {
   const w = TAG_PAD * 2 + measure(ctx, it.name) + (it.visits >= 2 ? BADGE_R * 2 + 5 : 0);
-  return { x: it.x - w / 2, y: it.y - it.r * 0.62 - TAG_H / 2, w, h: TAG_H };
+  // 작은 도장 배지·점은 가리지 않게 위에, 렌즈는 렌즈 윗부분에 걸쳐
+  const above = it.dot ? 6 + TAG_H / 2 : it.r < 20 ? it.r + 2 + TAG_H / 2 : it.r * 0.62;
+  return { x: it.x - w / 2, y: it.y - above - TAG_H / 2, w, h: TAG_H };
 }
 
 /** 검정 반투명 알약 (홈 도시는 --accent), 2번 이상 방문하면 오른쪽에 횟수 배지 */

@@ -24,7 +24,17 @@ import {
   type CountryProgress,
   type FlagCollection,
 } from './puzzle/puzzle';
-import { holeRadiusPx, lensOpacity, lensRadius, openProgress } from './radius';
+import {
+  STAMP_SIZE,
+  holeRadiusPx,
+  lensMix,
+  lensOpacity,
+  lensRadius,
+  lensRadiusAt,
+  openProgress,
+} from './radius';
+import { declutterLenses } from './lens/declutter';
+import { drawStamp } from '../../components/Stamp/drawStamp';
 import { ATTRIBUTION, LOCAL_IDEOGRAPH_FONT, fallbackStyle, isBoundaryLayer, themeStyle } from './style';
 import type { Circle } from './tags/collision';
 import type { MapTokens } from './tokens';
@@ -93,6 +103,9 @@ export class MapController {
   private featureIdsByRegion = new Map<string, number[]>();
   private lensSources = new Map<string, LensResult>();
   private lensMasks = new Map<string, HTMLCanvasElement>();
+  /** 유럽 전체 줌에서 그릴 도시별 가장 최근 도장 */
+  private stamps = new Map<string, { id: string; date: string; nth: number }>();
+  private stampImages = new Map<string, HTMLCanvasElement>();
   private lastLenses: { cityId: string; c: Circle }[] = [];
   private snapshotter: LensSnapshotter;
   private destroyed = false;
@@ -168,6 +181,12 @@ export class MapController {
 
   // ── 외부에서 부르는 갱신 ──────────────────────────────
 
+  /** 도시별 가장 최근 방문 (유럽 전체 줌의 도장 배지) */
+  setStamps(stamps: Map<string, { id: string; date: string; nth: number }>) {
+    this.stamps = stamps;
+    this.map.triggerRepaint();
+  }
+
   setVisits(counts: Map<string, number>) {
     const now = performance.now();
     if (this.initialized) {
@@ -199,6 +218,7 @@ export class MapController {
     const themeChanged = tokens.theme !== this.tokens.theme;
     this.tokens = tokens;
     this.lensMasks.clear();
+    this.stampImages.clear();
     if (themeChanged) {
       this.lensSources.clear();
       for (const c of this.visited) this.snapshotter.request({ cityId: c.id, lon: c.lon, lat: c.lat });
@@ -469,6 +489,8 @@ export class MapController {
 
     const zoom = map.getZoom();
     const alpha = lensOpacity(zoom);
+    // 유럽 전체(z<5)는 도장 배지, 나라 크기(z5~6)부터 렌즈로 바뀐다
+    const mix = lensMix(zoom);
     const now = performance.now();
     const items: LensItem[] = [];
     const t = this.tokens;
@@ -476,33 +498,100 @@ export class MapController {
       for (const c of this.visited) {
         const p = map.project([c.lon, c.lat]);
         const visits = this.visits.get(c.id) ?? 1;
-        const base = lensRadius(c.tier, visits);
-        const r = base * this.openScale(c.id, now);
+        const open = this.openScale(c.id, now);
+        const r = (mix > 0 ? lensRadiusAt(c.tier, visits, c.lat, zoom) : STAMP_SIZE / 2) * open;
         if (p.x + r < 0 || p.y + r < 0 || p.x - r > w || p.y - r > h + 40) continue;
         items.push({
           cityId: c.id,
           x: p.x,
           y: p.y,
           r,
-          image: this.lensImage(c.id, base, dpr),
+          // 렌즈 이미지는 기본 크기로 한 번 만들고 지금 반지름으로 줄여 그린다
+          image: mix > 0 ? this.lensImage(c.id, lensRadius(c.tier, visits), dpr) : null,
           name: c.name.ko,
           visits,
           home: c.id === this.homeId,
         });
       }
     }
-    const circles = drawLenses(ctx, items, alpha, {
-      bg: t.tagBg,
-      text: t.tagText,
-      badge: t.tagBadge,
-      home: t.accent,
-      font: t.font,
-    });
+    // 렌즈가 서로 겹치면 홈 · 많이 간 도시 · 큰 도시만 렌즈로, 나머지는 점으로
+    if (mix > 0) {
+      const keep = declutterLenses(
+        items.map((it) => ({
+          cityId: it.cityId,
+          x: it.x,
+          y: it.y,
+          r: it.r,
+          priority: (it.home ? 1000 : 0) + it.visits * 10 + (4 - (getCity(it.cityId)?.tier ?? 3)),
+        })),
+      );
+      for (const it of items) if (!keep.has(it.cityId)) it.dot = true;
+    }
+    // 도장 배지: 처음 간 순서대로 찍어 최근 도장이 위로 온다
+    if (mix < 1 && alpha > 0) {
+      ctx.save();
+      ctx.globalAlpha = alpha * (1 - mix);
+      const order = [...items].sort((a, b) =>
+        (this.stamps.get(a.cityId)?.date ?? '').localeCompare(this.stamps.get(b.cityId)?.date ?? ''),
+      );
+      for (const it of order) {
+        const img = this.stampImage(it.cityId, dpr);
+        if (!img) continue;
+        // 새로 찍힌 도장은 열리는 만큼 커진다 (it.r = 도장 반 변 × 열림)
+        const s = STAMP_SIZE * 1.4 * Math.min(1, it.r / (STAMP_SIZE / 2));
+        ctx.drawImage(img, it.x - s / 2, it.y - s / 2, s, s);
+      }
+      ctx.restore();
+    }
+    const circles = drawLenses(
+      ctx,
+      items,
+      alpha,
+      { bg: t.tagBg, text: t.tagText, badge: t.tagBadge, home: t.accent, font: t.font, dot: t.accent },
+      alpha * mix,
+    );
     this.lastLenses = items.map((it, i) => ({ cityId: it.cityId, c: circles[i]! }));
     this.opts.onFrame({ zoom, lenses: circles });
 
     // 구멍이 열리는 중이면 다음 프레임도 그린다
     if (this.openedAt.size > 0) map.triggerRepaint();
+  }
+
+  /** 도장 배지 이미지 (도시·방문·테마마다 한 번 그려 둔다). 회전 여유로 한 변의 1.4배 캔버스 */
+  private stampImage(cityId: string, dpr: number): HTMLCanvasElement | null {
+    const visit = this.stamps.get(cityId);
+    const city = getCity(cityId);
+    if (!visit || !city) return null;
+    const key = `${cityId}@${visit.id}@${visit.nth}@${dpr}`;
+    let img = this.stampImages.get(key);
+    if (!img) {
+      const box = STAMP_SIZE * 1.4;
+      img = document.createElement('canvas');
+      img.width = img.height = Math.ceil(box * dpr * 2);
+      const g = img.getContext('2d')!;
+      g.scale(dpr * 2, dpr * 2);
+      // 국기 색 위에서도 읽히게 종이색 원(가는 테두리)을 깔고 찍는다
+      g.fillStyle = this.tokens.surface;
+      g.strokeStyle = this.tokens.line;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.arc(box / 2, box / 2, STAMP_SIZE * 0.58, 0, Math.PI * 2);
+      g.fill();
+      g.stroke();
+      drawStamp(g, {
+        city,
+        visit,
+        nth: visit.nth,
+        x: box / 2,
+        y: box / 2,
+        size: STAMP_SIZE,
+        ink: city.gem ? this.tokens.gold : this.tokens.accent,
+        paper: this.tokens.surface,
+        mono: this.tokens.mono,
+      });
+      this.stampImages.set(key, img);
+    }
+    return img;
   }
 
   private lensImage(cityId: string, radius: number, dpr: number): HTMLCanvasElement | null {
